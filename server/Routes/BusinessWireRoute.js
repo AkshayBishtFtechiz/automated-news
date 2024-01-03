@@ -51,7 +51,7 @@ Router.get("/", async (req, res) => {
     await page.setCacheEnabled(false);
 
     const firmData = [];
-
+  
     for (let i = 0; i < law_firms.length; i++) {
       const firm = law_firms[i];
       const encodedFirm = encodeURI(firm);
@@ -101,35 +101,52 @@ Router.get("/", async (req, res) => {
         };
       });
 
-      if (days) {
-        const filteredData = payload.filter((newsData) => {
-          const entryDate = new Date(newsData.dateTimeIssued);
-          const cutoffDate = new Date();
-          cutoffDate.setDate(cutoffDate.getDate() - parseInt(days, 10));
-          return entryDate >= cutoffDate;
-        });
-
-        // Save each document separately
-        for (const newsData of filteredData) {
-          // const newNews = new BusinessWireSchema(newsData);
-          // await newNews.save();
-          firmData.push({ firm, payload: newsData });
-        }
-      } else {
         for (const newsData of payload) {
           firmData.push({ firm: listed_firms[i], payload: newsData });
-          // const newNews = new BusinessWireSchema(newsData);
-          // await newNews.save();
         }
-      }
     }
 
-    res.json(firmData);
+    const getAllBussinessNews = await BusinessWireSchema.find();
+    
+      if(getAllBussinessNews.length !== firmData.length) {
+        firmData.forEach(async function (data, index) {  
+          const newResponse = data.payload;
+
+          //const releaseUrl = newResponse.urlToRelease;
+          const newNews = new BusinessWireSchema(newResponse);
+          newNews.save();
+        });
+        res.json(firmData);
+      } 
+      else {
+        res.send({
+          message:"Duplicate News"
+        });
+      }
+
+    
     await browser.close();
   } catch (error) {
     console.error("Error:", error);
     res.status(500).send("Internal Server Error");
   }
+});
+
+
+Router.delete("/deleteall", async (req, res) => {
+  BusinessWireSchema.deleteMany({})
+  .then((data) => {
+    data === null
+      ? res.send({
+          message: "News already deleted",
+        })
+      : res.send({
+          message: "News deleted successfully",
+        });
+  })
+  .catch((err) => {
+    res.send(err);
+  });
 });
 
 module.exports = Router;
