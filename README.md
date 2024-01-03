@@ -18,8 +18,6 @@ This project is based on the methodology of web scraping where we get the data f
    ```bash
    npm start
 
-
-
 ## Server   
 
 ### Setup Process
