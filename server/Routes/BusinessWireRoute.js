@@ -48,8 +48,8 @@ Router.get("/", async (req, res) => {
     const page = await browser.newPage();
     await page.setCacheEnabled(false);
 
-    const firmData = [];
-  
+    let firmData = [];
+
     for (let i = 0; i < law_firms.length; i++) {
       const firm = law_firms[i];
       const encodedFirm = encodeURI(firm);
@@ -112,9 +112,25 @@ Router.get("/", async (req, res) => {
     }
 
     const getAllBussinessNews = await BusinessWireSchema.find();
-    console.log("getAllBussinessNews@@:", getAllBussinessNews);
+    //console.log("FirmDataTesting@@:", firmData);
+
+    /* firmData.push({
+      firm: "Berger Montague",
+      payload: {
+        tickerSymbol: "GNRC",
+        firmIssuing: "Berger Montague",
+        serviceIssuedOn: "BusinessWire",
+        dateTimeIssued: "January 02, 2024",
+        urlToRelease:
+          "http://www.businesswire.com/news/home/20240101367342/zh-HK/",
+        tickerIssuer: "NYSE",
+      },
+    }); */
+
+    console.log("getAllBussinessNews.length !== firmData.length:", getAllBussinessNews.length, firmData.length);
 
     if (getAllBussinessNews.length === 0) {
+      console.log("If Data is empty1");
       firmData.forEach(async function (data, index) {
         const newResponse = data.payload;
         const newNews = new BusinessWireSchema(newResponse);
@@ -122,37 +138,39 @@ Router.get("/", async (req, res) => {
       });
       res.json(firmData);
     } else if (getAllBussinessNews.length !== firmData.length) {
-      firmData.forEach(async function (data, index) {
-        const newResponse = data.payload;
+      console.log("If Data is empty21111", firmData);
 
-        //const releaseUrl = newResponse.urlToRelease;
+      /* firmData.forEach(async function (data, index) {
+        console.log("dataForEach:", getAllBussinessNews[index], index);
+
         if (
           getAllBussinessNews.length > 0 &&
-          getAllBussinessNews[index].urlToRelease !==
-            data[index].payload.urlToRelease
+          getAllBussinessNews[index]?.urlToRelease !== data.payload.urlToRelease
         ) {
-          firmData.push({ payload: data[index].payload });
-          /* const newNews = new BusinessWireSchema(newResponse);
-          newNews.save(); */
+          console.log("data.payload:", data.payload);
+          firmData.push({ payload: data.payload });
         }
       });
-        const newNews = new BusinessWireSchema(firmData);
+      console.log("firmData11@@$$:", firmData); */
+      /* firmData.forEach(function (respData, index) {
+        const newNews = new BusinessWireSchema(respData[index]);
         newNews.save();
+      }); */
+
       res.json(firmData);
     } else {
+      console.log("If Data is empty3");
       res.send({
         message: "Duplicate News",
       });
     }
 
-    
     await browser.close();
   } catch (error) {
     console.error("Error:", error);
     res.status(500).send("Internal Server Error");
   }
 });
-
 
 Router.delete("/deleteall", async (req, res) => {
   BusinessWireSchema.deleteMany({})
@@ -172,41 +190,38 @@ Router.delete("/deleteall", async (req, res) => {
 
 Router.post("/sendemail", (req, res) => {
   // send email
-  // Create a transporter using SMTP transport
   const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: 'automatednews21@gmail.com',
-        pass: 'ovig lcvq nfdn whsj'
+    service: "gmail",
+    auth: {
+      user: "automatednews21@gmail.com",
+      pass: "ovig lcvq nfdn whsj",
     },
-    secure: false, // use SSL
-    port: 25, // port for secure SMTP
+    secure: false,
+    port: 25,
     tls: {
-      rejectUnauthorized: false
-  }
+      rejectUnauthorized: false,
+    },
   });
-  
+
   // Define the email options
   const mailOptions = {
-      from: 'automatednews21@gmail.com',  // Sender address
-      to: 'shubham.pal@ftechiz.com',   // List of recipients
-      subject: 'Hello from Nodemailer',  // Subject line
-      text: 'Hello, this is a test email!'  // Plain text body
+    from: "automatednews21@gmail.com",
+    to: "shubham.pal@ftechiz.com",
+    subject: "Automated News",
+    text: "Hello, this is a test email!",
   };
-  
+
   // Send the email
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
-      res.send(error)
-      return console.error('Error:', error.message);
-      }
-    console.log('Email sent:', info.response);
+      res.send(error);
+      return console.error("Error:", error.message);
+    }
+    console.log("Email sent:", info.response);
     res.send({
-      message:"Email sent"
-    })
+      message: "Email sent",
+    });
   });
-  
-
 });
 
 module.exports = Router;
