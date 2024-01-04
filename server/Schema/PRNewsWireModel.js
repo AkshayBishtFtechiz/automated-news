@@ -6,6 +6,7 @@ const PRNewsWireSchema = new mongoose.Schema({
   serviceIssuedOn: String,
   dateTimeIssued: String,
   urlToRelease: String,
+  tickerIssuer: String,
 });
 
 module.exports = mongoose.model("pr-news-wire", PRNewsWireSchema);

@@ -3,7 +3,7 @@ const Router = express.Router();
 const GlobeNewsWireSchema = require("../Schema/GlobeNewsWireModel");
 const puppeteer = require("puppeteer");
 const cheerio = require("cheerio");
-
+const moment = require("moment");
 // GLOBE NEWS WIRE API
 
 Router.get("/", async (req, res) => {
@@ -39,10 +39,10 @@ Router.get("/", async (req, res) => {
       "Kaskela",
       "Glancy",
       "Levi & Korsinsky",
-      "Rosen"
+      "Rosen",
     ];
 
-    const browser = await puppeteer.launch({headless: 'new'});
+    const browser = await puppeteer.launch({ headless: "new" });
     const page = await browser.newPage();
     await page.setCacheEnabled(false);
 
@@ -89,8 +89,19 @@ Router.get("/", async (req, res) => {
       });
 
       const payload = filteredNewsItems.map((newsItem) => {
+        const tickerMatch =
+          newsItem.summary.match(/\((NASDAQ|NYSE|OTCBB):([^\)]+)\)/) ||
+          newsItem.title.match(/\((NASDAQ|NYSE|OTCBB):([^\)]+)\)/);
+        const tickerSymbolMatch = (tickerMatch ? tickerMatch[2].trim() : "").match(/([^;\s]+)/)
+        const formattedDate = moment(newsItem.date, ["MMM DD, YYYY", "MMM DD, YYYY h:mm A"]).format("MMMM DD, YYYY");
+
         return {
-          tickerSymbol:
+          tickerSymbol: tickerSymbolMatch ? tickerSymbolMatch[1] : "", // Extracted first ticker symbol
+          firmIssuing: law_firms[i],
+          serviceIssuedOn: "Globe News Wire", // Replace with actual service
+          dateTimeIssued: formattedDate, // Use the current date and time
+          urlToRelease: `https://www.globenewswire.com${newsItem.link}`,
+          tickerIssuer:
             newsItem.summary.includes("(NASDAQ:") ||
             newsItem.title.includes("(NASDAQ:")
               ? "NASDAQ"
@@ -101,10 +112,6 @@ Router.get("/", async (req, res) => {
                 newsItem.title.includes("(OTCBB:")
               ? "OTCBB"
               : "",
-          firmIssuing: law_firms[i], // Use the corresponding firm name
-          serviceIssuedOn: "Globe News Wire", // Replace with actual service
-          dateTimeIssued: newsItem.date, // Use the current date and time
-          urlToRelease: `https://www.globenewswire.com${newsItem.link}`,
         };
       });
 

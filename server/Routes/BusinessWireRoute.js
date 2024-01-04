@@ -2,9 +2,9 @@ const express = require("express");
 const Router = express.Router();
 const BusinessWireSchema = require("../Schema/BusinessWireModel");
 const puppeteer = require("puppeteer");
-const moment = require("moment");
 const cheerio = require("cheerio");
 const axios = require("axios");
+const nodemailer = require("nodemailer");
 
 // BUSINESS WIRE API
 
@@ -41,10 +41,8 @@ Router.get("/", async (req, res) => {
       "Kaskela",
       "Glancy",
       "Levi & Korsinsky",
-      "Rosen"
-    ]
-
-    const { days } = req?.query;
+      "Rosen",
+    ];
 
     const browser = await puppeteer.launch({ headless: "new" });
     const page = await browser.newPage();
@@ -86,43 +84,66 @@ Router.get("/", async (req, res) => {
       });
 
       const payload = newsItems.map((newsItem) => {
+        const tickerMatch = newsItem.summary.match(
+          /\((NASDAQ|NYSE|OTCBB):([^\)]+)\)/
+        );
+
         return {
-          tickerSymbol: newsItem.summary.includes("(NASDAQ:")
+          tickerSymbol: tickerMatch ? tickerMatch[2].trim() : "",
+          firmIssuing: law_firms[i],
+          serviceIssuedOn: "BusinessWire", // Replace with actual service
+          dateTimeIssued: newsItem.date, // Use the current date and time
+          urlToRelease: newsItem.link,
+          tickerIssuer: newsItem.summary.includes("(NASDAQ:")
             ? "NASDAQ"
             : newsItem.summary.includes("(NYSE:")
             ? "NYSE"
             : newsItem.summary.includes("(OTCBB:")
             ? "OTCBB"
             : "",
-          firmIssuing: law_firms[i],
-          serviceIssuedOn: "BusinessWire", // Replace with actual service
-          dateTimeIssued: newsItem.date, // Use the current date and time
-          urlToRelease: newsItem.link,
         };
       });
 
-        for (const newsData of payload) {
-          firmData.push({ firm: listed_firms[i], payload: newsData });
-        }
+      for (const newsData of payload) {
+        firmData.push({ firm: listed_firms[i], payload: newsData });
+        // const newNews = new BusinessWireSchema(newsData);
+        // await newNews.save();
+      }
     }
 
     const getAllBussinessNews = await BusinessWireSchema.find();
-    
-      if(getAllBussinessNews.length !== firmData.length) {
-        firmData.forEach(async function (data, index) {  
-          const newResponse = data.payload;
+    console.log("getAllBussinessNews@@:", getAllBussinessNews);
 
-          //const releaseUrl = newResponse.urlToRelease;
-          const newNews = new BusinessWireSchema(newResponse);
-          newNews.save();
-        });
-        res.json(firmData);
-      } 
-      else {
-        res.send({
-          message:"Duplicate News"
-        });
-      }
+    if (getAllBussinessNews.length === 0) {
+      firmData.forEach(async function (data, index) {
+        const newResponse = data.payload;
+        const newNews = new BusinessWireSchema(newResponse);
+        newNews.save();
+      });
+      res.json(firmData);
+    } else if (getAllBussinessNews.length !== firmData.length) {
+      firmData.forEach(async function (data, index) {
+        const newResponse = data.payload;
+
+        //const releaseUrl = newResponse.urlToRelease;
+        if (
+          getAllBussinessNews.length > 0 &&
+          getAllBussinessNews[index].urlToRelease !==
+            data[index].payload.urlToRelease
+        ) {
+          firmData.push({ payload: data[index].payload });
+          /* const newNews = new BusinessWireSchema(newResponse);
+          newNews.save(); */
+        }
+      });
+        const newNews = new BusinessWireSchema(firmData);
+        newNews.save();
+      res.json(firmData);
+    } else {
+      res.send({
+        message: "Duplicate News",
+      });
+    }
 
     
     await browser.close();
@@ -135,18 +156,57 @@ Router.get("/", async (req, res) => {
 
 Router.delete("/deleteall", async (req, res) => {
   BusinessWireSchema.deleteMany({})
-  .then((data) => {
-    data === null
-      ? res.send({
-          message: "News already deleted",
-        })
-      : res.send({
-          message: "News deleted successfully",
-        });
-  })
-  .catch((err) => {
-    res.send(err);
+    .then((data) => {
+      data === null
+        ? res.send({
+            message: "News already deleted",
+          })
+        : res.send({
+            message: "News deleted successfully",
+          });
+    })
+    .catch((err) => {
+      res.send(err);
+    });
+});
+
+Router.post("/sendemail", (req, res) => {
+  // send email
+  // Create a transporter using SMTP transport
+  const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: 'automatednews21@gmail.com',
+        pass: 'ovig lcvq nfdn whsj'
+    },
+    secure: false, // use SSL
+    port: 25, // port for secure SMTP
+    tls: {
+      rejectUnauthorized: false
+  }
   });
+  
+  // Define the email options
+  const mailOptions = {
+      from: 'automatednews21@gmail.com',  // Sender address
+      to: 'shubham.pal@ftechiz.com',   // List of recipients
+      subject: 'Hello from Nodemailer',  // Subject line
+      text: 'Hello, this is a test email!'  // Plain text body
+  };
+  
+  // Send the email
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      res.send(error)
+      return console.error('Error:', error.message);
+      }
+    console.log('Email sent:', info.response);
+    res.send({
+      message:"Email sent"
+    })
+  });
+  
+
 });
 
 module.exports = Router;

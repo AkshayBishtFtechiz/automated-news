@@ -357,7 +357,7 @@ const MostFrequentlyIssuedByTickerandFirm = () => {
           : separatedData["Kessler Topaz"]?.OTCBB?.length || 0,
     },
     {
-      type: "Pomerantz \nLLP",
+      type: "Pomerantz\nLLP",
       firm_value:
         myStore.filteredDataofTandF["Pomerantz"] === undefined
           ? separatedData["Pomerantz"]?.firmLength
