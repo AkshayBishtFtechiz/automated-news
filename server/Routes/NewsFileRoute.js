@@ -2,6 +2,7 @@ const express = require("express");
 const Router = express.Router();
 const NewsFileSchema = require("../Schema/NewsFileModel");
 const puppeteer = require("puppeteer");
+const moment = require("moment");
 
 // NEWS FILE API
 Router.get("/", async (req, res) => {
@@ -122,18 +123,23 @@ Router.get("/", async (req, res) => {
       );
 
       const payload = newsItems.map((newsItem) => {
+        const tickerMatch = newsItem.summary.match(
+          /\((NASDAQ|NYSE|OTCBB):([^\)]+)\)/
+        );
+        const formattedDate = moment(newsItem.date, ["YYYY-MM-DD h:mm A Z"]).format("MMMM DD, YYYY");
         return {
-          tickerSymbol: newsItem.summary.includes("(NASDAQ:")
+          tickerSymbol: tickerMatch ? tickerMatch[2].trim() : "",
+          firmIssuing: law_firms[i].name,
+          serviceIssuedOn: "News File Corp", // Replace with actual service
+          dateTimeIssued: formattedDate, // Use the current date and time
+          urlToRelease: `https://www.newsfilecorp.com/${newsItem.link}`,
+          tickerIssuer: newsItem.summary.includes("(NASDAQ:")
             ? "NASDAQ"
             : newsItem.summary.includes("(NYSE:")
             ? "NYSE"
             : newsItem.summary.includes("(OTCBB:")
             ? "OTCBB"
             : "",
-          firmIssuing: firm.name,
-          serviceIssuedOn: "News File Corp", // Replace with actual service
-          dateTimeIssued: newsItem.date, // Use the current date and time
-          urlToRelease: `https://www.newsfilecorp.com/${newsItem.link}`,
         };
       });
 

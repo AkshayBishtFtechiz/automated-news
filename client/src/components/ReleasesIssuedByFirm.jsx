@@ -147,7 +147,7 @@ const ReleasesIssuedByFirm = () => {
 
   const ColumnData = [
     {
-      type: "Berger\nMontague",
+      type: "Berg-\ner\nMonta-\ngue",
       value:
         myStore.filteredData["Berger Montague"] === undefined
           ? separatedData["Berger Montague"]?.length
@@ -163,7 +163,7 @@ const ReleasesIssuedByFirm = () => {
       label: separatedData.firms[0],
     },
     {
-      type: "Bronstein,\nGewirtz",
+      type: "Brons-\ntein,\nGewirtz",
       value:
         myStore.filteredData["Bronstein, Gewirtz"] === undefined
           ? separatedData["Bronstein, Gewirtz"]?.length
@@ -195,7 +195,7 @@ const ReleasesIssuedByFirm = () => {
       label: separatedData.firms[13],
     },
     {
-      type: "Hagens\n Berman",
+      type: "Hagens\nBerman",
       value:
         myStore.filteredData["Hagens Berman"] === undefined
           ? separatedData["Hagens Berman"]?.length
@@ -203,7 +203,7 @@ const ReleasesIssuedByFirm = () => {
       label: separatedData.firms[11],
     },
     {
-      type: "Kessler\nTopaz \nMeltzer\n&\nChe-\nck",
+      type: "Kessler\nTopaz\nMeltzer\n&\nChe-\nck",
       value:
         myStore.filteredData["Kessler Topaz"] === undefined
           ? separatedData["Kessler Topaz"]?.length
@@ -219,7 +219,7 @@ const ReleasesIssuedByFirm = () => {
       label: separatedData.firms[12],
     },
     {
-      type: "Rigrodsky\n Law",
+      type: "Rigro-\ndsky\nLaw",
       value:
         myStore.filteredData["Rigrodsky"] === undefined
           ? separatedData["Rigrodsky"]?.length
@@ -227,7 +227,7 @@ const ReleasesIssuedByFirm = () => {
       label: separatedData.firms[5],
     },
     {
-      type: "Schall\nLaw\n Firm",
+      type: "Schall\nLaw\nFirm",
       value:
         myStore.filteredData["Schall"] === undefined
           ? separatedData["Schall"]?.length
@@ -251,7 +251,7 @@ const ReleasesIssuedByFirm = () => {
       label: separatedData.firms[8],
     },
     {
-      type: "Kaskela\n Law",
+      type: "Kaskela\nLaw",
       value:
         myStore.filteredData["Kaskela"] === undefined
           ? separatedData["Kaskela"]?.length

@@ -23,7 +23,7 @@ const Layout = () => {
           </div>
          
         </div>
-        <div className="row">
+        <div className="row mb-5">
         <div className="col-lg-12 col-md-12 col-xs-12 mx-auto mt-4">
             <MostFrequentlyIssuedByTickerandFirm />
           </div>

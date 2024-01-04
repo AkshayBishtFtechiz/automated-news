@@ -2,6 +2,7 @@ const express = require("express");
 const Router = express.Router();
 const PRNewsWireSchema = require("../Schema/PRNewsWireModel");
 const puppeteer = require("puppeteer");
+const moment = require("moment");
 
 // PR NEWS WIRE API
 Router.get("/", async (req, res) => {
@@ -80,20 +81,36 @@ Router.get("/", async (req, res) => {
       );
 
       const payload = newsItems.map((newsItem) => {
-        return {
-          tickerSymbol: newsItem.summary.includes("(NASDAQ:") || newsItem.title.includes("(NASDAQ:")
-            ? "NASDAQ"
-            : newsItem.summary.includes("(NYSE:") || newsItem.title.includes("(NYSE:")
-            ? "NYSE"
-            : newsItem.summary.includes("(OTCBB:") || newsItem.title.includes("(OTCBB:")
-            ? "OTCBB"
-            : "",
-          firmIssuing: firm,
-          serviceIssuedOn: "PR Newswire", // Replace with actual service
-          dateTimeIssued: newsItem.date, // Use the current date and time
-          urlToRelease: `https://www.prnewswire.com${newsItem.link}`,
-        };
-      });
+        const tickerMatch =
+          newsItem.summary.match(/\((NASDAQ|NYSE|OTCBB):([^\)]+)\)/) ||
+          newsItem.title.match(/\((NASDAQ|NYSE|OTCBB):([^\)]+)\)/);
+        const tickerSymbolMatch = (tickerMatch ? tickerMatch[2].trim() : "").match(/([^;\s]+)/)
+        const formattedDate = moment(newsItem.date, ["MMM DD, YYYY", "MMM DD, YYYY h:mm A"]).format("MMMM DD, YYYY");
+
+        // Check if tickerSymbol is not empty before adding to payload
+        if (tickerSymbolMatch && tickerSymbolMatch[1]) {
+          return {
+            tickerSymbol: tickerSymbolMatch[1], // Extracted first ticker symbol
+            firmIssuing: law_firms[i],
+            serviceIssuedOn: "PR Newswire", // Replace with actual service
+            dateTimeIssued: formattedDate, // Use the current date and time
+            urlToRelease: `https://www.prnewswire.com${newsItem.link}`,
+            tickerIssuer:
+              newsItem.summary.includes("(NASDAQ:") ||
+              newsItem.title.includes("(NASDAQ:")
+                ? "NASDAQ"
+                : newsItem.summary.includes("(NYSE:") ||
+                  newsItem.title.includes("(NYSE:")
+                ? "NYSE"
+                : newsItem.summary.includes("(OTCBB:") ||
+                  newsItem.title.includes("(OTCBB:")
+                ? "OTCBB"
+                : "",
+          };
+        } else {
+          return null; // Skip items with empty tickerSymbol
+        }
+      }).filter(Boolean); // Remove null entries
 
       for (const newsData of payload) {
         // const newNews = new PRNewsWireSchema(newsData);

@@ -2,7 +2,6 @@ const express = require("express");
 const Router = express.Router();
 const BusinessWireSchema = require("../Schema/BusinessWireModel");
 const puppeteer = require("puppeteer");
-const moment = require("moment");
 const cheerio = require("cheerio");
 const axios = require("axios");
 
@@ -41,10 +40,8 @@ Router.get("/", async (req, res) => {
       "Kaskela",
       "Glancy",
       "Levi & Korsinsky",
-      "Rosen"
-    ]
-
-    const { days } = req?.query;
+      "Rosen",
+    ];
 
     const browser = await puppeteer.launch({ headless: "new" });
     const page = await browser.newPage();
@@ -86,41 +83,30 @@ Router.get("/", async (req, res) => {
       });
 
       const payload = newsItems.map((newsItem) => {
+        const tickerMatch = newsItem.summary.match(
+          /\((NASDAQ|NYSE|OTCBB):([^\)]+)\)/
+        );
+
         return {
-          tickerSymbol: newsItem.summary.includes("(NASDAQ:")
+          tickerSymbol: tickerMatch ? tickerMatch[2].trim() : "",
+          firmIssuing: law_firms[i],
+          serviceIssuedOn: "BusinessWire", // Replace with actual service
+          dateTimeIssued: newsItem.date, // Use the current date and time
+          urlToRelease: newsItem.link,
+          tickerIssuer: newsItem.summary.includes("(NASDAQ:")
             ? "NASDAQ"
             : newsItem.summary.includes("(NYSE:")
             ? "NYSE"
             : newsItem.summary.includes("(OTCBB:")
             ? "OTCBB"
             : "",
-          firmIssuing: law_firms[i],
-          serviceIssuedOn: "BusinessWire", // Replace with actual service
-          dateTimeIssued: newsItem.date, // Use the current date and time
-          urlToRelease: newsItem.link,
         };
       });
 
-      if (days) {
-        const filteredData = payload.filter((newsData) => {
-          const entryDate = new Date(newsData.dateTimeIssued);
-          const cutoffDate = new Date();
-          cutoffDate.setDate(cutoffDate.getDate() - parseInt(days, 10));
-          return entryDate >= cutoffDate;
-        });
-
-        // Save each document separately
-        for (const newsData of filteredData) {
-          // const newNews = new BusinessWireSchema(newsData);
-          // await newNews.save();
-          firmData.push({ firm, payload: newsData });
-        }
-      } else {
-        for (const newsData of payload) {
-          firmData.push({ firm: listed_firms[i], payload: newsData });
-          // const newNews = new BusinessWireSchema(newsData);
-          // await newNews.save();
-        }
+      for (const newsData of payload) {
+        firmData.push({ firm: listed_firms[i], payload: newsData });
+        // const newNews = new BusinessWireSchema(newsData);
+        // await newNews.save();
       }
     }
 
