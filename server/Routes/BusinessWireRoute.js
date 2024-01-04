@@ -125,9 +125,26 @@ Router.get("/", async (req, res) => {
           "http://www.businesswire.com/news/home/20240101367342/zh-HK/",
         tickerIssuer: "NYSE",
       },
+    });
+
+    firmData.push({
+      firm: "Rosen",
+      payload: {
+        tickerSymbol: "Rosen",
+        firmIssuing: "Berger Montague",
+        serviceIssuedOn: "BusinessWire",
+        dateTimeIssued: "January 02, 2024",
+        urlToRelease:
+          "http://www.businesswire.com/news/home/20240101367342/zh-HK/",
+        tickerIssuer: "NYSE",
+      },
     }); */
 
-    console.log("getAllBussinessNews.length !== firmData.length:", getAllBussinessNews.length, firmData.length);
+    console.log(
+      "getAllBussinessNews.length !== firmData.length:",
+      getAllBussinessNews.length,
+      firmData.length
+    );
 
     if (getAllBussinessNews.length === 0) {
       console.log("If Data is empty1");
@@ -138,20 +155,61 @@ Router.get("/", async (req, res) => {
       });
       res.json(firmData);
     } else if (getAllBussinessNews.length !== firmData.length) {
-      console.log("If Data is empty21111", firmData);
+      //console.log("If Data is empty21111", firmData);
 
-      /* firmData.forEach(async function (data, index) {
+      firmData.forEach(async function (data, index) {
         console.log("dataForEach:", getAllBussinessNews[index], index);
 
         if (
           getAllBussinessNews.length > 0 &&
-          getAllBussinessNews[index]?.urlToRelease !== data.payload.urlToRelease
+          getAllBussinessNews[index]?.urlToRelease !==
+            data.payload.urlToRelease &&
+          getAllBussinessNews[index] === undefined
         ) {
-          console.log("data.payload:", data.payload);
-          firmData.push({ payload: data.payload });
+          console.log("data.payload11111:", data);
+          firmData.push({ firm: data.firm, payload: data.payload });
+          const newNews = new BusinessWireSchema(data.payload);
+          newNews.save();
+
+          // Sending Email
+
+          const transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+              user: "automatednews21@gmail.com",
+              pass: "ovig lcvq nfdn whsj",
+            },
+            secure: false,
+            port: 25,
+            tls: {
+              rejectUnauthorized: false,
+            },
+          });
+
+          // Define the email options
+          const mailOptions = {
+            from: "automatednews21@gmail.com",
+            to: "shubham.pal@ftechiz.com",
+            subject: "Newly Discovered Ticker",
+            html:
+                  "<h1>Ticker</h1> "+ data?.payload?.tickerSymbol +
+                  "<h2 style='font- weight:bold;'> Url to Release </h2>" + data?.payload?.urlToRelease,
+          };
+
+          /* 1.Ticker - newly discovered ticker 
+2.Url to Release - a link to the release */
+
+          // Send the email
+          transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+              return console.error("Error:", error.message);
+            }
+            console.log("Email sent:", info.response);
+          });
         }
       });
-      console.log("firmData11@@$$:", firmData); */
+      //console.log("firmData11@@$$:", firmData);
+
       /* firmData.forEach(function (respData, index) {
         const newNews = new BusinessWireSchema(respData[index]);
         newNews.save();
