@@ -7,6 +7,7 @@ export const UseNewsStore = create(
       //  Initial State here
       firmData: [],
       allNewsData: [],
+      allTickers: [],
 
       // Initial State for Tickers
 
@@ -43,6 +44,9 @@ export const UseNewsStore = create(
 
       // SETTING FIRM DATA
       setFirmData: (data) => set({ firmData: data }),
+
+      // SETTING ALL TICKERS
+      setAllTickers: (data) => set({ allTickers: data})
     }),
     "NewsStore"
   )
