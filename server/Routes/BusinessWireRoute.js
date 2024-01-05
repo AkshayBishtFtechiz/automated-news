@@ -112,7 +112,6 @@ Router.get("/", async (req, res) => {
     }
 
     const getAllBussinessNews = await BusinessWireSchema.find();
-    //console.log("FirmDataTesting@@:", firmData);
 
     /* firmData.push({
       firm: "Berger Montague",
@@ -140,33 +139,22 @@ Router.get("/", async (req, res) => {
       },
     }); */
 
-    console.log(
-      "getAllBussinessNews.length !== firmData.length:",
-      getAllBussinessNews.length,
-      firmData.length
-    );
-
     if (getAllBussinessNews.length === 0) {
-      console.log("If Data is empty1");
       firmData.forEach(async function (data, index) {
         const newResponse = data.payload;
         const newNews = new BusinessWireSchema(newResponse);
         newNews.save();
       });
       res.json(firmData);
-    } else if (getAllBussinessNews.length !== firmData.length) {
-      //console.log("If Data is empty21111", firmData);
-
+    }
+    else if (getAllBussinessNews.length !== firmData.length) {
       firmData.forEach(async function (data, index) {
-        console.log("dataForEach:", getAllBussinessNews[index], index);
-
         if (
           getAllBussinessNews.length > 0 &&
           getAllBussinessNews[index]?.urlToRelease !==
             data.payload.urlToRelease &&
           getAllBussinessNews[index] === undefined
         ) {
-          console.log("data.payload11111:", data);
           firmData.push({ firm: data.firm, payload: data.payload });
           const newNews = new BusinessWireSchema(data.payload);
           newNews.save();
@@ -192,12 +180,11 @@ Router.get("/", async (req, res) => {
             to: "shubham.pal@ftechiz.com",
             subject: "Newly Discovered Ticker",
             html:
-                  "<h1>Ticker</h1> "+ data?.payload?.tickerSymbol +
-                  "<h2 style='font- weight:bold;'> Url to Release </h2>" + data?.payload?.urlToRelease,
+              "<h1>Ticker</h1> " +
+              data?.payload?.tickerSymbol +
+              "<h2 style='font- weight:bold;'> Url to Release </h2>" +
+              data?.payload?.urlToRelease,
           };
-
-          /* 1.Ticker - newly discovered ticker 
-2.Url to Release - a link to the release */
 
           // Send the email
           transporter.sendMail(mailOptions, (error, info) => {
@@ -208,16 +195,9 @@ Router.get("/", async (req, res) => {
           });
         }
       });
-      //console.log("firmData11@@$$:", firmData);
-
-      /* firmData.forEach(function (respData, index) {
-        const newNews = new BusinessWireSchema(respData[index]);
-        newNews.save();
-      }); */
 
       res.json(firmData);
     } else {
-      console.log("If Data is empty3");
       res.send({
         message: "Duplicate News",
       });
