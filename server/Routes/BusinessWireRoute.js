@@ -5,6 +5,7 @@ const puppeteer = require("puppeteer");
 const cheerio = require("cheerio");
 const axios = require("axios");
 const nodemailer = require("nodemailer");
+const emailSent = require("../utils/emailSent");
 
 // BUSINESS WIRE API
 
@@ -106,12 +107,8 @@ Router.get("/", async (req, res) => {
 
       for (const newsData of payload) {
         firmData.push({ firm: listed_firms[i], payload: newsData });
-        // const newNews = new BusinessWireSchema(newsData);
-        // await newNews.save();
       }
     }
-
-    const getAllBussinessNews = await BusinessWireSchema.find();
 
     /* firmData.push({
       firm: "Berger Montague",
@@ -139,69 +136,8 @@ Router.get("/", async (req, res) => {
       },
     }); */
 
-    if (getAllBussinessNews.length === 0) {
-      firmData.forEach(async function (data, index) {
-        const newResponse = data.payload;
-        const newNews = new BusinessWireSchema(newResponse);
-        newNews.save();
-      });
-      res.json(firmData);
-    }
-    else if (getAllBussinessNews.length !== firmData.length) {
-      firmData.forEach(async function (data, index) {
-        if (
-          getAllBussinessNews.length > 0 &&
-          getAllBussinessNews[index]?.urlToRelease !==
-            data.payload.urlToRelease &&
-          getAllBussinessNews[index] === undefined
-        ) {
-          firmData.push({ firm: data.firm, payload: data.payload });
-          const newNews = new BusinessWireSchema(data.payload);
-          newNews.save();
-
-          // Sending Email
-
-          const transporter = nodemailer.createTransport({
-            service: "gmail",
-            auth: {
-              user: "automatednews21@gmail.com",
-              pass: "ovig lcvq nfdn whsj",
-            },
-            secure: false,
-            port: 25,
-            tls: {
-              rejectUnauthorized: false,
-            },
-          });
-
-          // Define the email options
-          const mailOptions = {
-            from: "automatednews21@gmail.com",
-            to: "shubham.pal@ftechiz.com",
-            subject: "Newly Discovered Ticker",
-            html:
-              "<h1>Ticker</h1> " +
-              data?.payload?.tickerSymbol +
-              "<h2 style='font- weight:bold;'> Url to Release </h2>" +
-              data?.payload?.urlToRelease,
-          };
-
-          // Send the email
-          transporter.sendMail(mailOptions, (error, info) => {
-            if (error) {
-              return console.error("Error:", error.message);
-            }
-            console.log("Email sent:", info.response);
-          });
-        }
-      });
-
-      res.json(firmData);
-    } else {
-      res.send({
-        message: "Duplicate News",
-      });
-    }
+    const getAllBussinessNews = await BusinessWireSchema.find();
+    emailSent(req, res, getAllBussinessNews, firmData, BusinessWireSchema);
 
     await browser.close();
   } catch (error) {
@@ -209,6 +145,8 @@ Router.get("/", async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 });
+
+// Delete BussinessWireNews
 
 Router.delete("/deleteall", async (req, res) => {
   BusinessWireSchema.deleteMany({})
