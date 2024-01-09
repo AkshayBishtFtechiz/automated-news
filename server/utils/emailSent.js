@@ -2,7 +2,8 @@ const nodemailer = require("nodemailer");
 
 const emailSent = async (req, res, getAllNews, firmData, newsSchema) => {
 
-    if (getAllNews.length === 0) {
+  if (getAllNews.length === 0) {
+      console.log("One")
         firmData.forEach(async function (data, index) {
           const newResponse = data.payload;
           const newNews = new newsSchema(newResponse);
@@ -10,7 +11,9 @@ const emailSent = async (req, res, getAllNews, firmData, newsSchema) => {
         });
         res.json(firmData);
       }
-      else if (getAllNews.length !== firmData.length) {
+  else if (getAllNews.length !== firmData.length) {
+    console.log("Two")
+    
         firmData.forEach(async function (data, index) {
           if (
             getAllNews.length > 0 &&
@@ -61,9 +64,7 @@ const emailSent = async (req, res, getAllNews, firmData, newsSchema) => {
   
         res.json(firmData);
       } else {
-        res.send({
-          message: "Duplicate News",
-        });
+        res.send(firmData);
       }
 }
 
