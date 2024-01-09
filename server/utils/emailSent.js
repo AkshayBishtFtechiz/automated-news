@@ -5,7 +5,7 @@ const emailSent = async (req, res, getAllNews, firmData, newsSchema) => {
   if (getAllNews.length === 0) {
         firmData.forEach(async function (data, index) {
           const newResponse = data.payload;
-          const newNews = new newsSchema(newResponse);
+          const newNews = new newsSchema({ firm: data.firm, payload: newResponse });
           newNews.save();
         });
         res.json(firmData);
@@ -18,8 +18,9 @@ const emailSent = async (req, res, getAllNews, firmData, newsSchema) => {
               data.payload.urlToRelease &&
             getAllNews[index] === undefined
           ) {
+            console.log("dataFirm:",data)
             firmData.push({ firm: data.firm, payload: data.payload });
-            const newNews = new newsSchema(data.payload);
+            const newNews = new newsSchema({ firm: data.firm, payload: data.payload });
             newNews.save();
   
             // Sending Email
@@ -41,12 +42,8 @@ const emailSent = async (req, res, getAllNews, firmData, newsSchema) => {
             const mailOptions = {
               from: "automatednews21@gmail.com",
               to: "shubham.pal@ftechiz.com",
-              subject: "Newly Discovered Ticker",
-              html:
-                "<h1>Ticker</h1> " +
-                data?.payload?.tickerSymbol +
-                "<h2 style='font- weight:bold;'> Url to Release </h2>" +
-                data?.payload?.urlToRelease,
+              subject: `Alert: First Press Release for ${data?.payload?.tickerSymbol}`,
+              html: `<p><p style='font-weight:bold;'>${data.firm}</p> issued a press release for <p style='font-weight:bold;'>${data?.payload?.tickerSymbol}</p>. This is the first press release observed for <p style='font-weight:bold;'>${data?.payload?.tickerSymbol}</p> in the past 60 days. View the release here: ${data?.payload?.urlToRelease}.</p>`,
             };
   
             // Send the email
