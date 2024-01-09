@@ -4,6 +4,8 @@ const BusinessWireSchema = require("../Schema/BusinessWireModel");
 const puppeteer = require("puppeteer");
 const cheerio = require("cheerio");
 const axios = require("axios");
+const nodemailer = require("nodemailer");
+const emailSent = require("../utils/emailSent");
 
 // BUSINESS WIRE API
 
@@ -47,7 +49,7 @@ Router.get("/", async (req, res) => {
     const page = await browser.newPage();
     await page.setCacheEnabled(false);
 
-    const firmData = [];
+    let firmData = [];
 
     for (let i = 0; i < law_firms.length; i++) {
       const firm = law_firms[i];
@@ -105,17 +107,97 @@ Router.get("/", async (req, res) => {
 
       for (const newsData of payload) {
         firmData.push({ firm: listed_firms[i], payload: newsData });
-        // const newNews = new BusinessWireSchema(newsData);
-        // await newNews.save();
       }
     }
 
-    res.json(firmData);
+    /* firmData.push({
+      firm: "Berger Montague",
+      payload: {
+        tickerSymbol: "GNRC",
+        firmIssuing: "Berger Montague",
+        serviceIssuedOn: "BusinessWire",
+        dateTimeIssued: "January 02, 2024",
+        urlToRelease:
+          "http://www.businesswire.com/news/home/20240101367342/zh-HK/",
+        tickerIssuer: "NYSE",
+      },
+    });
+
+    firmData.push({
+      firm: "Rosen",
+      payload: {
+        tickerSymbol: "Rosen",
+        firmIssuing: "Berger Montague",
+        serviceIssuedOn: "BusinessWire",
+        dateTimeIssued: "January 02, 2024",
+        urlToRelease:
+          "http://www.businesswire.com/news/home/20240101367342/zh-HK/",
+        tickerIssuer: "NYSE",
+      },
+    }); */
+
+    const getAllBussinessNews = await BusinessWireSchema.find();
+    emailSent(req, res, getAllBussinessNews, firmData, BusinessWireSchema);
+
     await browser.close();
   } catch (error) {
     console.error("Error:", error);
     res.status(500).send("Internal Server Error");
   }
+});
+
+// Delete BussinessWireNews
+
+Router.delete("/deleteall", async (req, res) => {
+  BusinessWireSchema.deleteMany({})
+    .then((data) => {
+      data === null
+        ? res.send({
+            message: "News already deleted",
+          })
+        : res.send({
+            message: "News deleted successfully",
+          });
+    })
+    .catch((err) => {
+      res.send(err);
+    });
+});
+
+Router.post("/sendemail", (req, res) => {
+  // send email
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: "automatednews21@gmail.com",
+      pass: "ovig lcvq nfdn whsj",
+    },
+    secure: false,
+    port: 25,
+    tls: {
+      rejectUnauthorized: false,
+    },
+  });
+
+  // Define the email options
+  const mailOptions = {
+    from: "automatednews21@gmail.com",
+    to: "shubham.pal@ftechiz.com",
+    subject: "Automated News",
+    text: "Hello, this is a test email!",
+  };
+
+  // Send the email
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      res.send(error);
+      return console.error("Error:", error.message);
+    }
+    console.log("Email sent:", info.response);
+    res.send({
+      message: "Email sent",
+    });
+  });
 });
 
 module.exports = Router;

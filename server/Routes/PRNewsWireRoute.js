@@ -3,6 +3,7 @@ const Router = express.Router();
 const PRNewsWireSchema = require("../Schema/PRNewsWireModel");
 const puppeteer = require("puppeteer");
 const moment = require("moment");
+const emailSent = require("../utils/emailSent");
 
 // PR NEWS WIRE API
 Router.get("/", async (req, res) => {
@@ -119,13 +120,58 @@ Router.get("/", async (req, res) => {
       }
     }
 
-    res.send(firmData);
+    /* firmData.push({
+      firm: "Berger Montague",
+      payload: {
+        tickerSymbol: "SERV",
+        firmIssuing: "Berger Montague",
+        serviceIssuedOn: "BusinessWire",
+        dateTimeIssued: "January 02, 2024",
+        urlToRelease:
+          "http://www.businesswire.com/news/home/20240101367342/zh-HK/",
+        tickerIssuer: "NYSE",
+      },
+    });
+
+    firmData.push({
+      firm: "Rosen",
+      payload: {
+        tickerSymbol: "BIDU",
+        firmIssuing: "Berger Montague",
+        serviceIssuedOn: "BusinessWire",
+        dateTimeIssued: "January 02, 2024",
+        urlToRelease:
+          "http://www.businesswire.com/news/home/20240101367342/zh-HK/",
+        tickerIssuer: "NYSE",
+      },
+    }); */
+    
+    const getAllPRNewsWire = await PRNewsWireSchema.find();
+    emailSent(req, res, getAllPRNewsWire, firmData, PRNewsWireSchema);
 
     await browser.close();
   } catch (error) {
     console.error("Error:", error);
     res.status(500).send("Internal Server Error");
   }
+});
+
+// Delete PRNewsWire
+
+Router.delete("/deleteall", async (req, res) => {
+  PRNewsWireSchema.deleteMany({})
+    .then((data) => {
+      data === null
+        ? res.send({
+            message: "News already deleted",
+          })
+        : res.send({
+            message: "News deleted successfully",
+          });
+    })
+    .catch((err) => {
+      res.send(err);
+    });
 });
 
 

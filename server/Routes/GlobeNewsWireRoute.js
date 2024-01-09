@@ -4,6 +4,8 @@ const GlobeNewsWireSchema = require("../Schema/GlobeNewsWireModel");
 const puppeteer = require("puppeteer");
 const cheerio = require("cheerio");
 const moment = require("moment");
+const emailSent = require("../utils/emailSent");
+
 // GLOBE NEWS WIRE API
 
 Router.get("/", async (req, res) => {
@@ -117,18 +119,62 @@ Router.get("/", async (req, res) => {
 
       // Save each document separately
       for (const newsData of payload) {
-        // const newNews = new GlobeNewsWireSchema(newsData);
-        // await newNews.save();
         firmData.push({ firm: listed_firms[i], payload: newsData });
       }
     }
 
-    res.send(firmData);
+    /* firmData.push({
+      firm: "Berger Montague",
+      payload: {
+        tickerSymbol: "SERV",
+        firmIssuing: "Berger Montague",
+        serviceIssuedOn: "BusinessWire",
+        dateTimeIssued: "January 02, 2024",
+        urlToRelease:
+          "http://www.businesswire.com/news/home/20240101367342/zh-HK/",
+        tickerIssuer: "NYSE",
+      },
+    });
+
+    firmData.push({
+      firm: "Rosen",
+      payload: {
+        tickerSymbol: "BIDU",
+        firmIssuing: "Berger Montague",
+        serviceIssuedOn: "BusinessWire",
+        dateTimeIssued: "January 02, 2024",
+        urlToRelease:
+          "http://www.businesswire.com/news/home/20240101367342/zh-HK/",
+        tickerIssuer: "NYSE",
+      },
+    }); */
+    
+    const getAllGlobeNewsWire = await GlobeNewsWireSchema.find();
+    emailSent(req, res, getAllGlobeNewsWire, firmData, GlobeNewsWireSchema);
+
     await browser.close();
   } catch (error) {
     console.error("Error:", error);
     res.status(500).send("Internal Server Error");
   }
+});
+
+// Delete GlobeWireNews
+
+Router.delete("/deleteall", async (req, res) => {
+  GlobeNewsWireSchema.deleteMany({})
+    .then((data) => {
+      data === null
+        ? res.send({
+            message: "News already deleted",
+          })
+        : res.send({
+            message: "News deleted successfully",
+          });
+    })
+    .catch((err) => {
+      res.send(err);
+    });
 });
 
 module.exports = Router;

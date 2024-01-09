@@ -3,6 +3,7 @@ const Router = express.Router();
 const NewsFileSchema = require("../Schema/NewsFileModel");
 const puppeteer = require("puppeteer");
 const moment = require("moment");
+const emailSent = require("../utils/emailSent");
 
 // NEWS FILE API
 Router.get("/", async (req, res) => {
@@ -150,7 +151,34 @@ Router.get("/", async (req, res) => {
       }
     }
 
-    res.send(firmData);
+    /* firmData.push({
+      firm: "Berger Montague",
+      payload: {
+        tickerSymbol: "SERV",
+        firmIssuing: "Berger Montague",
+        serviceIssuedOn: "BusinessWire",
+        dateTimeIssued: "January 02, 2024",
+        urlToRelease:
+          "http://www.businesswire.com/news/home/20240101367342/zh-HK/",
+        tickerIssuer: "NYSE",
+      },
+    });
+
+    firmData.push({
+      firm: "Rosen",
+      payload: {
+        tickerSymbol: "BIDU",
+        firmIssuing: "Berger Montague",
+        serviceIssuedOn: "BusinessWire",
+        dateTimeIssued: "January 02, 2024",
+        urlToRelease:
+          "http://www.businesswire.com/news/home/20240101367342/zh-HK/",
+        tickerIssuer: "NYSE",
+      },
+    }); */
+    
+    const getAllNewsFile = await NewsFileSchema.find();
+    emailSent(req, res, getAllNewsFile, firmData, NewsFileSchema);
 
     await browser.close();
   } catch (error) {
@@ -159,5 +187,22 @@ Router.get("/", async (req, res) => {
   }
 });
 
+// Delete NewsFile
+
+Router.delete("/deleteall", async (req, res) => {
+  NewsFileSchema.deleteMany({})
+    .then((data) => {
+      data === null
+        ? res.send({
+            message: "News already deleted",
+          })
+        : res.send({
+            message: "News deleted successfully",
+          });
+    })
+    .catch((err) => {
+      res.send(err);
+    });
+});
 
 module.exports = Router;
