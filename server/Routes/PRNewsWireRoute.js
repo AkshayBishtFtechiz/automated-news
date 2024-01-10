@@ -126,7 +126,7 @@ Router.get("/", async (req, res) => {
         tickerSymbol: "SERV",
         firmIssuing: "Berger Montague",
         serviceIssuedOn: "BusinessWire",
-        dateTimeIssued: "January 02, 2024",
+        dateTimeIssued: "October 26, 2023",
         urlToRelease:
           "http://www.businesswire.com/news/home/20240101367342/zh-HK/",
         tickerIssuer: "NYSE",
@@ -139,7 +139,7 @@ Router.get("/", async (req, res) => {
         tickerSymbol: "BIDU",
         firmIssuing: "Berger Montague",
         serviceIssuedOn: "BusinessWire",
-        dateTimeIssued: "January 02, 2024",
+        dateTimeIssued: "October 25, 2023",
         urlToRelease:
           "http://www.businesswire.com/news/home/20240101367342/zh-HK/",
         tickerIssuer: "NYSE",
