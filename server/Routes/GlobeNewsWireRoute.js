@@ -6,6 +6,7 @@ const cheerio = require("cheerio");
 const moment = require("moment");
 const emailSent = require("../utils/emailSent");
 const filterDays = require("../utils/filterDays");
+const { v4: uuidv4 } = require('uuid');
 
 // GLOBE NEWS WIRE API
 
@@ -97,8 +98,9 @@ Router.get("/", async (req, res) => {
           newsItem.title.match(/\((NASDAQ|NYSE|OTCBB):([^\)]+)\)/);
         const tickerSymbolMatch = (tickerMatch ? tickerMatch[2].trim() : "").match(/([^;\s]+)/)
         const formattedDate = moment(newsItem.date, ["MMM DD, YYYY", "MMM DD, YYYY h:mm A"]).format("MMMM DD, YYYY");
-
+        const id = uuidv4();
         return {
+          scrapId: id,
           tickerSymbol: tickerSymbolMatch ? tickerSymbolMatch[1] : "", // Extracted first ticker symbol
           firmIssuing: law_firms[i],
           serviceIssuedOn: "Globe News Wire", // Replace with actual service

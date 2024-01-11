@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const NewsFileSchema = new mongoose.Schema({
   firm: String,
   payload: {
+    scrapId: String,
     tickerSymbol: String,
     firmIssuing: String,
     serviceIssuedOn: String,

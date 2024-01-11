@@ -7,6 +7,7 @@ const axios = require("axios");
 const nodemailer = require("nodemailer");
 const emailSent = require("../utils/emailSent");
 const filterDays = require("../utils/filterDays");
+const { v4: uuidv4 } = require('uuid');
 
 // BUSINESS WIRE API
 
@@ -89,8 +90,10 @@ Router.get("/", async (req, res) => {
         const tickerMatch = newsItem.summary.match(
           /\((NASDAQ|NYSE|OTCBB):([^\)]+)\)/
         );
+        const id = uuidv4();
 
         return {
+          scrapId: id,
           tickerSymbol: tickerMatch ? tickerMatch[2].trim() : "",
           firmIssuing: law_firms[i],
           serviceIssuedOn: "BusinessWire", // Replace with actual service

@@ -6,6 +6,7 @@ const moment = require("moment");
 const emailSent = require("../utils/emailSent");
 const { format, subDays, parse } = require('date-fns');
 const filterDays = require("../utils/filterDays");
+const { v4: uuidv4 } = require('uuid');
 
 // PR NEWS WIRE API
 Router.get("/", async (req, res) => {
@@ -89,10 +90,11 @@ Router.get("/", async (req, res) => {
           newsItem.title.match(/\((NASDAQ|NYSE|OTCBB):([^\)]+)\)/);
         const tickerSymbolMatch = (tickerMatch ? tickerMatch[2].trim() : "").match(/([^;\s]+)/)
         const formattedDate = moment(newsItem.date, ["MMM DD, YYYY", "MMM DD, YYYY h:mm A"]).format("MMMM DD, YYYY");
-
+        const id = uuidv4();
         // Check if tickerSymbol is not empty before adding to payload
         if (tickerSymbolMatch && tickerSymbolMatch[1]) {
           return {
+            scrapId: id,
             tickerSymbol: tickerSymbolMatch[1], // Extracted first ticker symbol
             firmIssuing: law_firms[i],
             serviceIssuedOn: "PR Newswire", // Replace with actual service
