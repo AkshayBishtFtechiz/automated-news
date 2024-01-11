@@ -1,11 +1,28 @@
 import React, { useState, useEffect } from "react";
-import { Table, Card, Select, Spin } from "antd";
+import {
+  Card,
+  Select,
+  CircularProgress,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TablePagination,
+  CardHeader,
+  FormControl,
+  InputLabel,
+  MenuItem,
+} from "@mui/material";
 import { UseNewsStore } from "../store";
 import moment from "moment";
 
 const MostFrequentlyIssuedByTicker = () => {
   const myStore = UseNewsStore();
   const [isLoading, setIsLoading] = useState(true);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
 
   const filterDataByDays = (data, days) => {
     const currentDate = moment();
@@ -25,7 +42,7 @@ const MostFrequentlyIssuedByTicker = () => {
       tickerCounts[tickerSymbol].dates.push(dateTimeIssued);
     });
 
-    return Object.entries(tickerCounts).map(([tickerSymbol, {count, dates}], index) => ({
+    return Object.entries(tickerCounts).map(([tickerSymbol, { count, dates }], index) => ({
       serial: index + 1,
       dateTimeIssued: dates.sort().pop(),
       tickers: tickerSymbol,
@@ -45,37 +62,32 @@ const MostFrequentlyIssuedByTicker = () => {
     // Step 1: Filter data by days
     const filteredData = filterDataByDays(myStore.allTickers, dynamicDuration);
 
-    // Step 2: Update the filtered data in the store
-    myStore.setTickerFilteredData(filteredData);
-
     // Step 3: Count occurrences of each ticker in the filtered data
     const tickerCountsArray = countTickerOccurrences(filteredData);
+    
+    // Step 2: Update the filtered data in the store
+    myStore.setTickerFilteredData(tickerCountsArray);
 
-    // Step 4: Update the component state or store with the ticker counts array
-    myStore.setTickerCounts(tickerCountsArray);
+    // Reset pagination to the first page when changing filters
+    setPage(0);
   };
 
   const columns = [
     {
-      title: "Serial No.",
-      dataIndex: "serial",
-      key: "serial",
+      id: "serial",
+      label: "Serial No.",
     },
     {
-      title: "Date",
-      dataIndex: "dateTimeIssued",
-      key: "dateTimeIssued",
+      id: "dateTimeIssued",
+      label: "Date",
     },
     {
-      title: "Tickers",
-      dataIndex: "tickers",
-      key: "tickers",
-      sortOrder: "ascend",
+      id: "tickers",
+      label: "Tickers",
     },
     {
-      title: "Ticker count",
-      dataIndex: "tickerCount",
-      key: "tickerCount",
+      id: "tickerCount",
+      label: "Ticker count",
     },
   ];
 
@@ -89,72 +101,120 @@ const MostFrequentlyIssuedByTicker = () => {
     tickerCounts[tickerSymbol].count += 1;
     tickerCounts[tickerSymbol].dates.push(dateTimeIssued);
   });
-  
+
   // Convert the counts into an array of objects
   const tickerCountsArray = Object.entries(tickerCounts).map(
     ([tickerSymbol, { count, dates }], index) => ({
       serial: index + 1,
-      dateTimeIssued: dates.sort().pop(), // Get the latest dateTimeIssued
+      dateTimeIssued: dates.sort().pop(),
       tickers: tickerSymbol,
       tickerCount: count,
     })
   );
 
   // Sort the data in ascending order based on the "Tickers" column
-const sortedTickerCountsArray = tickerCountsArray.slice().sort((a, b) => {
-  return a.tickers.localeCompare(b.tickers);
-});
+  const sortedTickerCountsArray = tickerCountsArray.slice().sort((a, b) => {
+    return a.tickers.localeCompare(b.tickers);
+  });
+
+  const createData = (item) => {
+    return {
+      serial: item.serial,
+      dateTimeIssued: item.dateTimeIssued,
+      tickers: item.tickers,
+      tickerCount: item.tickerCount,
+    };
+  };
+
+  const rows = myStore?.filteredTickerData?.length === 0
+    ? sortedTickerCountsArray.map((item) => createData(item))
+    : myStore?.filteredTickerData.map((item) => createData(item));
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
   return (
     <div>
       <Card
         title="Issued by Ticker"
-        bordered={false}
-        className="mb-3"
-        extra={
-          !isLoading ? (
-            <Select
-              placeholder="Days"
-              style={{
-                width: 100,
-              }}
-              onChange={handleChange}
-              options={[
-                {
-                  value: "5",
-                  label: "5 Days",
-                },
-                {
-                  value: "15",
-                  label: "15 Days",
-                },
-                {
-                  value: "30",
-                  label: "30 Days",
-                },
-              ]}
-            />
-          ) : (
-            ""
-          )
-        }
+        variant="outlined"
+        sx={{ mb: 3 }}
       >
+        <CardHeader
+          title={<p style={{fontFamily: 'Inter', fontSize: "medium", fontWeight: 'bold'}}>{"Issued by Ticker"}</p>}
+          action={
+            !isLoading ? (
+              <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
+              <InputLabel id="most-frequent-issue-by-ticker-select-small-label">Days</InputLabel>
+              <Select
+                labelId="most-frequent-issue-by-ticker-select-small-label"
+                id="most-frequent-issue-by-ticker-select-small"
+                label="Days"
+                onChange={(e) => handleChange(e.target.value)}
+                sx={{fontSize: "medium"}}
+                defaultValue={""}
+              >
+                <MenuItem value='5'>5 Days</MenuItem>
+                <MenuItem value='15'>15 Days</MenuItem>
+                <MenuItem value='30'>30 Days</MenuItem>
+              </Select>
+            </FormControl>
+            ) : (
+              ""
+            )
+          }
+        />
+
         {isLoading ? (
-          <div className="text-center">
-            <Spin />
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              minHeight: "200px",
+            }}
+          >
+            <CircularProgress sx={{marginBottom: 10}} />
           </div>
         ) : (
-          <Table
-            columns={columns}
-            dataSource={
-              myStore.tickerCounts.length === 0
-                ? sortedTickerCountsArray
-                : myStore.tickerCounts
-            }
-            sortDirections={["ascend"]}
-            pagination={{defaultPageSize: 5}}
-            bordered
-          />
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  {columns.map((column) => (
+                    <TableCell key={column.id} style={{ fontWeight: 'bold' }}>{column.label}</TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {rows
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((row) => (
+                    <TableRow key={row.serial}>
+                      {columns.map((column) => (
+                        <TableCell key={column.id}>{row[column.id]}</TableCell>
+                      ))}
+                    </TableRow>
+                  ))}
+              </TableBody>
+            </Table>
+            <TablePagination
+            sx={{ marginBottom: '0px !important'}}
+              rowsPerPageOptions={[5, 10, 25]}
+              component="div"
+              count={rows.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
+          </TableContainer>
         )}
       </Card>
     </div>
