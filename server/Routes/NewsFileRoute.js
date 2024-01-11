@@ -4,6 +4,7 @@ const NewsFileSchema = require("../Schema/NewsFileModel");
 const puppeteer = require("puppeteer");
 const moment = require("moment");
 const emailSent = require("../utils/emailSent");
+const { v4: uuidv4 } = require('uuid');
 
 // NEWS FILE API
 Router.get("/", async (req, res) => {
@@ -128,7 +129,9 @@ Router.get("/", async (req, res) => {
           /\((NASDAQ|NYSE|OTCBB):([^\)]+)\)/
         );
         const formattedDate = moment(newsItem.date, ["YYYY-MM-DD h:mm A Z"]).format("MMMM DD, YYYY");
+        const id = uuidv4();
         return {
+          scrapId: id,
           tickerSymbol: tickerMatch ? tickerMatch[2].trim() : "",
           firmIssuing: law_firms[i].name,
           serviceIssuedOn: "News File Corp", // Replace with actual service
