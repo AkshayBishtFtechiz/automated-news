@@ -127,6 +127,7 @@ Router.get("/", async (req, res) => {
     /* firmData.push({
       firm: "Berger Montague",
       payload: {
+        scrapId: uuidv4(),
         tickerSymbol: "SERV",
         firmIssuing: "Berger Montague",
         serviceIssuedOn: "BusinessWire",
@@ -140,6 +141,7 @@ Router.get("/", async (req, res) => {
     firmData.push({
       firm: "Rosen",
       payload: {
+        scrapId: uuidv4(),
         tickerSymbol: "BIDU",
         firmIssuing: "Berger Montague",
         serviceIssuedOn: "BusinessWire",

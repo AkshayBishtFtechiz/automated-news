@@ -8,6 +8,7 @@ const emailSent = async (req, res, getAllNews, firmData, newsSchema) => {
   //Delete news records if it's more than 75 days
 
   console.log("getAllNews.length !== firmData.length:", getAllNews.length, firmData.length);
+  console.log("data123456:",getAllNews[0]?.payload, firmData[0].payload)
 
   if (getAllNews.length === 0) {
     console.log("NewsFirm_1");
@@ -24,7 +25,7 @@ const emailSent = async (req, res, getAllNews, firmData, newsSchema) => {
     firmData.forEach(async function (data, index) {
       if (
         getAllNews.length > 0 &&
-        getAllNews[index]?.urlToRelease !== data.payload.urlToRelease &&
+        getAllNews[index]?.payload.scrapId !== data.payload.scrapId &&
         getAllNews[index] === undefined
       ) {
         firmData.push({ firm: data.firm, payload: data.payload });
