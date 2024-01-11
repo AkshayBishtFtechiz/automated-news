@@ -136,6 +136,29 @@ Router.get("/", async (req, res) => {
       },
     }); */
 
+    // Search news details 75 days before the current date and remove before 75 days news deyails
+    const currentDate = new Date();
+    const formattedCurrentDate = format(currentDate, "MMMM dd, yyyy");
+
+    const seventyFiveDaysBefore = subDays(formattedCurrentDate, 75);
+
+    const formattedDateSeventyFive = format(seventyFiveDaysBefore, "MMMM dd, yyyy");
+
+    console.log("DaysBefore_75Days", formattedDateSeventyFive);
+
+    const dateToCompare = new Date(formattedDateSeventyFive);
+    console.log("FirmData_Before:", firmData.length);
+
+        firmData?.forEach(function (newsDetails, index) {
+          const allPRNewsDate = new Date(newsDetails?.payload.dateTimeIssued);
+          
+          if (dateToCompare > allPRNewsDate) {
+            firmData.splice(index, 1);
+          }
+        });
+    
+    console.log("FirmData_After:", firmData.length);
+
     const getAllBussinessNews = await BusinessWireSchema.find();
     emailSent(req, res, getAllBussinessNews, firmData, BusinessWireSchema);
 
