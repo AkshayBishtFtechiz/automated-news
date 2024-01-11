@@ -1,11 +1,29 @@
 import React, { useState, useEffect } from "react";
-import { Table, Card, Select, Spin, Tag } from "antd";
+import {
+  Card,
+  Select,
+  CircularProgress,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Chip,
+  TablePagination,
+  CardHeader,
+  FormControl,
+  InputLabel,
+  MenuItem,
+} from "@mui/material";
 import { UseNewsStore } from "../store";
 import moment from "moment";
 
 const MostFrequentlyIssuedByTickerandFirm = () => {
   const myStore = UseNewsStore();
   const [isLoading, setIsLoading] = useState(true);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
 
   const filterDataByDays = (data, days) => {
     const currentDate = moment();
@@ -37,57 +55,37 @@ const MostFrequentlyIssuedByTickerandFirm = () => {
 
     // Step 2: Updating State
     myStore.setFilteredDataTandF(filteredData);
+
+    // Reset pagination to the first page when changing filters
+    setPage(0);
   };
 
   const columns = [
     {
-      title: "Serial No.",
-      dataIndex: "serial",
-      key: "serial",
+      id: "serial",
+      label: "Serial No.",
     },
     {
-      title: "Date",
-      dataIndex: "dateTimeIssued",
-      key: "dateTimeIssued",
+      id: "dateTimeIssued",
+      label: "Date",
     },
     {
-      title: "Tickers",
-      dataIndex: "tickers",
-      key: "tickers",
-      defaultSortOrder: "ascend",
+      id: "tickers",
+      label: "Tickers",
     },
     {
-      title: "Ticker count",
-      dataIndex: "tickerCount",
-      key: "tickerCount",
+      id: "tickerCount",
+      label: "Ticker count",
     },
     {
-      title: "Firm",
-      dataIndex: "firm",
-      key: "firm",
-
-      render: (_, { firms }) => (
-        <>
-          {firms.map((item, index) => (
-            <Tag key={index} color={getTagColor(item)}>
-              {item}
-            </Tag>
-          ))}
-        </>
-      ),
+      id: "firm",
+      label: "Firm",
     },
     {
-      title: "Firm Count",
-      dataIndex: "firmCount",
-      key: "firmCount",
+      id: "firmCount",
+      label: "Firm Count",
     },
   ];
-
-  function getTagColor(ticker) {
-    const colors = ["red", "blue", "green", "orange", "purple"];
-    const randomColor = colors[Math.floor(Math.random() * colors.length)];
-    return randomColor;
-  }
 
   // Create an object to store the occurrence count of each ticker symbol
   const tickerCounts = {};
@@ -134,56 +132,113 @@ const MostFrequentlyIssuedByTickerandFirm = () => {
     ...item,
   }));
 
+  const createData = (item) => {
+    return {
+      serial: item.serial,
+      dateTimeIssued: item.dateTimeIssued,
+      tickers: item.tickers,
+      tickerCount: item.tickerCount,
+      firm: item.firms.map((firm, index) => (
+        <Chip
+        size="small"
+          key={index}
+          label={firm}
+          style={{ marginRight: 5, marginTop: 5 }}
+        />
+      )),
+      firmCount: item.firmCount,
+    };
+  };
+
+  const rows = myStore?.filteredDataofTandF?.length === 0
+    ? resultWithSerial.map((item) => createData(item))
+    : myStore?.filteredDataofTandF.map((item) => createData(item));
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
   return (
     <div>
       <Card
         title="Issued by Ticker and Firm"
-        bordered={false}
-        className="mb-3"
-        extra={
+        variant="outlined"
+        sx={{ mb: 3 }}
+       
+      >
+        <CardHeader
+        title={<p style={{fontFamily: 'Inter', fontSize: "medium", fontWeight: 'bold'}}>{"Issued by Ticker and Firm"}</p>}
+        action={
           !isLoading ? (
+
+            <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
+            <InputLabel id="most-frequent-issue-by-ticker-and-firm-select-small-label">Days</InputLabel>
             <Select
-              placeholder="Days"
-              style={{
-                width: 100,
-              }}
-              onChange={handleChange}
-              options={[
-                {
-                  value: "5",
-                  label: "5 Days",
-                },
-                {
-                  value: "15",
-                  label: "15 Days",
-                },
-                {
-                  value: "30",
-                  label: "30 Days",
-                },
-              ]}
-            />
+              labelId="most-frequent-issue-by-ticker-and-firm-select-small-label"
+              id="most-frequent-issue-by-ticker-and-firm-select-small"
+              label="Days"
+              onChange={(e) => handleChange(e.target.value)}
+              sx={{fontSize: "medium"}}
+              defaultValue={""}
+            >
+              <MenuItem value='5'>5 Days</MenuItem>
+              <MenuItem value='15'>15 Days</MenuItem>
+              <MenuItem value='30'>30 Days</MenuItem>
+            </Select>
+          </FormControl>
           ) : (
             ""
           )
-        }
-      >
+        } />
+
         {isLoading ? (
-          <div className="text-center">
-            <Spin />
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              minHeight: "200px",
+            }}
+          >
+            <CircularProgress sx={{marginBottom: 10}}/>
           </div>
         ) : (
-          <Table
-            columns={columns}
-            dataSource={
-              myStore?.filteredDataofTandF?.length === 0
-                ? resultWithSerial
-                : myStore?.filteredDataofTandF
-            }
-            sortDirections={["ascend"]}
-            pagination={{ defaultPageSize: 5 }}
-            bordered
-          />
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                {columns.map((column) => (
+                    <TableCell key={column.id} style={{fontWeight: 'bold'}}>{column.label}</TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+              {rows
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((row) => (
+                    <TableRow key={row.serial}>
+                      {columns.map((column) => (
+                        <TableCell key={column.id}>{row[column.id]}</TableCell>
+                      ))}
+                    </TableRow>
+                  ))}
+              </TableBody>
+            </Table>
+            <TablePagination
+            rowsPerPageOptions={[5, 10, 25]}
+              component="div"
+              count={rows.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
+          </TableContainer>
         )}
       </Card>
     </div>

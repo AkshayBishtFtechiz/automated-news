@@ -1,5 +1,21 @@
-import React from "react";
-import { Table, Card, Select, Spin, Tag } from "antd";
+import React, { useState } from "react";
+import {
+  Card,
+  Select,
+  CircularProgress,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Chip,
+  TablePagination,
+  CardHeader,
+  FormControl,
+  InputLabel,
+  MenuItem,
+} from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { UseNewsStore } from "../store";
@@ -8,6 +24,9 @@ import moment from "moment";
 const ReleasesIssuedByFirm = () => {
   const queryKey = "businessWireData";
   const myStore = UseNewsStore();
+  // const [isLoading, setIsLoading] = useState(true);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
 
   const fetchBusinessWireData = async () => {
     try {
@@ -31,6 +50,8 @@ const ReleasesIssuedByFirm = () => {
 
       myStore.setAllTickers(arr);
       myStore.setAllNewsData(allNewsData);
+
+      return allNewsData;
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -118,55 +139,26 @@ const ReleasesIssuedByFirm = () => {
 
   const columns = [
     {
-      title: "Serial No.",
-      dataIndex: "serial",
-      key: "serial",
+      id: "serial",
+      label: "Serial No.",
     },
     {
-      title: "Firm",
-      dataIndex: "firmName",
-      key: "firmName",
+      id: "firmName",
+      label: "Firm",
     },
     {
-      title: "Total Releases",
-      dataIndex: "totalReleases",
-      key: "totalReleases",
+      id: "totalReleases",
+      label: "Total Releases",
     },
     {
-      title: "Service Issued on",
-      dataIndex: "filteredServiceIssuedOnData",
-      key: "filteredServiceIssuedOnData",
-      render: (_, { filteredServiceIssuedOnData }) => (
-        <>
-          {filteredServiceIssuedOnData.map((item, index) => (
-            <Tag key={index} style={{marginBottom: 5}}>
-              {item}
-            </Tag>
-          ))}
-        </>
-      ),
+      id: "filteredServiceIssuedOnData",
+      label: "Service Issued on",
     },
     {
-      title: "Tickers",
-      dataIndex: "tickers",
-      key: "tickers",
-      render: (_, { tickers }) => (
-        <>
-          {tickers.map((item, index) => (
-            <Tag key={index} color={getTagColor(item)} style={{marginBottom: 5}} >
-             {item}
-            </Tag>
-          ))}
-        </>
-      ),
+      id: "tickers",
+      label: "Tickers",
     },
   ];
-
-  function getTagColor(ticker) {
-    const colors = ["red", "blue", "green", "orange", "purple"];
-    const randomColor = colors[Math.floor(Math.random() * colors.length)];
-    return randomColor;
-  }
 
   const data = Object.entries(separatedData).map(
     ([firmName, firmData], index) => {
@@ -198,51 +190,114 @@ const ReleasesIssuedByFirm = () => {
   );
   const filteredData = data.slice(1);
 
+  const createData = (item) => {
+    return {
+      serial: item.serial,
+      firmName: item.firmName,
+      totalReleases: item.totalReleases,
+      filteredServiceIssuedOnData: item.filteredServiceIssuedOnData.map(
+        (serviceIssuedOn, index) => (
+          <Chip key={index} style={{ marginBottom: 5, marginRight: 5 }} label={serviceIssuedOn} size="small"/>
+        )
+      ),
+      tickers: item.tickers.map((ticker, index) => (
+        <Chip
+          key={index}
+          style={{ marginBottom: 5, marginRight: 5 }}
+          label={ticker}
+          size="small"
+        />
+      )),
+    };
+  };
+
+  const rows = filteredData.map((item) => createData(item));
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+
   return (
     <div>
-      <Card
-        title="Issued by Firm"
-        bordered={false}
-        className="mb-3"
-        extra={
-          !isLoading ? (
-          <Select
-            placeholder="Days"
-            style={{
-              width: 100,
-            }}
-            onChange={handleChange}
-            options={[
-              {
-                value: "5",
-                label: "5 Days",
-              },
-              {
-                value: "15",
-                label: "15 Days",
-              },
-              {
-                value: "30",
-                label: "30 Days",
-              },
-            ]}
-          />
+      <Card variant="outlined" sx={{ mb: 3 }}>
+      <CardHeader
+        title={<p style={{fontFamily: 'Inter', fontSize: "medium", fontWeight: 'bold'}}>{"Issued by Firm"}</p>}
+        action={
+          isLoading === false ? (
+            <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
+            <InputLabel id="release-issue-select-small-label">Days</InputLabel>
+            <Select
+              labelId="release-issue-select-small-label"
+              id="release-issue-select-small"
+              label="Days"
+              onChange={(e) => handleChange(e.target.value)}
+              sx={{fontSize: "medium"}}
+              defaultValue={""}
+            >
+              <MenuItem value='5'>5 Days</MenuItem>
+              <MenuItem value='15'>15 Days</MenuItem>
+              <MenuItem value='30'>30 Days</MenuItem>
+            </Select>
+          </FormControl>
           ) : (
             ""
           )
-        }
-      >
+        } />
+
         {isLoading ? (
-          <div className="text-center">
-           <Spin />
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              minHeight: "200px",
+            }}
+          >
+            <CircularProgress sx={{marginBottom: 10}} />
           </div>
         ) : (
-        <Table
-          columns={columns}
-          dataSource={filteredData}
-          pagination={{ defaultPageSize: 5 }}
-          bordered
-        />
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  {columns.map((column) => (
+                    <TableCell key={column.id} style={{ fontWeight: "bold" }}>
+                      {column.label}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {rows
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((row) => (
+                    <TableRow key={row.serial}>
+                      {columns.map((column) => (
+                        <TableCell key={column.id}>
+                          {row[column.id]}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))}
+              </TableBody>
+            </Table>
+            <TablePagination
+              sx={{ marginBottom: '0px !important'}}
+              rowsPerPageOptions={[5, 10, 25]}
+              component="div"
+              count={rows.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
+          </TableContainer>
         )}
       </Card>
     </div>

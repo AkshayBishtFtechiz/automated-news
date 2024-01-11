@@ -8,3 +8,13 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+.MuiTablePagination-selectLabel
+{
+  /* margin-bottom: 0px !important; */
+}
+
+.MuiTablePagination-displayedRows
+{
+  /* margin-bottom: 0px !important; */
+}
