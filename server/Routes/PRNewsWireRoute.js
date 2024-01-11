@@ -49,8 +49,8 @@ Router.get("/", async (req, res) => {
       const firm = law_firms[i];
       const encodedFirm = encodeURI(firm);
       const prNewsUrl = `https://www.prnewswire.com/news/${encodedFirm}/`;
-      await page.goto(prNewsUrl, { waitUntil: "domcontentloaded" });
-      await page.waitForSelector(".card-list .newsCards");
+      await page.goto(prNewsUrl, { waitUntil: "domcontentloaded",timeout:120000 });
+      await page.waitForSelector(".card-list .newsCards",{timeout:120000});
 
       var newsItems = await page.$$eval(
         ".card-list .newsCards",

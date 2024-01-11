@@ -55,8 +55,8 @@ Router.get("/", async (req, res) => {
       const firm = law_firms[i];
       const encodedFirm = encodeURI(firm);
       const businessWireUrl = `https://www.businesswire.com/portal/site/home/search/?searchType=all&searchTerm=${encodedFirm}&searchPage=1`;
-      await page.goto(businessWireUrl, { waitUntil: "domcontentloaded" });
-      await page.waitForSelector(".bw-news-section li");
+      await page.goto(businessWireUrl, { waitUntil: "domcontentloaded",timeout:120000 });
+      await page.waitForSelector(".bw-news-section li",{timeout:120000});
 
       const newsItems = await page.$$eval(".bw-news-section li", (items) => {
         return items

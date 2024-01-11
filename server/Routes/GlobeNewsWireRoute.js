@@ -54,8 +54,8 @@ Router.get("/", async (req, res) => {
       const firm = law_firms[i];
       const encodedFirm = encodeURI(firm);
       const globeNewsWireUrl = `https://www.globenewswire.com/en/search/organization/${encodedFirm}?page=1`;
-      await page.goto(globeNewsWireUrl, { waitUntil: "domcontentloaded" });
-      await page.waitForSelector(".pagging-list-item");
+      await page.goto(globeNewsWireUrl, { waitUntil: "domcontentloaded",timeout:120000 });
+      await page.waitForSelector(".pagging-list-item",{timeout:120000});
 
       const htmlContent = await page.content();
       const $ = cheerio.load(htmlContent);

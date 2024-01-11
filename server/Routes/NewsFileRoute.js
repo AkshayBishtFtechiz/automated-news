@@ -93,8 +93,8 @@ Router.get("/", async (req, res) => {
     for (let i = 0; i < law_firms.length; i++) {
       const firm = law_firms[i];
       const newsFilesUrl = `https://www.newsfilecorp.com/company/${firm.index}/${firm.name}`;
-      await page.goto(newsFilesUrl, { waitUntil: "domcontentloaded" });
-      await page.waitForSelector(".latest-news.no-images li");
+      await page.goto(newsFilesUrl, { waitUntil: "domcontentloaded",timeout:120000 });
+      await page.waitForSelector(".latest-news.no-images li",{timeout:120000});
 
       var newsItems = await page.$$eval(
         ".latest-news.no-images li",
