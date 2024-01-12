@@ -1,27 +1,18 @@
 const nodemailer = require("nodemailer");
-const { format, subDays, parse } = require('date-fns');
+const { format, subDays, parse } = require("date-fns");
 
 const emailSent = async (req, res, getAllNews, firmData, newsSchema) => {
-
-  ///////////////////Date and remove records limit 75/////////////////////
-
-  //Delete news records if it's more than 75 days
-
-  console.log("getAllNews.length !== firmData.length:", getAllNews.length, firmData.length);
-  console.log("data123456:",getAllNews[0]?.payload, firmData[0].payload)
-
   if (getAllNews.length === 0) {
-    console.log("NewsFirm_1");
     firmData.forEach(async function (data, index) {
       const newResponse = data.payload;
       const newNews = new newsSchema({ firm: data.firm, payload: newResponse });
       newNews.save();
     });
     res.json(firmData);
-
-  } 
+  }
   else if (getAllNews.length !== firmData.length) {
-    console.log("NewsFirm_2");
+    // Comparing ticker with previous 60 days tikcer and send mail
+
     firmData.forEach(async function (data, index) {
       if (
         getAllNews.length > 0 &&
@@ -29,49 +20,68 @@ const emailSent = async (req, res, getAllNews, firmData, newsSchema) => {
         getAllNews[index] === undefined
       ) {
         firmData.push({ firm: data.firm, payload: data.payload });
+
+        const newlyTickerDate = data.payload.dateTimeIssued;
+
+        const formattedDate = format(newlyTickerDate, "MMMM dd, yyyy");
+
+        const sixtyDaysBefore = subDays(formattedDate, 60);
+
+        const formattedDateSixtyDay = format(sixtyDaysBefore, "MMMM dd, yyyy");
+
+        const dateToCompare = new Date(formattedDateSixtyDay);
+
+        const newsWithinSixtyDays = getAllNews.filter(
+          (compareNews, index) =>
+            dateToCompare < new Date(compareNews.payload.dateTimeIssued)
+        );
+
+        const compareTickerSymbol = newsWithinSixtyDays.filter(
+          (compareSixtyNews, index) =>
+            compareSixtyNews.payload.tickerSymbol === data.payload.tickerSymbol
+        );
+
+        if (compareTickerSymbol.length === 0) {
+          const transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+              user: "automatednews21@gmail.com",
+              pass: "ovig lcvq nfdn whsj",
+            },
+            secure: false,
+            port: 25,
+            tls: {
+              rejectUnauthorized: false,
+            },
+          });
+
+          // Define the email options
+          const mailOptions = {
+            from: "automatednews21@gmail.com",
+            to: "shubham.pal@ftechiz.com",
+            subject: `Alert: First Press Release for ${data?.payload?.tickerSymbol}`,
+            html: `<p><span style='font-weight:bold;'>${data.firm}</span> issued a press release for <span style='font-weight:bold;'>${data?.payload?.tickerSymbol}</span>. This is the first press release observed for <span style='font-weight:bold;'>${data?.payload?.tickerSymbol}</span> in the past 60 days. View the release here: ${data?.payload?.urlToRelease}.</p>`,
+          };
+
+          // Send the email
+          transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+              return console.error("Error:", error.message);
+            }
+            console.log("Email sent:", info.response);
+          });
+        }
+
         const newNews = new newsSchema({
           firm: data.firm,
           payload: data.payload,
         });
         newNews.save();
-
-        // Sending Email
-
-        const transporter = nodemailer.createTransport({
-          service: "gmail",
-          auth: {
-            user: "automatednews21@gmail.com",
-            pass: "ovig lcvq nfdn whsj",
-          },
-          secure: false,
-          port: 25,
-          tls: {
-            rejectUnauthorized: false,
-          },
-        });
-
-        // Define the email options
-        const mailOptions = {
-          from: "automatednews21@gmail.com",
-          to: "shubham.pal@ftechiz.com",
-          subject: `Alert: First Press Release for ${data?.payload?.tickerSymbol}`,
-          html: `<p><span style='font-weight:bold;'>${data.firm}</span> issued a press release for <span style='font-weight:bold;'>${data?.payload?.tickerSymbol}</span>. This is the first press release observed for <span style='font-weight:bold;'>${data?.payload?.tickerSymbol}</span> in the past 60 days. View the release here: ${data?.payload?.urlToRelease}.</p>`,
-        };
-
-        // Send the email
-        transporter.sendMail(mailOptions, (error, info) => {
-          if (error) {
-            return console.error("Error:", error.message);
-          }
-          console.log("Email sent:", info.response);
-        });
       }
     });
 
     res.json(firmData);
   } else {
-    console.log("NewsFirm_3");
-
     res.send(firmData);
   }
 };

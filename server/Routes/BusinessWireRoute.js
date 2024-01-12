@@ -140,13 +140,9 @@ Router.get("/", async (req, res) => {
       },
     }); */
 
-    console.log("FirmData_Before:", firmData.length);
-
     // Search news details 75 days before the current date and remove before 75 days news deyails
     
     const dateToCompare = filterDays(firmData);
-
-    console.log("FirmData_Before:", firmData.length);
 
         firmData?.forEach(function (newsDetails, index) {
           const allPRNewsDate = new Date(newsDetails?.payload.dateTimeIssued);
@@ -155,8 +151,6 @@ Router.get("/", async (req, res) => {
             firmData.splice(index, 1);
           }
         });
-    
-    console.log("FirmData_After:", firmData.length);
 
     const getAllBussinessNews = await BusinessWireSchema.find();
     emailSent(req, res, getAllBussinessNews, firmData, BusinessWireSchema);
