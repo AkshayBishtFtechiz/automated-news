@@ -7,7 +7,7 @@ const axios = require("axios");
 const nodemailer = require("nodemailer");
 const emailSent = require("../utils/emailSent");
 const filterDays = require("../utils/filterDays");
-const { v4: uuidv4 } = require('uuid');
+const { v4: uuidv4 } = require("uuid");
 
 // BUSINESS WIRE API
 
@@ -57,8 +57,11 @@ Router.get("/", async (req, res) => {
       const firm = law_firms[i];
       const encodedFirm = encodeURI(firm);
       const businessWireUrl = `https://www.businesswire.com/portal/site/home/search/?searchType=all&searchTerm=${encodedFirm}&searchPage=1`;
-      await page.goto(businessWireUrl, { waitUntil: "domcontentloaded",timeout:120000 });
-      await page.waitForSelector(".bw-news-section li",{timeout:120000});
+      await page.goto(businessWireUrl, {
+        waitUntil: "domcontentloaded",
+        timeout: 300000,
+      });
+      await page.waitForSelector(".bw-news-section li", { timeout: 300000 });
 
       const newsItems = await page.$$eval(".bw-news-section li", (items) => {
         return items
@@ -114,48 +117,50 @@ Router.get("/", async (req, res) => {
       }
     }
 
-    /* firmData.push({
-      firm: "Berger Montague",
-      payload: {
-        tickerSymbol: "GNRC",
-        firmIssuing: "Berger Montague",
-        serviceIssuedOn: "BusinessWire",
-        dateTimeIssued: "January 02, 2024",
-        urlToRelease:
-          "http://www.businesswire.com/news/home/20240101367342/zh-HK/",
-        tickerIssuer: "NYSE",
-      },
-    });
+    // firmData.push({
+    //   firm: "Berger Montague",
+    //   payload: {
+    //     scrapId: uuidv4(),
+    //     tickerSymbol: "NEW1",
+    //     firmIssuing: "Berger Montague",
+    //     serviceIssuedOn: "BusinessWire",
+    //     dateTimeIssued: "January 11, 2024",
+    //     urlToRelease:
+    //       "http://www.businesswire.com/news/home/20240101367342/zh-HK/",
+    //     tickerIssuer: "NYSE",
+    //   },
+    // });
 
-    firmData.push({
-      firm: "Rosen",
-      payload: {
-        tickerSymbol: "Rosen",
-        firmIssuing: "Berger Montague",
-        serviceIssuedOn: "BusinessWire",
-        dateTimeIssued: "January 02, 2024",
-        urlToRelease:
-          "http://www.businesswire.com/news/home/20240101367342/zh-HK/",
-        tickerIssuer: "NYSE",
-      },
-    }); */
+    // firmData.push({
+    //   firm: "Rosen",
+    //   payload: {
+    //     scrapId: uuidv4(),
+    //     tickerSymbol: "NEW2",
+    //     firmIssuing: "Berger Montague",
+    //     serviceIssuedOn: "BusinessWire",
+    //     dateTimeIssued: "January 11, 2024",
+    //     urlToRelease:
+    //       "http://www.businesswire.com/news/home/20240101367342/zh-HK/",
+    //     tickerIssuer: "NYSE",
+    //   },
+    // });
 
     console.log("FirmData_Before:", firmData.length);
 
     // Search news details 75 days before the current date and remove before 75 days news deyails
-    
+
     const dateToCompare = filterDays(firmData);
 
     console.log("FirmData_Before:", firmData.length);
 
-        firmData?.forEach(function (newsDetails, index) {
-          const allPRNewsDate = new Date(newsDetails?.payload.dateTimeIssued);
-          
-          if (dateToCompare > allPRNewsDate) {
-            firmData.splice(index, 1);
-          }
-        });
-    
+    firmData?.forEach(function (newsDetails, index) {
+      const allPRNewsDate = new Date(newsDetails?.payload.dateTimeIssued);
+
+      if (dateToCompare > allPRNewsDate) {
+        firmData.splice(index, 1);
+      }
+    });
+
     console.log("FirmData_After:", firmData.length);
 
     const getAllBussinessNews = await BusinessWireSchema.find();
@@ -204,7 +209,7 @@ Router.post("/sendemail", (req, res) => {
   // Define the email options
   const mailOptions = {
     from: "automatednews21@gmail.com",
-    to: "shubham.pal@ftechiz.com",
+    to: "akshay.bisht1@ftechiz.com",
     subject: "Automated News",
     text: "Hello, this is a test email!",
   };
