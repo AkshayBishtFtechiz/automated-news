@@ -11,8 +11,6 @@ const filterDays = () => {
     "MMMM dd, yyyy"
   );
 
-  console.log("DaysBefore_75Days", formattedDateSeventyFive);
-
   const dateToCompare = new Date(formattedDateSeventyFive);
   return dateToCompare;
 };

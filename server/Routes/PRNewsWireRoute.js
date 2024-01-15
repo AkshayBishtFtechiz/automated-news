@@ -53,9 +53,9 @@ Router.get("/", async (req, res) => {
       const prNewsUrl = `https://www.prnewswire.com/news/${encodedFirm}/`;
       await page.goto(prNewsUrl, {
         waitUntil: "domcontentloaded",
-        timeout: 300000,
+        timeout: 120000,
       });
-      await page.waitForSelector(".card-list .newsCards", { timeout: 300000 });
+      await page.waitForSelector(".card-list .newsCards", { timeout: 120000 });
 
       var newsItems = await page.$$eval(".card-list .newsCards", (items) => {
         return items
@@ -137,7 +137,7 @@ Router.get("/", async (req, res) => {
       firm: "Berger Montague",
       payload: {
         scrapId: uuidv4(),
-        tickerSymbol: "SERV",
+        tickerSymbol: "SERVSHSH11",
         firmIssuing: "Berger Montague",
         serviceIssuedOn: "BusinessWire",
         dateTimeIssued: "January 02, 2024",
@@ -151,7 +151,7 @@ Router.get("/", async (req, res) => {
       firm: "Rosen",
       payload: {
         scrapId: uuidv4(),
-        tickerSymbol: "BIDU",
+        tickerSymbol: "BIDUWWE22",
         firmIssuing: "Berger Montague",
         serviceIssuedOn: "BusinessWire",
         dateTimeIssued: "January 05, 2024",
@@ -160,7 +160,6 @@ Router.get("/", async (req, res) => {
         tickerIssuer: "NYSE",
       },
     }); */
-    console.log("FirmData_Before:", firmData.length);
 
     // Search news details 75 days before the current date and remove before 75 days news details
 
@@ -173,8 +172,6 @@ Router.get("/", async (req, res) => {
         firmData.splice(index, 1);
       }
     });
-
-    console.log("FirmData_After:", firmData.length);
 
     const getAllPRNewsWire = await PRNewsWireSchema.find();
     emailSent(req, res, getAllPRNewsWire, firmData, PRNewsWireSchema);

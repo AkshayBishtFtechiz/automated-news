@@ -121,10 +121,10 @@ Router.get("/", async (req, res) => {
     //   firm: "Berger Montague",
     //   payload: {
     //     scrapId: uuidv4(),
-    //     tickerSymbol: "NEW1",
+    //     tickerSymbol: "JDNX",
     //     firmIssuing: "Berger Montague",
     //     serviceIssuedOn: "BusinessWire",
-    //     dateTimeIssued: "January 11, 2024",
+    //     dateTimeIssued: "January 15, 2024",
     //     urlToRelease:
     //       "http://www.businesswire.com/news/home/20240101367342/zh-HK/",
     //     tickerIssuer: "NYSE",
@@ -145,13 +145,23 @@ Router.get("/", async (req, res) => {
     //   },
     // });
 
-    console.log("FirmData_Before:", firmData.length);
+    firmData.push({
+      firm: "Rosen",
+      payload: {
+        scrapId: uuidv4(),
+        tickerSymbol: "UNINOR",
+        firmIssuing: "Berger Montague",
+        serviceIssuedOn: "BusinessWire",
+        dateTimeIssued: "January 15, 2024",
+        urlToRelease:
+          "http://www.businesswire.com/news/home/20240101367342/zh-HK/",
+        tickerIssuer: "NYSE",
+      },
+    });
 
     // Search news details 75 days before the current date and remove before 75 days news deyails
 
     const dateToCompare = filterDays(firmData);
-
-    console.log("FirmData_Before:", firmData.length);
 
     firmData?.forEach(function (newsDetails, index) {
       const allPRNewsDate = new Date(newsDetails?.payload.dateTimeIssued);
@@ -160,8 +170,6 @@ Router.get("/", async (req, res) => {
         firmData.splice(index, 1);
       }
     });
-
-    console.log("FirmData_After:", firmData.length);
 
     const getAllBussinessNews = await BusinessWireSchema.find();
     emailSent(req, res, getAllBussinessNews, firmData, BusinessWireSchema);
@@ -189,42 +197,6 @@ Router.delete("/deleteall", async (req, res) => {
     .catch((err) => {
       res.send(err);
     });
-});
-
-Router.post("/sendemail", (req, res) => {
-  // send email
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: "automatednews21@gmail.com",
-      pass: "ovig lcvq nfdn whsj",
-    },
-    secure: false,
-    port: 25,
-    tls: {
-      rejectUnauthorized: false,
-    },
-  });
-
-  // Define the email options
-  const mailOptions = {
-    from: "automatednews21@gmail.com",
-    to: "akshay.bisht1@ftechiz.com",
-    subject: "Automated News",
-    text: "Hello, this is a test email!",
-  };
-
-  // Send the email
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      res.send(error);
-      return console.error("Error:", error.message);
-    }
-    console.log("Email sent:", info.response);
-    res.send({
-      message: "Email sent",
-    });
-  });
 });
 
 module.exports = Router;
