@@ -143,7 +143,8 @@ const MostFrequentlyIssuedByTickerandFirm = () => {
         size="small"
           key={index}
           label={firm}
-          style={{ marginRight: 5, marginTop: 5 }}
+          style={{ marginRight: 5, marginTop: 5, padding: "5px 5px 5px 5px" }}
+          className="chip"
         />
       )),
       firmCount: item.firmCount,
@@ -210,7 +211,7 @@ const MostFrequentlyIssuedByTickerandFirm = () => {
         ) : (
           <TableContainer>
             <Table>
-              <TableHead>
+              <TableHead sx={{borderTop: '1px solid #e0e0e0'}}>
                 <TableRow>
                 {columns.map((column) => (
                     <TableCell key={column.id} style={{fontWeight: 'bold'}}>{column.label}</TableCell>

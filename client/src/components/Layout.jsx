@@ -8,9 +8,9 @@ const Layout = () => {
   return (
     <>
       <div>
-        <h4 align="center" style={{ marginBottom: "30px", marginTop: "30px" }}>
+        <h1 align="center" style={{ marginBottom: "30px", marginTop: "30px" }}>
           Automated News
-        </h4>
+        </h1>
       </div>
       <Container>
         <ReleasesIssuedByFirm />

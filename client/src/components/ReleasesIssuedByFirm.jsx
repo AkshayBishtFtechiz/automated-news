@@ -197,15 +197,16 @@ const ReleasesIssuedByFirm = () => {
       totalReleases: item.totalReleases,
       filteredServiceIssuedOnData: item.filteredServiceIssuedOnData.map(
         (serviceIssuedOn, index) => (
-          <Chip key={index} style={{ marginBottom: 5, marginRight: 5 }} label={serviceIssuedOn} size="small"/>
+          <Chip key={index} style={{ marginBottom: 5, marginRight: 5, padding: "5px 5px 5px 5px" }} label={serviceIssuedOn} size="small" className="chip"/>
         )
       ),
       tickers: item.tickers.map((ticker, index) => (
         <Chip
           key={index}
-          style={{ marginBottom: 5, marginRight: 5 }}
+          style={{ marginBottom: 5, marginRight: 5,  padding: "5px 5px 5px 5px"}}
           label={ticker}
           size="small"
+          className="chip"
         />
       )),
     };
@@ -264,7 +265,7 @@ const ReleasesIssuedByFirm = () => {
         ) : (
           <TableContainer>
             <Table>
-              <TableHead>
+              <TableHead sx={{borderTop: '1px solid #e0e0e0'}}>
                 <TableRow>
                   {columns.map((column) => (
                     <TableCell key={column.id} style={{ fontWeight: "bold" }}>

@@ -185,7 +185,7 @@ const MostFrequentlyIssuedByTicker = () => {
         ) : (
           <TableContainer>
             <Table>
-              <TableHead>
+              <TableHead sx={{borderTop: '1px solid #e0e0e0'}}>
                 <TableRow>
                   {columns.map((column) => (
                     <TableCell key={column.id} style={{ fontWeight: 'bold' }}>{column.label}</TableCell>
