@@ -1,199 +1,220 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  CartesianGrid,
-} from "recharts";
-import { Card } from "antd";
-import { Select } from "antd";
-import { Typography, Spin } from "antd";
+  Card,
+  Select,
+  CircularProgress,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TablePagination,
+  CardHeader,
+  FormControl,
+  InputLabel,
+  MenuItem,
+} from "@mui/material";
 import { UseNewsStore } from "../store";
 import moment from "moment";
 
 const MostFrequentlyIssuedByTicker = () => {
-  const { Paragraph, Text } = Typography;
-  const [isLoading, setIsLoading] = useState(true);
-  // const paletteSemanticRed = "#F4664A";
-  const brandColor = "#5B8FF9";
-
   const myStore = UseNewsStore();
+  const [isLoading, setIsLoading] = useState(true);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  const filterDataByDays = (data, days) => {
+    const currentDate = moment();
+    return data.filter((item) => {
+      const issuedDate = moment(item.dateTimeIssued, "MMMM DD, YYYY");
+      const differenceInDays = currentDate.diff(issuedDate, "days");
+      return differenceInDays <= days;
+    });
+  };
+
+  const countTickerOccurrences = (filteredData) => {
+    const tickerCounts = {};
+    filteredData.forEach((tickerObj) => {
+      const { tickerSymbol, dateTimeIssued } = tickerObj;
+      tickerCounts[tickerSymbol] = tickerCounts[tickerSymbol] || { count: 0, dates: [] };
+      tickerCounts[tickerSymbol].count += 1;
+      tickerCounts[tickerSymbol].dates.push(dateTimeIssued);
+    });
+
+    return Object.entries(tickerCounts).map(([tickerSymbol, { count, dates }], index) => ({
+      serial: index + 1,
+      dateTimeIssued: dates.sort().pop(),
+      tickers: tickerSymbol,
+      tickerCount: count,
+    }));
+  };
 
   useEffect(() => {
-    if (myStore.NASDAQData.length > 0) {
+    if (myStore.allTickers.length > 0) {
       setIsLoading(false);
     }
-  }, [myStore.NASDAQData, setIsLoading, isLoading]);
+  }, [myStore.allTickers, setIsLoading, isLoading]);
 
-  const ColumnData = [
+  const handleChange = async (value) => {
+    const dynamicDuration = parseInt(value);
+
+    // Step 1: Filter data by days
+    const filteredData = filterDataByDays(myStore.allTickers, dynamicDuration);
+
+    // Step 3: Count occurrences of each ticker in the filtered data
+    const tickerCountsArray = countTickerOccurrences(filteredData);
+    
+    // Step 2: Update the filtered data in the store
+    myStore.setTickerFilteredData(tickerCountsArray);
+
+    // Reset pagination to the first page when changing filters
+    setPage(0);
+  };
+
+  const columns = [
     {
-      type: "NASDAQ",
-      value:
-        myStore?.filteredNASDAQData?.length !== 0
-          ? myStore?.filteredNASDAQData?.length
-          : myStore?.NASDAQData?.length,
+      id: "serial",
+      label: "Serial No.",
     },
     {
-      type: "OTCBB",
-      value:
-        myStore?.filteredOTCBBData?.length !== 0
-          ? myStore?.filteredOTCBBData?.length
-          : myStore?.OTCBBData?.length,
+      id: "dateTimeIssued",
+      label: "Date",
     },
     {
-      type: "NYSE",
-      value:
-        myStore?.filteredNYSEData?.length !== 0
-          ? myStore?.filteredNYSEData?.length
-          : myStore?.NYSEData?.length,
+      id: "tickers",
+      label: "Tickers",
+    },
+    {
+      id: "tickerCount",
+      label: "Ticker count",
     },
   ];
 
-  const handleChange = async (value) => {
-    setIsLoading(false);
-    // Filter data based on the selected number of days
-    const currentDate = moment();
-    const filterDate = currentDate.subtract(value, "days");
+  const data = myStore?.allTickers || [];
+  // Create an object to store the occurrence count of each ticker symbol
+  const tickerCounts = {};
 
-    const filteredData = myStore?.NASDAQData?.filter((item) => {
-      const itemDate = moment(
-        item.payload.dateTimeIssued,
-        "MMM DD, YYYY, HH:mm A"
-      );
-      return itemDate.isSameOrAfter(filterDate, "day");
-    });
+  data.forEach((tickerObj) => {
+    const { tickerSymbol, dateTimeIssued } = tickerObj;
+    tickerCounts[tickerSymbol] = tickerCounts[tickerSymbol] || { count: 0, dates: [] };
+    tickerCounts[tickerSymbol].count += 1;
+    tickerCounts[tickerSymbol].dates.push(dateTimeIssued);
+  });
 
-    const filteredData1 = myStore?.OTCBBData?.filter((item) => {
-      const itemDate = moment(
-        item.payload.dateTimeIssued,
-        "MMM DD, YYYY, HH:mm A"
-      );
-      return itemDate.isSameOrAfter(filterDate, "day");
-    });
+  // Convert the counts into an array of objects
+  const tickerCountsArray = Object.entries(tickerCounts).map(
+    ([tickerSymbol, { count, dates }], index) => ({
+      serial: index + 1,
+      dateTimeIssued: dates.sort().pop(),
+      tickers: tickerSymbol,
+      tickerCount: count,
+    })
+  );
 
-    const filteredData2 = myStore?.NYSEData?.filter((item) => {
-      const itemDate = moment(
-        item.payload.dateTimeIssued,
-        "MMM DD, YYYY, HH:mm A"
-      );
-      return itemDate.isSameOrAfter(filterDate, "day");
-    });
+  // Sort the data in ascending order based on the "Tickers" column
+  const sortedTickerCountsArray = tickerCountsArray.slice().sort((a, b) => {
+    return a.tickers.localeCompare(b.tickers);
+  });
 
-    myStore?.setFilteredNASDAQ(filteredData);
-    myStore?.setFilteredOTCBB(filteredData1);
-    myStore?.setFilteredNYSE(filteredData2);
+  const createData = (item) => {
+    return {
+      serial: item.serial,
+      dateTimeIssued: item.dateTimeIssued,
+      tickers: item.tickers,
+      tickerCount: item.tickerCount,
+    };
   };
 
-  const CustomTooltip = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
-      const dataPoint = payload[0];
-      return (
-        <div className="custom-tooltip">
-          <div className="mb-0">
-            <span>
-              <Paragraph className="fw-bold" style={{ fontSize: 14 }}>
-                Ticker Issued:{" "}
-                <Text className="fw-normal" style={{ fontSize: 14 }}>
-                  {label}
-                </Text>
-              </Paragraph>
-            </span>
-          </div>
-          <div className="mt-0">
-            <span>
-              <Paragraph className="fw-bold">
-                Total Releases:{" "}
-                <Text className="fw-normal">{dataPoint.value}</Text>
-              </Paragraph>
-            </span>
-          </div>
-        </div>
-      );
-    }
-    return null;
+  const rows = myStore?.filteredTickerData?.length === 0
+    ? sortedTickerCountsArray.map((item) => createData(item))
+    : myStore?.filteredTickerData.map((item) => createData(item));
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
   };
 
-  const CustomXAxisTick = ({ x, y, payload }) => {
-    const lines = payload.value.split("\n");
-    return (
-      <g transform={`translate(${x},${y})`}>
-        {lines.map((line, index) => (
-          <text
-            key={index}
-            x={0}
-            y={index * 12}
-            dy={16}
-            textAnchor="middle"
-            fill="#666"
-          >
-            {line}
-          </text>
-        ))}
-      </g>
-    );
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
   };
 
   return (
     <div>
       <Card
         title="Issued by Ticker"
-        bordered={false}
-        className="mb-3"
-        extra={
-          !isLoading ? (
-            <Select
-              // defaultValue="lucy"
-              placeholder="Days"
-              style={{
-                width: 100,
-              }}
-              onChange={handleChange}
-              options={[
-                {
-                  value: 5,
-                  label: "5 Days",
-                },
-                {
-                  value: 15,
-                  label: "15 Days",
-                },
-                {
-                  value: 30,
-                  label: "30 Days",
-                },
-              ]}
-            />
-          ) : (
-            ""
-          )
-        }
+        variant="outlined"
+        sx={{ mb: 3 }}
       >
+        <CardHeader
+          title={<p style={{fontFamily: 'Inter', fontSize: "medium", fontWeight: 'bold'}}>{"Issued by Ticker"}</p>}
+          action={
+            !isLoading ? (
+              <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
+              <InputLabel id="most-frequent-issue-by-ticker-select-small-label">Days</InputLabel>
+              <Select
+                labelId="most-frequent-issue-by-ticker-select-small-label"
+                id="most-frequent-issue-by-ticker-select-small"
+                label="Days"
+                onChange={(e) => handleChange(e.target.value)}
+                sx={{fontSize: "medium"}}
+                defaultValue={""}
+              >
+                <MenuItem value='5'>5 Days</MenuItem>
+                <MenuItem value='15'>15 Days</MenuItem>
+                <MenuItem value='30'>30 Days</MenuItem>
+              </Select>
+            </FormControl>
+            ) : (
+              ""
+            )
+          }
+        />
+
         {isLoading ? (
-          <div className="text-center">
-            <Spin />
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              minHeight: "200px",
+            }}
+          >
+            <CircularProgress sx={{marginBottom: 10}} />
           </div>
         ) : (
-          <ResponsiveContainer width="100%" height="100%" aspect={1}>
-            <BarChart
-              data={ColumnData}
-              // height={250}
-              margin={{ top: 5, right: 10, bottom: 20, left: -20 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis
-                dataKey="type"
-                tick={<CustomXAxisTick />}
-                fontSize="small"
-              />
-              <YAxis />
-              <Tooltip content={<CustomTooltip />} />
-              {/* <Legend /> */}
-              <Bar dataKey="value" fill={brandColor} />
-            </BarChart>
-          </ResponsiveContainer>
+          <TableContainer>
+            <Table>
+              <TableHead sx={{borderTop: '1px solid #e0e0e0'}}>
+                <TableRow>
+                  {columns.map((column) => (
+                    <TableCell key={column.id} style={{ fontWeight: 'bold' }}>{column.label}</TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {rows
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((row) => (
+                    <TableRow key={row.serial}>
+                      {columns.map((column) => (
+                        <TableCell key={column.id}>{row[column.id]}</TableCell>
+                      ))}
+                    </TableRow>
+                  ))}
+              </TableBody>
+            </Table>
+            <TablePagination
+            sx={{ marginBottom: '0px !important'}}
+              rowsPerPageOptions={[5, 10, 25]}
+              component="div"
+              count={rows.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
+          </TableContainer>
         )}
       </Card>
     </div>
