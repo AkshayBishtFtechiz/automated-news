@@ -2,7 +2,7 @@ const nodemailer = require("nodemailer");
 const { format, subDays, parse } = require("date-fns");
 
 const emailSent = async (req, res, getAllNews, firmData, newsSchema) => {
-  console.log("getAllNews.length !== firmData.length",getAllNews.length, firmData.length)
+  
   if (getAllNews.length === 0) {
     firmData.forEach(async function (data, index) {
       const newResponse = data.payload;
