@@ -30,11 +30,11 @@ const ReleasesIssuedByFirm = () => {
 
   const fetchBusinessWireData = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/business-wire");
-      const response1 = await axios.get("http://localhost:5000/pr-news-wire");
-      const response2 = await axios.get("http://localhost:5000/news-files");
+      const response = await axios.get("http://localhost:5000/api/business-wire");
+      const response1 = await axios.get("http://localhost:5000/api/pr-news-wire");
+      const response2 = await axios.get("http://localhost:5000/api/news-files");
       const response3 = await axios.get(
-        "http://localhost:5000/globe-news-wire"
+        "http://localhost:5000/api/globe-news-wire"
       );
 
       const allNewsData = [
