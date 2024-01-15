@@ -13,10 +13,12 @@ const GlobeNewsWireRoute = require("./Routes/GlobeNewsWireRoute");
 app.use(cors());
 app.use(express.json());
 
-app.use("/business-wire", BusinessWireRoute);
-app.use("/pr-news-wire", PRNewsWireRoute);
-app.use("/news-files", NewsFilesRoute);
-app.use("/globe-news-wire", GlobeNewsWireRoute);
+// News Routes
+
+BusinessWireRoute(app);
+PRNewsWireRoute(app);
+NewsFilesRoute(app);
+GlobeNewsWireRoute(app);
 
 // Database connection
 const connection = mongoose.connect(MongoURI);
