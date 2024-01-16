@@ -1,10 +1,9 @@
 const express = require("express");
-const Router = express.Router();
 const NewsFileSchema = require("../Schema/NewsFileModel");
 const puppeteer = require("puppeteer");
 const moment = require("moment");
 const emailSent = require("../utils/emailSent");
-const filterDays = require("../utils/filterDays");
+const { filterDays } = require("../utils/filterDays");
 const { v4: uuidv4 } = require("uuid");
 
 // NEWS FILE API
@@ -199,20 +198,22 @@ exports.getAllNewsFile = async (req, res) => {
 
     // Search news details 75 days before the current date and remove before 75 days news deyails
 
-    const dateToCompare = filterDays(firmData);
-
-        firmData?.forEach(function (newsDetails, index) {
-          const allPRNewsDate = new Date(newsDetails?.payload.dateTimeIssued);
-          
-          if (dateToCompare > allPRNewsDate) {
-            firmData.splice(index, 1);
-          }
-        });
-    
-    const getAllNewsFile = await NewsFileSchema.find();
-    emailSent(req, res, getAllNewsFile, firmData, NewsFileSchema);
-
-    await browser.close();
+    try {
+      const { targetDate, formattedTargetDate } = filterDays(75);
+      const last75DaysData = firmData.filter((newsDetails) => {
+        const allPRNewsDate = moment(
+          newsDetails?.payload.dateTimeIssued,
+          "MMMM DD, YYYY"
+        );
+        return targetDate < allPRNewsDate;
+      });
+      const getAllNewsFile = await NewsFileSchema.find();
+      emailSent(req, res, getAllNewsFile, last75DaysData, NewsFileSchema);
+      await browser.close();
+    } catch (error) {
+      console.error("Error:", error);
+      res.status(500).send("Internal Server Error");
+    }
   } catch (error) {
     console.error("Error:", error);
     res.status(500).send("Internal Server Error");

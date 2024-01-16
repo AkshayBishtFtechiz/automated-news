@@ -79,10 +79,16 @@ const ReleasesIssuedByFirm = () => {
   };
 
   // Use useQuery hook to handle data fetching and caching
+  // const { isLoading } = useQuery({
+  //   queryKey: [queryKey],
+  //   queryFn: fetchBusinessWireData,
+  //   refetchInterval: 1200000,
+  // });
+
   const { isLoading } = useQuery({
     queryKey: [queryKey],
     queryFn: fetchBusinessWireData,
-    refetchInterval: 1200000,
+    // refetchInterval: 60000,
   });
 
   const separatedData = separateFirmTypes(myStore.allNewsData);
