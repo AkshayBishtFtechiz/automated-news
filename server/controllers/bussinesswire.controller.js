@@ -1,10 +1,5 @@
-const express = require("express");
-const Router = express.Router();
 const BusinessWireSchema = require("../Schema/BusinessWireModel");
 const puppeteer = require("puppeteer");
-const cheerio = require("cheerio");
-const axios = require("axios");
-const nodemailer = require("nodemailer");
 const emailSent = require("../utils/emailSent");
 const filterDays = require("../utils/filterDays");
 const { v4: uuidv4 } = require("uuid");
@@ -170,6 +165,8 @@ exports.getAllBussinessWire = async (req, res) => {
         firmData.splice(index, 1);
       }
     });
+
+    console.log("bUSSINESSfirmData:",firmData)
 
     const getAllBussinessNews = await BusinessWireSchema.find();
     emailSent(req, res, getAllBussinessNews, firmData, BusinessWireSchema);

@@ -1,5 +1,3 @@
-const express = require("express");
-const Router = express.Router();
 const NewsFileSchema = require("../Schema/NewsFileModel");
 const puppeteer = require("puppeteer");
 const moment = require("moment");
