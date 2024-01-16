@@ -1,4 +1,3 @@
-const express = require("express");
 const NewsFileSchema = require("../Schema/NewsFileModel");
 const puppeteer = require("puppeteer");
 const moment = require("moment");
