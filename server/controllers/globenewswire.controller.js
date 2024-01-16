@@ -1,4 +1,3 @@
-const express = require("express");
 const GlobeNewsWireSchema = require("../Schema/GlobeNewsWireModel");
 const puppeteer = require("puppeteer");
 const cheerio = require("cheerio");

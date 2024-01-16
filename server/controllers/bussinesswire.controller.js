@@ -1,4 +1,3 @@
-const express = require("express");
 const BusinessWireSchema = require("../Schema/BusinessWireModel");
 const puppeteer = require("puppeteer");
 const emailSent = require("../utils/emailSent");
@@ -8,7 +7,7 @@ const moment = require("moment");
 
 // BUSINESS WIRE API
 
-exports.getAllBussinessWire = async (req, res) => {
+exports.getAllBussinessWire = async (req, res) => {0
   try {
     const law_firms = [
       "Berger Montague",
@@ -114,47 +113,40 @@ exports.getAllBussinessWire = async (req, res) => {
       }
     }
 
+
+   // JSON OF NEW TICKER.
+
     // firmData.push({
     //   firm: "Berger Montague",
     //   payload: {
     //     scrapId: uuidv4(),
-    //     tickerSymbol: "JDNX",
+    //     tickerSymbol: "NEWTICKER", // NEW TICKER THAT COMES
     //     firmIssuing: "Berger Montague",
     //     serviceIssuedOn: "BusinessWire",
-    //     dateTimeIssued: "January 15, 2024",
+    //     dateTimeIssued: "January 16, 2024",
     //     urlToRelease:
     //       "http://www.businesswire.com/news/home/20240101367342/zh-HK/",
     //     tickerIssuer: "NYSE",
     //   },
     // });
 
+    // JSON OF TICKER ALREADY THAT EXISTS IN LAST 60 DAYS.
+
     // firmData.push({
     //   firm: "Rosen",
     //   payload: {
     //     scrapId: uuidv4(),
-    //     tickerSymbol: "NEWR",
+    //     tickerSymbol: "DADA", //TICKER ALREADY EXISTS
     //     firmIssuing: "Berger Montague",
     //     serviceIssuedOn: "BusinessWire",
-    //     dateTimeIssued: "January 11, 2024",
+    //     dateTimeIssued: "January 16, 2024",
     //     urlToRelease:
     //       "http://www.businesswire.com/news/home/20240101367342/zh-HK/",
     //     tickerIssuer: "NYSE",
     //   },
     // });
 
-    // firmData.push({
-    //   firm: "Rosen",
-    //   payload: {
-    //     scrapId: uuidv4(),
-    //     tickerSymbol: "UNINOR",
-    //     firmIssuing: "Berger Montague",
-    //     serviceIssuedOn: "BusinessWire",
-    //     dateTimeIssued: "January 15, 2024",
-    //     urlToRelease:
-    //       "http://www.businesswire.com/news/home/20240101367342/zh-HK/",
-    //     tickerIssuer: "NYSE",
-    //   },
-    // });
+
 
     // Search news details 75 days before the current date and remove before 75 days news deyails
 
