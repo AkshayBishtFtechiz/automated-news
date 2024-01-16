@@ -7,7 +7,7 @@ const moment = require("moment");
 
 // BUSINESS WIRE API
 
-exports.getAllBussinessWire = async (req, res) => {
+exports.getAllBussinessWire = async (req, res) => {0
   try {
     const law_firms = [
       "Berger Montague",
@@ -120,7 +120,7 @@ exports.getAllBussinessWire = async (req, res) => {
     //   firm: "Berger Montague",
     //   payload: {
     //     scrapId: uuidv4(),
-    //     tickerSymbol: "NEWTICKER",
+    //     tickerSymbol: "NEWTICKER", // NEW TICKER THAT COMES
     //     firmIssuing: "Berger Montague",
     //     serviceIssuedOn: "BusinessWire",
     //     dateTimeIssued: "January 16, 2024",
