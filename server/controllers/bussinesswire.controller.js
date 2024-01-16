@@ -1,13 +1,10 @@
 const express = require("express");
-const Router = express.Router();
 const BusinessWireSchema = require("../Schema/BusinessWireModel");
 const puppeteer = require("puppeteer");
-const cheerio = require("cheerio");
-const axios = require("axios");
-const nodemailer = require("nodemailer");
 const emailSent = require("../utils/emailSent");
-const filterDays = require("../utils/filterDays");
+const { filterDays } = require("../utils/filterDays");
 const { v4: uuidv4 } = require("uuid");
+const moment = require("moment");
 
 // BUSINESS WIRE API
 
@@ -105,10 +102,10 @@ exports.getAllBussinessWire = async (req, res) => {
           tickerIssuer: newsItem.summary.includes("(NASDAQ:")
             ? "NASDAQ"
             : newsItem.summary.includes("(NYSE:")
-              ? "NYSE"
-              : newsItem.summary.includes("(OTCBB:")
-                ? "OTCBB"
-                : "",
+            ? "NYSE"
+            : newsItem.summary.includes("(OTCBB:")
+            ? "OTCBB"
+            : "",
         };
       });
 
@@ -135,7 +132,7 @@ exports.getAllBussinessWire = async (req, res) => {
     //   firm: "Rosen",
     //   payload: {
     //     scrapId: uuidv4(),
-    //     tickerSymbol: "NEW2",
+    //     tickerSymbol: "NEWR",
     //     firmIssuing: "Berger Montague",
     //     serviceIssuedOn: "BusinessWire",
     //     dateTimeIssued: "January 11, 2024",
@@ -145,36 +142,44 @@ exports.getAllBussinessWire = async (req, res) => {
     //   },
     // });
 
-    firmData.push({
-      firm: "Rosen",
-      payload: {
-        scrapId: uuidv4(),
-        tickerSymbol: "UNINOR",
-        firmIssuing: "Berger Montague",
-        serviceIssuedOn: "BusinessWire",
-        dateTimeIssued: "January 15, 2024",
-        urlToRelease:
-          "http://www.businesswire.com/news/home/20240101367342/zh-HK/",
-        tickerIssuer: "NYSE",
-      },
-    });
+    // firmData.push({
+    //   firm: "Rosen",
+    //   payload: {
+    //     scrapId: uuidv4(),
+    //     tickerSymbol: "UNINOR",
+    //     firmIssuing: "Berger Montague",
+    //     serviceIssuedOn: "BusinessWire",
+    //     dateTimeIssued: "January 15, 2024",
+    //     urlToRelease:
+    //       "http://www.businesswire.com/news/home/20240101367342/zh-HK/",
+    //     tickerIssuer: "NYSE",
+    //   },
+    // });
 
     // Search news details 75 days before the current date and remove before 75 days news deyails
 
-    const dateToCompare = filterDays(firmData);
-
-    firmData?.forEach(function (newsDetails, index) {
-      const allPRNewsDate = new Date(newsDetails?.payload.dateTimeIssued);
-
-      if (dateToCompare > allPRNewsDate) {
-        firmData.splice(index, 1);
-      }
-    });
-
-    const getAllBussinessNews = await BusinessWireSchema.find();
-    emailSent(req, res, getAllBussinessNews, firmData, BusinessWireSchema);
-
-    await browser.close();
+    try {
+      const { targetDate, formattedTargetDate } = filterDays(75);
+      const last75DaysData = firmData.filter((newsDetails) => {
+        const allPRNewsDate = moment(
+          newsDetails?.payload.dateTimeIssued,
+          "MMMM DD, YYYY"
+        );
+        return targetDate < allPRNewsDate;
+      });
+      const getAllBusinessNews = await BusinessWireSchema.find();
+      emailSent(
+        req,
+        res,
+        getAllBusinessNews,
+        last75DaysData,
+        BusinessWireSchema
+      );
+      await browser.close();
+    } catch (error) {
+      console.error("Error:", error);
+      res.status(500).send("Internal Server Error");
+    }
   } catch (error) {
     console.error("Error:", error);
     res.status(500).send("Internal Server Error");

@@ -1,11 +1,9 @@
 const express = require("express");
-const Router = express.Router();
 const PRNewsWireSchema = require("../Schema/PRNewsWireModel");
 const puppeteer = require("puppeteer");
 const moment = require("moment");
 const emailSent = require("../utils/emailSent");
-const { format, subDays, parse } = require("date-fns");
-const filterDays = require("../utils/filterDays");
+const { filterDays } = require("../utils/filterDays");
 const { v4: uuidv4 } = require("uuid");
 
 // PR NEWS WIRE API
@@ -111,15 +109,15 @@ exports.getAllPRNewsWire = async (req, res) => {
               urlToRelease: `https://www.prnewswire.com${newsItem.link}`,
               tickerIssuer:
                 newsItem.summary.includes("(NASDAQ:") ||
-                  newsItem.title.includes("(NASDAQ:")
+                newsItem.title.includes("(NASDAQ:")
                   ? "NASDAQ"
                   : newsItem.summary.includes("(NYSE:") ||
                     newsItem.title.includes("(NYSE:")
-                    ? "NYSE"
-                    : newsItem.summary.includes("(OTCBB:") ||
-                      newsItem.title.includes("(OTCBB:")
-                      ? "OTCBB"
-                      : "",
+                  ? "NYSE"
+                  : newsItem.summary.includes("(OTCBB:") ||
+                    newsItem.title.includes("(OTCBB:")
+                  ? "OTCBB"
+                  : "",
             };
           } else {
             return null; // Skip items with empty tickerSymbol
@@ -164,20 +162,22 @@ exports.getAllPRNewsWire = async (req, res) => {
 
     // Search news details 75 days before the current date and remove before 75 days news details
 
-    const dateToCompare = filterDays(firmData);
-
-    firmData?.forEach(function (newsDetails, index) {
-      const allPRNewsDate = new Date(newsDetails?.payload.dateTimeIssued);
-
-      if (dateToCompare > allPRNewsDate) {
-        firmData.splice(index, 1);
-      }
-    });
-
-    const getAllPRNewsWire = await PRNewsWireSchema.find();
-    emailSent(req, res, getAllPRNewsWire, firmData, PRNewsWireSchema);
-
-    await browser.close();
+    try {
+      const { targetDate, formattedTargetDate } = filterDays(75);
+      const last75DaysData = firmData.filter((newsDetails) => {
+        const allPRNewsDate = moment(
+          newsDetails?.payload.dateTimeIssued,
+          "MMMM DD, YYYY"
+        );
+        return targetDate < allPRNewsDate;
+      });
+      const getAllPRNewsWire = await PRNewsWireSchema.find();
+      emailSent(req, res, getAllPRNewsWire, last75DaysData, PRNewsWireSchema);
+      await browser.close();
+    } catch (error) {
+      console.error("Error:", error);
+      res.status(500).send("Internal Server Error");
+    }
   } catch (error) {
     console.error("Error:", error);
     res.status(500).send("Internal Server Error");
