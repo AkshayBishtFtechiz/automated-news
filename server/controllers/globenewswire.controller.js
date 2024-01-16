@@ -1,12 +1,11 @@
 const express = require("express");
-const Router = express.Router();
 const GlobeNewsWireSchema = require("../Schema/GlobeNewsWireModel");
 const puppeteer = require("puppeteer");
 const cheerio = require("cheerio");
 const moment = require("moment");
 const emailSent = require("../utils/emailSent");
-const filterDays = require("../utils/filterDays");
-const { v4: uuidv4 } = require('uuid');
+const { filterDays } = require("../utils/filterDays");
+const { v4: uuidv4 } = require("uuid");
 
 // GLOBE NEWS WIRE API
 
@@ -56,7 +55,10 @@ exports.getAllGlobeNewsWire = async (req, res) => {
       const firm = law_firms[i];
       const encodedFirm = encodeURI(firm);
       const globeNewsWireUrl = `https://www.globenewswire.com/en/search/organization/${encodedFirm}?page=1`;
-      await page.goto(globeNewsWireUrl, { waitUntil: "domcontentloaded", timeout: 300000 });
+      await page.goto(globeNewsWireUrl, {
+        waitUntil: "domcontentloaded",
+        timeout: 300000,
+      });
       await page.waitForSelector(".pagging-list-item", { timeout: 300000 });
 
       const htmlContent = await page.content();
@@ -96,8 +98,13 @@ exports.getAllGlobeNewsWire = async (req, res) => {
         const tickerMatch =
           newsItem.summary.match(/\((NASDAQ|NYSE|OTCBB):([^\)]+)\)/) ||
           newsItem.title.match(/\((NASDAQ|NYSE|OTCBB):([^\)]+)\)/);
-        const tickerSymbolMatch = (tickerMatch ? tickerMatch[2].trim() : "").match(/([^;\s]+)/)
-        const formattedDate = moment(newsItem.date, ["MMM DD, YYYY", "MMM DD, YYYY h:mm A"]).format("MMMM DD, YYYY");
+        const tickerSymbolMatch = (
+          tickerMatch ? tickerMatch[2].trim() : ""
+        ).match(/([^;\s]+)/);
+        const formattedDate = moment(newsItem.date, [
+          "MMM DD, YYYY",
+          "MMM DD, YYYY h:mm A",
+        ]).format("MMMM DD, YYYY");
         const id = uuidv4();
         return {
           scrapId: id,
@@ -108,15 +115,15 @@ exports.getAllGlobeNewsWire = async (req, res) => {
           urlToRelease: `https://www.globenewswire.com${newsItem.link}`,
           tickerIssuer:
             newsItem.summary.includes("(NASDAQ:") ||
-              newsItem.title.includes("(NASDAQ:")
+            newsItem.title.includes("(NASDAQ:")
               ? "NASDAQ"
               : newsItem.summary.includes("(NYSE:") ||
                 newsItem.title.includes("(NYSE:")
-                ? "NYSE"
-                : newsItem.summary.includes("(OTCBB:") ||
-                  newsItem.title.includes("(OTCBB:")
-                  ? "OTCBB"
-                  : "",
+              ? "NYSE"
+              : newsItem.summary.includes("(OTCBB:") ||
+                newsItem.title.includes("(OTCBB:")
+              ? "OTCBB"
+              : "",
         };
       });
 
@@ -153,21 +160,29 @@ exports.getAllGlobeNewsWire = async (req, res) => {
     }); */
 
     // Search news details 75 days before the current date and remove before 75 days news deyails
-    
-    const dateToCompare = filterDays(firmData);
 
-    firmData?.forEach(function (newsDetails, index) {
-      const allPRNewsDate = new Date(newsDetails?.payload.dateTimeIssued);
-          
-      if (dateToCompare > allPRNewsDate) {
-        firmData.splice(index, 1);
-      }
-    });
-    
-    const getAllGlobeNewsWire = await GlobeNewsWireSchema.find();
-    emailSent(req, res, getAllGlobeNewsWire, firmData, GlobeNewsWireSchema);
-
-    await browser.close();
+    try {
+      const { targetDate, formattedTargetDate } = filterDays(75);
+      const last75DaysData = firmData.filter((newsDetails) => {
+        const allPRNewsDate = moment(
+          newsDetails?.payload.dateTimeIssued,
+          "MMMM DD, YYYY"
+        );
+        return targetDate < allPRNewsDate;
+      });
+      const getAllGlobeNewsWire = await GlobeNewsWireSchema.find();
+      emailSent(
+        req,
+        res,
+        getAllGlobeNewsWire,
+        last75DaysData,
+        GlobeNewsWireSchema
+      );
+      await browser.close();
+    } catch (error) {
+      console.error("Error:", error);
+      res.status(500).send("Internal Server Error");
+    }
   } catch (error) {
     console.error("Error:", error);
     res.status(500).send("Internal Server Error");
@@ -181,11 +196,11 @@ exports.deleteGlobeNewsWireAll = async (req, res) => {
     .then((data) => {
       data === null
         ? res.send({
-          message: "News already deleted",
-        })
+            message: "News already deleted",
+          })
         : res.send({
-          message: "News deleted successfully",
-        });
+            message: "News deleted successfully",
+          });
     })
     .catch((err) => {
       res.send(err);
