@@ -137,34 +137,68 @@ exports.getAllNewsFile = async (req, res) => {
         }
       );
 
-      const payload = newsItems.map((newsItem) => {
-        const tickerMatch = newsItem.summary.match(
-          /\((NASDAQ|NYSE|OTCBB):([^\)]+)\)/
-        );
-        const formattedDate = moment(newsItem.date, [
-          "YYYY-MM-DD h:mm A Z",
-        ]).format("MMMM DD, YYYY");
-        const id = uuidv4();
-        return {
-          scrapId: id,
-          tickerSymbol: tickerMatch ? tickerMatch[2].trim() : "",
-          firmIssuing: law_firms[i].name,
-          serviceIssuedOn: "News File Corp", // Replace with actual service
-          dateTimeIssued: formattedDate, // Use the current date and time
-          urlToRelease: `https://www.newsfilecorp.com/${newsItem.link}`,
-          tickerIssuer: newsItem.summary.includes("(NASDAQ:")
-            ? "NASDAQ"
-            : newsItem.summary.includes("(NYSE:")
-            ? "NYSE"
-            : newsItem.summary.includes("(OTCBB:")
-            ? "OTCBB"
-            : "",
-        };
-      });
+      const payload = newsItems
+        .map((newsItem) => {
+          const tickerMatch = newsItem.summary.match(
+            /\((NASDAQ|NYSE|OTCBB):([^\)]+)\)/
+          );
+          const formattedDate = moment(newsItem.date, [
+            "YYYY-MM-DD h:mm A Z",
+          ]).format("MMMM DD, YYYY");
+          const id = uuidv4();
 
+          // Check if tickerSymbol and tickerIssuer are not blank
+          if (
+            tickerMatch &&
+            tickerMatch[2].trim() &&
+            newsItem.summary.includes("(NASDAQ:")
+          ) {
+            return {
+              scrapId: id,
+              tickerSymbol: tickerMatch[2].trim(),
+              firmIssuing: law_firms[i].name,
+              serviceIssuedOn: "News File Corp", // Replace with actual service
+              dateTimeIssued: formattedDate, // Use the current date and time
+              urlToRelease: `https://www.newsfilecorp.com/${newsItem.link}`,
+              tickerIssuer: "NASDAQ",
+            };
+          } else if (
+            tickerMatch &&
+            tickerMatch[2].trim() &&
+            newsItem.summary.includes("(NYSE:")
+          ) {
+            return {
+              scrapId: id,
+              tickerSymbol: tickerMatch[2].trim(),
+              firmIssuing: law_firms[i].name,
+              serviceIssuedOn: "News File Corp", // Replace with actual service
+              dateTimeIssued: formattedDate, // Use the current date and time
+              urlToRelease: `https://www.newsfilecorp.com/${newsItem.link}`,
+              tickerIssuer: "NYSE",
+            };
+          } else if (
+            tickerMatch &&
+            tickerMatch[2].trim() &&
+            newsItem.summary.includes("(OTCBB:")
+          ) {
+            return {
+              scrapId: id,
+              tickerSymbol: tickerMatch[2].trim(),
+              firmIssuing: law_firms[i].name,
+              serviceIssuedOn: "News File Corp", // Replace with actual service
+              dateTimeIssued: formattedDate, // Use the current date and time
+              urlToRelease: `https://www.newsfilecorp.com/${newsItem.link}`,
+              tickerIssuer: "OTCBB",
+            };
+          } else {
+            // Handle the case where tickerSymbol or tickerIssuer is blank
+            return null;
+          }
+        })
+        .filter(Boolean); // Filter out null values
+
+      // Save each document separately
       for (const newsData of payload) {
-        // const newNews = new NewsFileSchema(newsData);
-        // await newNews.save();
         firmData.push({ firm: listed_firms[i], payload: newsData });
       }
     }

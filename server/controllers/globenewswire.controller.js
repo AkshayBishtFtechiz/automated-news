@@ -93,38 +93,72 @@ exports.getAllGlobeNewsWire = async (req, res) => {
         );
       });
 
-      const payload = filteredNewsItems.map((newsItem) => {
-        const tickerMatch =
-          newsItem.summary.match(/\((NASDAQ|NYSE|OTCBB):([^\)]+)\)/) ||
-          newsItem.title.match(/\((NASDAQ|NYSE|OTCBB):([^\)]+)\)/);
-        const tickerSymbolMatch = (
-          tickerMatch ? tickerMatch[2].trim() : ""
-        ).match(/([^;\s]+)/);
-        const formattedDate = moment(newsItem.date, [
-          "MMM DD, YYYY",
-          "MMM DD, YYYY h:mm A",
-        ]).format("MMMM DD, YYYY");
-        const id = uuidv4();
-        return {
-          scrapId: id,
-          tickerSymbol: tickerSymbolMatch ? tickerSymbolMatch[1] : "", // Extracted first ticker symbol
-          firmIssuing: law_firms[i],
-          serviceIssuedOn: "Globe News Wire", // Replace with actual service
-          dateTimeIssued: formattedDate, // Use the current date and time
-          urlToRelease: `https://www.globenewswire.com${newsItem.link}`,
-          tickerIssuer:
-            newsItem.summary.includes("(NASDAQ:") ||
+      const payload = filteredNewsItems
+        .map((newsItem) => {
+          const tickerMatch =
+            newsItem.summary.match(/\((NASDAQ|NYSE|OTCBB):([^\)]+)\)/) ||
+            newsItem.title.match(/\((NASDAQ|NYSE|OTCBB):([^\)]+)\)/);
+          const tickerSymbolMatch = (
+            tickerMatch ? tickerMatch[2].trim() : ""
+          ).match(/([^;\s]+)/);
+          const formattedDate = moment(newsItem.date, [
+            "MMM DD, YYYY",
+            "MMM DD, YYYY h:mm A",
+          ]).format("MMMM DD, YYYY");
+          const id = uuidv4();
+
+          // Check if tickerSymbol and tickerIssuer are not blank
+          if (
+            (tickerSymbolMatch &&
+              tickerSymbolMatch[1] &&
+              newsItem.summary.includes("(NASDAQ:")) ||
             newsItem.title.includes("(NASDAQ:")
-              ? "NASDAQ"
-              : newsItem.summary.includes("(NYSE:") ||
-                newsItem.title.includes("(NYSE:")
-              ? "NYSE"
-              : newsItem.summary.includes("(OTCBB:") ||
-                newsItem.title.includes("(OTCBB:")
-              ? "OTCBB"
-              : "",
-        };
-      });
+          ) {
+            return {
+              scrapId: id,
+              tickerSymbol: tickerSymbolMatch[1], // Extracted first ticker symbol
+              firmIssuing: law_firms[i],
+              serviceIssuedOn: "Globe News Wire", // Replace with actual service
+              dateTimeIssued: formattedDate, // Use the current date and time
+              urlToRelease: `https://www.globenewswire.com${newsItem.link}`,
+              tickerIssuer: "NASDAQ",
+            };
+          } else if (
+            (tickerSymbolMatch &&
+              tickerSymbolMatch[1] &&
+              newsItem.summary.includes("(NYSE:")) ||
+            newsItem.title.includes("(NYSE:")
+          ) {
+            return {
+              scrapId: id,
+              tickerSymbol: tickerSymbolMatch[1], // Extracted first ticker symbol
+              firmIssuing: law_firms[i],
+              serviceIssuedOn: "Globe News Wire", // Replace with actual service
+              dateTimeIssued: formattedDate, // Use the current date and time
+              urlToRelease: `https://www.globenewswire.com${newsItem.link}`,
+              tickerIssuer: "NYSE",
+            };
+          } else if (
+            (tickerSymbolMatch &&
+              tickerSymbolMatch[1] &&
+              newsItem.summary.includes("(OTCBB:")) ||
+            newsItem.title.includes("(OTCBB:")
+          ) {
+            return {
+              scrapId: id,
+              tickerSymbol: tickerSymbolMatch[1], // Extracted first ticker symbol
+              firmIssuing: law_firms[i],
+              serviceIssuedOn: "Globe News Wire", // Replace with actual service
+              dateTimeIssued: formattedDate, // Use the current date and time
+              urlToRelease: `https://www.globenewswire.com${newsItem.link}`,
+              tickerIssuer: "OTCBB",
+            };
+          } else {
+            // Handle the case where tickerSymbol or tickerIssuer is blank
+            return null;
+          }
+        })
+        .filter(Boolean); // Filter out null values
 
       // Save each document separately
       for (const newsData of payload) {

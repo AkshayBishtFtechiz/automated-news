@@ -9,6 +9,7 @@ const BusinessWireRoute = require("./Routes/BusinessWireRoute");
 const PRNewsWireRoute = require("./Routes/PRNewsWireRoute");
 const NewsFilesRoute = require("./Routes/NewsFileRoute");
 const GlobeNewsWireRoute = require("./Routes/GlobeNewsWireRoute");
+const AccessWireRoute = require("./Routes/AccessWireRoute");
 
 app.use(cors());
 app.use(express.json());
@@ -19,6 +20,7 @@ BusinessWireRoute(app);
 PRNewsWireRoute(app);
 NewsFilesRoute(app);
 GlobeNewsWireRoute(app);
+AccessWireRoute(app);
 
 // Database connection
 const connection = mongoose.connect(MongoURI);
