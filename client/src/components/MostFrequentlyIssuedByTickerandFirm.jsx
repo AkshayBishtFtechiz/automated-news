@@ -64,7 +64,6 @@ const MostFrequentlyIssuedByTickerandFirm = () => {
         tickerCount: count,
         dateTimeIssued: dates.sort().pop(),
         tickers: tickerSymbol,
-        tickerCount: count,
       })
     );
   };
@@ -88,7 +87,7 @@ const MostFrequentlyIssuedByTickerandFirm = () => {
       item.serial = index + 1;
     });
 
-    // Step 1: Filter data by days
+    // Step 2: Filter data by days for TickerCount
     const filteredData1 = filterDataByDays1(
       myStore.allTickers,
       dynamicDuration
@@ -97,9 +96,7 @@ const MostFrequentlyIssuedByTickerandFirm = () => {
     // Step 3: Count occurrences of each ticker in the filtered data
     const tickerCountsArray = countTickerOccurrences(filteredData1);
 
-    // console.log("tickerCountsArray", tickerCountsArray);
-    // console.log("filteredData", filteredData)
-
+    // MERGE LOGIC HERE
     // Create a dictionary to map tickers to tickerCount from data1
     const tickerCountMap = tickerCountsArray.reduce((map, item) => {
       map[item.tickers] = item.tickerCount;
@@ -112,10 +109,7 @@ const MostFrequentlyIssuedByTickerandFirm = () => {
       return { ...item, tickerCount };
     });
 
-    // console.log(mergedData);
-    // MERGE LOGIC HERE
-
-    // Step 2: Updating State
+    // Step 4: Updating State
     myStore.setFilteredDataTandF(mergedData);
 
     // Reset pagination to the first page when changing filters
@@ -174,20 +168,15 @@ const MostFrequentlyIssuedByTickerandFirm = () => {
     })
   );
 
-  // console.log("TIC", tickerCountsArray1);
-
   // Count occurrences of each ticker symbol and store firms
   myStore.allNewsData.forEach((tickerObj) => {
     const { tickerSymbol, dateTimeIssued } = tickerObj.payload;
     const { firm } = tickerObj;
-
     const issuedDate = moment(dateTimeIssued, "MMMM DD, YYYY");
     const currentDate = moment();
     const differenceInDays = currentDate.diff(issuedDate, "days");
-
     firmsByTicker[tickerSymbol] = firmsByTicker[tickerSymbol] || [];
     firmsByTicker[tickerSymbol].push(firm);
-
     if (
       differenceInDays <= 5 ||
       differenceInDays <= 15 ||
@@ -211,31 +200,37 @@ const MostFrequentlyIssuedByTickerandFirm = () => {
       });
       return occurrences;
     }
-
     const inputArray = firmsByTicker[tickerSymbol];
-
     const occurrences = countOccurrences(inputArray);
 
-    console.log("tickerCountsArray1", tickerCountsArray1);
-   
-      return {
-        tickers: tickerSymbol,
-        tickerCount:  tickerCountsArray1?.map(item => item.tickerCount),
-        firms: [...new Set(firmsByTicker[tickerSymbol])], // Include the list of firms
-        extra: Object.entries(occurrences).map((items) => {
-          return items;
-        }),
-        firmCount: firmsByTicker[tickerSymbol].length,
-        dateTimeIssued: moment(Math.max(...dateTimeIssuedArray)).format(
-          "MMMM DD, YYYY"
-        ),
-      };
-  
-    
+    return {
+      tickers: tickerSymbol,
+      tickerCount: 0,
+      firms: [...new Set(firmsByTicker[tickerSymbol])],
+      extra: Object.entries(occurrences).map((items) => {
+        return items;
+      }),
+      firmCount: firmsByTicker[tickerSymbol].length,
+      dateTimeIssued: moment(Math.max(...dateTimeIssuedArray)).format(
+        "MMMM DD, YYYY"
+      ),
+    };
+  });
+
+  // Logic for filtering and merging tickercount
+  const tickerCountMap = tickerCountsArray1.reduce((map, item) => {
+    map[item.tickers] = item.tickerCount;
+    return map;
+  }, {});
+
+  // Merge data2 with tickerCount from tickerCountsArray1
+  const mergedData = tickerCountsArray.map((item) => {
+    const tickerCount = tickerCountMap[item.tickers] || 0;
+    return { ...item, tickerCount };
   });
 
   // Sort the ticker data in ascending order based on the "Tickers" column
-  const sortedTickerCountsArray = tickerCountsArray.slice().sort((a, b) => {
+  const sortedTickerCountsArray = mergedData.slice().sort((a, b) => {
     return a.tickers.localeCompare(b.tickers);
   });
 
@@ -244,8 +239,6 @@ const MostFrequentlyIssuedByTickerandFirm = () => {
     serial: index + 1,
     ...item,
   }));
-
-  console.log(resultWithSerial);
 
   const createData = (item) => {
     return {
@@ -425,12 +418,6 @@ const MostFrequentlyIssuedByTickerandFirm = () => {
                     <TableRow key={index}>
                       {columns.map((column) => (
                         <TableCell key={column.id}>
-                          {/* {column.id === "tickerCount" ? (
-                            // console.log(row)
-                            row[column.id].map((digit, digitIndex) => (
-                              <div key={digitIndex}>{digit}</div>
-                            ))
-                          ): ""} */}
                           {column.id === "firm" ? (
                             // Render the 'firm' column differently
                             <div style={{ display: "flex", flexWrap: "wrap" }}>

@@ -65,10 +65,10 @@ const MostFrequentlyIssuedByTicker = () => {
     // Step 1: Filter data by days
     const filteredData = filterDataByDays(myStore.allTickers, dynamicDuration);
 
-    // Step 3: Count occurrences of each ticker in the filtered data
+    // Step 2: Count occurrences of each ticker in the filtered data
     const tickerCountsArray = countTickerOccurrences(filteredData);
     
-    // Step 2: Update the filtered data in the store
+    // Step 3: Update the filtered data in the store
     myStore.setTickerFilteredData(tickerCountsArray);
 
     // Reset pagination to the first page when changing filters
