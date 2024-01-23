@@ -7,7 +7,7 @@ const moment = require("moment");
 
 // BUSINESS WIRE API
 
-exports.getAllBussinessWire = async (req, res) => {0
+exports.getAllBussinessWire = async (req, res) => {
   try {
     const law_firms = [
       "Berger Montague",
@@ -85,36 +85,45 @@ exports.getAllBussinessWire = async (req, res) => {0
           });
       });
 
-      const payload = newsItems.map((newsItem) => {
-        const tickerMatch = newsItem.summary.match(
-          /\((NASDAQ|NYSE|OTCBB):([^\)]+)\)/
-        );
-        const id = uuidv4();
+      const payload = newsItems
+        .map((newsItem) => {
+          const tickerMatch = newsItem.summary.match(
+            /\((NASDAQ|NYSE|OTCBB):([^\)]+)\)/
+          );
+          const id = uuidv4();
 
-        return {
-          scrapId: id,
-          tickerSymbol: tickerMatch ? tickerMatch[2].trim() : "",
-          firmIssuing: law_firms[i],
-          serviceIssuedOn: "BusinessWire", // Replace with actual service
-          dateTimeIssued: newsItem.date, // Use the current date and time
-          urlToRelease: newsItem.link,
-          tickerIssuer: newsItem.summary.includes("(NASDAQ:")
+          const tickerSymbol = tickerMatch ? tickerMatch[2].trim() : "";
+          const tickerIssuer = newsItem.summary.includes("(NASDAQ:")
             ? "NASDAQ"
             : newsItem.summary.includes("(NYSE:")
             ? "NYSE"
             : newsItem.summary.includes("(OTCBB:")
             ? "OTCBB"
-            : "",
-        };
-      });
+            : "";
+
+          // Check if both tickerSymbol and tickerIssuer are not blank
+          if (tickerSymbol && tickerIssuer) {
+            return {
+              scrapId: id,
+              tickerSymbol: tickerSymbol,
+              firmIssuing: law_firms[i],
+              serviceIssuedOn: "BusinessWire",
+              dateTimeIssued: newsItem.date,
+              urlToRelease: newsItem.link,
+              tickerIssuer: tickerIssuer,
+            };
+          } else {
+            return null; // Exclude news items with blank tickerSymbol or tickerIssuer
+          }
+        })
+        .filter((item) => item !== null); // Filter out null items (news items with blank tickerSymbol or tickerIssuer)
 
       for (const newsData of payload) {
         firmData.push({ firm: listed_firms[i], payload: newsData });
       }
     }
 
-
-   // JSON OF NEW TICKER.
+    // JSON OF NEW TICKER.
 
     // firmData.push({
     //   firm: "Berger Montague",
@@ -123,7 +132,7 @@ exports.getAllBussinessWire = async (req, res) => {0
     //     tickerSymbol: "NEWTICKER", // NEW TICKER THAT COMES
     //     firmIssuing: "Berger Montague",
     //     serviceIssuedOn: "BusinessWire",
-    //     dateTimeIssued: "January 16, 2024",
+    //     dateTimeIssued: "January 23, 2024",
     //     urlToRelease:
     //       "http://www.businesswire.com/news/home/20240101367342/zh-HK/",
     //     tickerIssuer: "NYSE",
@@ -145,8 +154,6 @@ exports.getAllBussinessWire = async (req, res) => {0
     //     tickerIssuer: "NYSE",
     //   },
     // });
-
-
 
     // Search news details 75 days before the current date and remove before 75 days news deyails
 

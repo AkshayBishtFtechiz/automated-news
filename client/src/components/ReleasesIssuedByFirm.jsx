@@ -15,6 +15,7 @@ import {
   FormControl,
   InputLabel,
   MenuItem,
+  TableSortLabel,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
@@ -27,6 +28,8 @@ const ReleasesIssuedByFirm = () => {
   // const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [orderBy, setOrderBy] = useState("serial");
+  const [sortDirection, setSortDirection] = useState("asc");
 
   const fetchBusinessWireData = async () => {
     try {
@@ -36,12 +39,14 @@ const ReleasesIssuedByFirm = () => {
       const response3 = await axios.get(
         "http://localhost:5000/api/globe-news-wire"
       );
+      const response4 = await axios.get("http://localhost:5000/api/access-wire")
 
       const allNewsData = [
         ...response.data,
         ...response1.data,
         ...response2.data,
         ...response3.data,
+        ...response4.data
       ];
 
       const arr = allNewsData
@@ -137,6 +142,39 @@ const ReleasesIssuedByFirm = () => {
     myStore.setFilteredData(filteredData[0]);
   };
 
+  const handleSort = (columnId) => {
+    const isAsc = orderBy === columnId && sortDirection === "asc";
+    setOrderBy(columnId);
+    setSortDirection(isAsc ? "desc" : "asc");
+  };
+
+
+  function stableSort(array, comparator) {
+    const stabilizedThis = array.map((el, index) => [el, index]);
+    stabilizedThis.sort((a, b) => {
+      const order = comparator(a[0], b[0]);
+      if (order !== 0) return order;
+      return a[1] - b[1];
+    });
+    return stabilizedThis.map((el) => el[0]);
+  }
+  
+  function getComparator(order, direction) {
+    return direction === "desc"
+      ? (a, b) => descendingComparator(a, b, order)
+      : (a, b) => -descendingComparator(a, b, order);
+  }
+  
+  function descendingComparator(a, b, orderBy) {
+    if (b[orderBy] < a[orderBy]) {
+      return -1;
+    }
+    if (b[orderBy] > a[orderBy]) {
+      return 1;
+    }
+    return 0;
+  }
+
   const columns = [
     {
       id: "serial",
@@ -214,6 +252,8 @@ const ReleasesIssuedByFirm = () => {
 
   const rows = filteredData.map((item) => createData(item));
 
+  const sortedRows = stableSort(rows, getComparator(orderBy, sortDirection));
+
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -264,41 +304,57 @@ const ReleasesIssuedByFirm = () => {
           </div>
         ) : (
           <TableContainer>
-            <Table>
-              <TableHead sx={{borderTop: '1px solid #e0e0e0'}}>
-                <TableRow>
-                  {columns.map((column) => (
-                    <TableCell key={column.id} style={{ fontWeight: "bold" }}>
-                      {column.label}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {rows
-                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((row) => (
-                    <TableRow key={row.serial}>
-                      {columns.map((column) => (
-                        <TableCell key={column.id}>
-                          {row[column.id]}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  ))}
-              </TableBody>
-            </Table>
-            <TablePagination
-              sx={{ marginBottom: '0px !important'}}
-              rowsPerPageOptions={[5, 10, 25]}
-              component="div"
-              count={rows.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              onPageChange={handleChangePage}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-            />
-          </TableContainer>
+          <Table>
+            <TableHead sx={{ borderTop: "1px solid #e0e0e0" }}>
+              <TableRow>
+                {columns.map((column) => (
+                  <TableCell
+                    key={column.id}
+                    style={{ fontWeight: "bold" }}
+                    sortDirection={orderBy === column.id ? sortDirection : false}
+                    hidesorticon={`${false}`}
+                  >
+                    {column.id !== "tickers" ? (
+                      <TableSortLabel
+                        active={orderBy === column.id}
+                        direction={orderBy === column.id ? sortDirection : "asc"}
+                        onClick={() => handleSort(column.id)}
+                        hidesorticon={`${false}`}
+                      >
+                        {column.label}
+                      </TableSortLabel>
+                    ) : (
+                      column.label
+                    )}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {sortedRows
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((row) => (
+                  <TableRow key={row.serial}>
+                    {columns.map((column) => (
+                      <TableCell key={column.id} hidesorticon={`${false}`}>
+                        {row[column.id]}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+            </TableBody>
+          </Table>
+          <TablePagination
+            sx={{ marginBottom: "0px !important" }}
+            rowsPerPageOptions={[5, 10, 25]}
+            component="div"
+            count={sortedRows.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
+        </TableContainer>
         )}
       </Card>
     </div>

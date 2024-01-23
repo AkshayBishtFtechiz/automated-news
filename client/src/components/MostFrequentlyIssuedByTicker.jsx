@@ -14,6 +14,7 @@ import {
   FormControl,
   InputLabel,
   MenuItem,
+  TableSortLabel,
 } from "@mui/material";
 import { UseNewsStore } from "../store";
 import moment from "moment";
@@ -23,6 +24,8 @@ const MostFrequentlyIssuedByTicker = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [orderBy, setOrderBy] = useState("tickers");
+  const [order, setOrder] = useState("asc");
 
   const filterDataByDays = (data, days) => {
     const currentDate = moment();
@@ -62,14 +65,24 @@ const MostFrequentlyIssuedByTicker = () => {
     // Step 1: Filter data by days
     const filteredData = filterDataByDays(myStore.allTickers, dynamicDuration);
 
-    // Step 3: Count occurrences of each ticker in the filtered data
+    // Step 2: Count occurrences of each ticker in the filtered data
     const tickerCountsArray = countTickerOccurrences(filteredData);
     
-    // Step 2: Update the filtered data in the store
+    // Step 3: Update the filtered data in the store
     myStore.setTickerFilteredData(tickerCountsArray);
 
     // Reset pagination to the first page when changing filters
     setPage(0);
+  };
+
+  const handleSort = (columnId) => {
+    const isAsc = orderBy === columnId && order === "asc";
+    setOrder(isAsc ? "desc" : "asc");
+    setOrderBy(columnId);
+  };
+
+  const createSortHandler = (columnId) => () => {
+    handleSort(columnId);
   };
 
   const columns = [
@@ -112,10 +125,13 @@ const MostFrequentlyIssuedByTicker = () => {
     })
   );
 
-  // Sort the data in ascending order based on the "Tickers" column
-  const sortedTickerCountsArray = tickerCountsArray.slice().sort((a, b) => {
-    return a.tickers.localeCompare(b.tickers);
-  });
+  // Sort the data based on the current sorting order and column
+  const sortedTickerCountsArray = tickerCountsArray
+    .slice()
+    .sort((a, b) => {
+      const isAsc = order === "asc";
+      return isAsc ? a[orderBy].localeCompare(b[orderBy]) : b[orderBy].localeCompare(a[orderBy]);
+    });
 
   const createData = (item) => {
     return {
@@ -188,7 +204,15 @@ const MostFrequentlyIssuedByTicker = () => {
               <TableHead sx={{borderTop: '1px solid #e0e0e0'}}>
                 <TableRow>
                   {columns.map((column) => (
-                    <TableCell key={column.id} style={{ fontWeight: 'bold' }}>{column.label}</TableCell>
+                    <TableCell key={column.id} style={{ fontWeight: 'bold' }}>
+                        <TableSortLabel
+                          active={orderBy === column.id}
+                          direction={orderBy === column.id ? order : "asc"}
+                          onClick={createSortHandler(column.id)}
+                        >
+                          {column.label}
+                        </TableSortLabel>
+                    </TableCell>
                   ))}
                 </TableRow>
               </TableHead>
