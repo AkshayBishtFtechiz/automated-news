@@ -1,4 +1,3 @@
-const express = require("express");
 const PRNewsWireSchema = require("../Schema/PRNewsWireModel");
 const puppeteer = require("puppeteer");
 const moment = require("moment");
