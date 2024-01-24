@@ -132,7 +132,7 @@ exports.getAllBussinessWire = async (req, res) => {
     //     tickerSymbol: "NEWTICKER", // NEW TICKER THAT COMES
     //     firmIssuing: "Berger Montague",
     //     serviceIssuedOn: "BusinessWire",
-    //     dateTimeIssued: "January 16, 2024",
+    //     dateTimeIssued: "January 23, 2024",
     //     urlToRelease:
     //       "http://www.businesswire.com/news/home/20240101367342/zh-HK/",
     //     tickerIssuer: "NYSE",
