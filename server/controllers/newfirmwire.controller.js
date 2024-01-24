@@ -36,9 +36,24 @@ exports.createNewFirmWire = async (req, res) => {
 // Delete NewFirmWireNews
 
 exports.deleteNewFirmWire = async (req, res) => {
+  const { _id } = req.body;
+  NewFirmsWireSchema.deleteOne({ _id })
+    .then((data) => {
+      res.send({
+        message: "News deleted successfully",
+      });
+    })
+    .catch((err) => {
+      res.send(err);
+    });
+};
+
+// Delete NewFirmWireNews
+
+exports.deleteAllNewFirmWire = async (req, res) => {
   NewFirmsWireSchema.deleteMany({})
     .then((data) => {
-      data === null
+      data.deletedCount === 0
         ? res.send({
             message: "News already deleted",
           })

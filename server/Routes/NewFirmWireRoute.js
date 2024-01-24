@@ -6,7 +6,10 @@ const NewFirmWireRoute = (app) => {
     router.post("/new-firm-news-wire", newfirmwire.createNewFirmWire);
 
     // Delete New Firm Wire
-    router.delete("/new-firm-news-wire/deleteall", newfirmwire.deleteNewFirmWire);
+    router.delete("/new-firm-news-wire/delete", newfirmwire.deleteNewFirmWire);
+
+    // Delete All New Firm Wire
+    router.delete("/new-firm-news-wire/deleteall", newfirmwire.deleteAllNewFirmWire);
     
     app.use("/api", router);
   };
