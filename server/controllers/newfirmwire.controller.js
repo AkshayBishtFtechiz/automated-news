@@ -1,0 +1,49 @@
+const NewFirmsWireSchema = require("../Schema/NewFirmModel");
+
+// Create NewFirmWireNews
+exports.createNewFirmWire = async (req, res) => {
+  const r = req.body;
+
+  await NewFirmsWireSchema.find({
+    $and: [{ firmName: r.firmName }, { newsWire: r.newsWire }],
+  })
+    .then((data) => {
+      if (data.length > 0) {
+        res.send({
+          message: "Firm Already Present",
+        });
+      } else {
+        // Insert new firm in db
+        NewFirmsWireSchema.create(r)
+          .then(async (data) => {
+            res.send({
+              message: "New Firm Inserted",
+            });
+          })
+          .catch((err) => {
+            res.send(err);
+          });
+      }
+    })
+    .catch((err) => {
+      res.send(err);
+    });
+};
+
+// Delete NewFirmWireNews
+
+exports.deleteNewFirmWire = async (req, res) => {
+  NewFirmsWireSchema.deleteMany({})
+    .then((data) => {
+      data === null
+        ? res.send({
+            message: "News already deleted",
+          })
+        : res.send({
+            message: "News deleted successfully",
+          });
+    })
+    .catch((err) => {
+      res.send(err);
+    });
+};
