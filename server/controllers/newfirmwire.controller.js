@@ -15,10 +15,9 @@ exports.createNewFirmWire = async (req, res) => {
       } else {
         // Insert new firm in db
         NewFirmsWireSchema.create(r)
-          .then(async (data) => {
-            res.send({
-              message: "New Firm Inserted",
-            });
+            .then(async (data) => {
+                const getNewFirm = await NewFirmsWireSchema.find();
+                res.send(getNewFirm);
           })
           .catch((err) => {
             res.send(err);
