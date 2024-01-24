@@ -7,17 +7,21 @@ exports.createNewFirmWire = async (req, res) => {
   await NewFirmsWireSchema.find({
     $and: [{ firmName: r.firmName }, { newsWire: r.newsWire }],
   })
-    .then((data) => {
+    .then(async (data) => {
       if (data.length > 0) {
-        res.send({
-          message: "Firm Already Present",
-        });
+        const getNewFirm = await NewFirmsWireSchema.find();
+        res.send([
+          {
+            message: "Firm Already Present",
+            newFirms: getNewFirm,
+          },
+        ]);
       } else {
         // Insert new firm in db
         NewFirmsWireSchema.create(r)
-            .then(async (data) => {
-                const getNewFirm = await NewFirmsWireSchema.find();
-                res.send(getNewFirm);
+          .then(async (data) => {
+            const getNewFirm = await NewFirmsWireSchema.find();
+            res.send(getNewFirm);
           })
           .catch((err) => {
             res.send(err);
