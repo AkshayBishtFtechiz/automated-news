@@ -41,7 +41,7 @@ const emailSent = async (req, res, getAllNews, firmData, newsSchema) => {
           (compareSixtyNews, index) =>
             compareSixtyNews.payload.tickerSymbol === data.payload.tickerSymbol
         );
-
+        
         if (compareTickerSymbol.length === 0) {
           const transporter = nodemailer.createTransport({
             service: "gmail",
@@ -59,7 +59,7 @@ const emailSent = async (req, res, getAllNews, firmData, newsSchema) => {
           // Define the email options
           const mailOptions = {
             from: "blocklevitonalerts@gmail.com",
-            to: "jake@blockleviton.com",
+            to: "shubham.pal@ftechiz.com",
             subject: `Alert: First Press Release for ${data?.payload?.tickerSymbol}`,
             html: `<p><span style='font-weight:bold;'>${data.firm}</span> issued a press release for <span style='font-weight:bold;'>${data?.payload?.tickerSymbol}</span>. This is the first press release observed for <span style='font-weight:bold;'>${data?.payload?.tickerSymbol}</span> in the past 60 days.<br/><br/>View the release here: ${data?.payload?.urlToRelease}.</p>`,
           };
@@ -70,17 +70,19 @@ const emailSent = async (req, res, getAllNews, firmData, newsSchema) => {
               return console.error("Error:", error.message);
             }
           });
-        }
 
-        const newNews = new newsSchema({
-          firm: data.firm,
-          payload: data.payload,
-        });
-        newNews.save();
+          const newNews = new newsSchema({
+            firm: data.firm,
+            payload: data.payload,
+          });
+          newNews.save();
+        }
       }
     });
-
-    res.json(firmData);
+    setTimeout(async () => {
+      const response = await newsSchema.find();
+      res.json(response);
+    }, 1000);
   } else {
     res.send(firmData);
   }

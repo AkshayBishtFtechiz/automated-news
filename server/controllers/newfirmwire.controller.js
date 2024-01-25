@@ -12,7 +12,7 @@ exports.createNewFirmWire = async (req, res) => {
         const getNewFirm = await NewFirmsWireSchema.find();
         res.send([
           {
-            message: "Firm Already Present",
+            message: "Firm is already present!",
             newFirms: getNewFirm,
           },
         ]);
@@ -35,15 +35,15 @@ exports.createNewFirmWire = async (req, res) => {
 
 // Get NewFirmsNew Details
 
-exports.getNewFirmDetails = ((req, res) => {
+exports.getNewFirmDetails = (req, res) => {
   NewFirmsWireSchema.find()
     .then((data) => {
       res.send(data);
     })
     .catch((err) => {
       res.send(err);
-  })
-})
+    });
+};
 
 // Delete NewFirmWireNews
 
@@ -52,7 +52,7 @@ exports.deleteNewFirmWire = async (req, res) => {
   NewFirmsWireSchema.deleteOne({ _id })
     .then((data) => {
       res.send({
-        message: "News deleted successfully",
+        message: "Firm has been deleted successfully.",
       });
     })
     .catch((err) => {

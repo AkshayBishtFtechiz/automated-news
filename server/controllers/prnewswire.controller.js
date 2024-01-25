@@ -135,9 +135,9 @@ exports.getAllPRNewsWire = async (req, res) => {
       firm: "Berger Montague",
       payload: {
         scrapId: uuidv4(),
-        tickerSymbol: "SERVSHSH11",
+        tickerSymbol: "DADA",
         firmIssuing: "Berger Montague",
-        serviceIssuedOn: "BusinessWire",
+        serviceIssuedOn: "Flipkart",
         dateTimeIssued: "January 02, 2024",
         urlToRelease:
           "http://www.businesswire.com/news/home/20240101367342/zh-HK/",
@@ -149,9 +149,23 @@ exports.getAllPRNewsWire = async (req, res) => {
       firm: "Rosen",
       payload: {
         scrapId: uuidv4(),
-        tickerSymbol: "BIDUWWE22",
+        tickerSymbol: "DADA1212",
         firmIssuing: "Berger Montague",
-        serviceIssuedOn: "BusinessWire",
+        serviceIssuedOn: "Amazon",
+        dateTimeIssued: "January 05, 2024",
+        urlToRelease:
+          "http://www.businesswire.com/news/home/20240101367342/zh-HK/",
+        tickerIssuer: "NYSE",
+      },
+    });
+
+    firmData.push({
+      firm: "Rosen",
+      payload: {
+        scrapId: uuidv4(),
+        tickerSymbol: "DADA1313",
+        firmIssuing: "Berger Montague",
+        serviceIssuedOn: "Google",
         dateTimeIssued: "January 05, 2024",
         urlToRelease:
           "http://www.businesswire.com/news/home/20240101367342/zh-HK/",
