@@ -84,7 +84,8 @@ const emailSent = async (req, res, getAllNews, firmData, newsSchema) => {
       res.json(response);
     }, 1000);
   } else {
-    res.send(firmData);
+    const response = await newsSchema.find();
+    res.send(response);
   }
 };
 
