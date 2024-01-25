@@ -5,6 +5,9 @@ const NewFirmWireRoute = (app) => {
     // Create New Firm Wire
     router.post("/new-firm-news-wire", newfirmwire.createNewFirmWire);
 
+    // Get New Firm Wire
+    router.get("/new-firm-news-wire-getdetails", newfirmwire.getNewFirmDetails);
+
     // Delete New Firm Wire
     router.delete("/new-firm-news-wire/delete", newfirmwire.deleteNewFirmWire);
 

@@ -33,6 +33,18 @@ exports.createNewFirmWire = async (req, res) => {
     });
 };
 
+// Get NewFirmsNew Details
+
+exports.getNewFirmDetails = ((req, res) => {
+  NewFirmsWireSchema.find()
+    .then((data) => {
+      res.send(data);
+    })
+    .catch((err) => {
+      res.send(err);
+  })
+})
+
 // Delete NewFirmWireNews
 
 exports.deleteNewFirmWire = async (req, res) => {
