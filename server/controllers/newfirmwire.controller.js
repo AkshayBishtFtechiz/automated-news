@@ -5,7 +5,7 @@ exports.createNewFirmWire = async (req, res) => {
   const r = req.body;
 
   await NewFirmsWireSchema.find({
-    $and: [{ firmName: r.firmName }, { newsWire: r.newsWire }],
+    $and: [{ firmName: r.firmName }, { index: r.index }],
   })
     .then(async (data) => {
       if (data.length > 0) {
