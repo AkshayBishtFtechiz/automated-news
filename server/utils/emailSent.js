@@ -1,18 +1,46 @@
 const nodemailer = require("nodemailer");
 const { format, subDays, parse } = require("date-fns");
 
-const emailSent = async (req, res, getAllNews, firmData, newsSchema) => {
-  
+const emailSent = async (
+  req,
+  res,
+  getAllNews,
+  firmData,
+  newsSchema,
+  flag
+) => {
+  console.log("Checking_Flag:", flag);
+  console.log("Compare_Length:",getAllNews.length, firmData.length);
+
   if (getAllNews.length === 0) {
-    firmData.forEach(async function (data, index) {
-      const newResponse = data.payload;
-      const newNews = new newsSchema({ firm: data.firm, payload: newResponse });
-      newNews.save();
-    });
-    res.json(firmData);
-  }
-  else if (getAllNews.length !== firmData.length) {
+
+      // NEW LOGIC
+      const uniqueTickerSymbols = new Set();
+
+      const filteredData = await firmData.filter((entry) => {
+        if (uniqueTickerSymbols.has(entry.payload.tickerSymbol)) {
+          // Duplicate entry, return false to filter it out
+          return false;
+        } else {
+          // Not a duplicate, add the tickerSymbol to the Set and return true
+          uniqueTickerSymbols.add(entry.payload.tickerSymbol);
+          return true;
+        }
+      });
+  
+      filteredData.forEach(async function (data, index) {
+        const newResponse = data.payload;
+        const newNews = await new newsSchema({ firm: data.firm, payload: newResponse });
+        newNews.save();
+      });
+    
+    console.log("Inside_If");
+    {
+      flag !== true && res.json(firmData);
+    }
+  } else if (getAllNews.length !== firmData.length) {
     // Comparing ticker with previous 60 days tikcer and send mail
+    console.log("Inside_ElseIf");
 
     firmData.forEach(async function (data, index) {
       if (
@@ -42,7 +70,9 @@ const emailSent = async (req, res, getAllNews, firmData, newsSchema) => {
             compareSixtyNews.payload.tickerSymbol === data.payload.tickerSymbol
         );
         
+        console.log("Above_If");
         if (compareTickerSymbol.length === 0) {
+          console.log("Inside_If");
           const transporter = nodemailer.createTransport({
             service: "gmail",
             auth: {
@@ -81,11 +111,16 @@ const emailSent = async (req, res, getAllNews, firmData, newsSchema) => {
     });
     setTimeout(async () => {
       const response = await newsSchema.find();
-      res.json(response);
+      {
+        flag !== true && res.json(response);
+      }
     }, 1000);
   } else {
+    console.log("Inside_Else");
     const response = await newsSchema.find();
-    res.send(response);
+    {
+      flag !== true && res.send(response);
+    }
   }
 };
 

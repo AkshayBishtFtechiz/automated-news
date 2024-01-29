@@ -8,6 +8,9 @@ const { v4: uuidv4 } = require("uuid");
 // NEWS FILE API
 
 exports.getAllNewsFile = async (req, res) => {
+  const { flag } = req.body;
+  console.log("Coming_InsidePR", req.body);
+  
   try {
     const law_firms = [
       {
@@ -85,7 +88,7 @@ exports.getAllNewsFile = async (req, res) => {
       "Rosen",
     ];
 
-    const browser = await puppeteer.launch({ headless: "new" });
+    const browser = await puppeteer.launch({ headless: false });
     const page = await browser.newPage();
     await page.setCacheEnabled(false);
 
@@ -206,7 +209,7 @@ exports.getAllNewsFile = async (req, res) => {
     /* firmData.push({
       firm: "Berger Montague",
       payload: {
-        tickerSymbol: "SERV",
+        tickerSymbol: "SERVtest",
         firmIssuing: "Berger Montague",
         serviceIssuedOn: "BusinessWire",
         dateTimeIssued: "January 02, 2024",
@@ -219,10 +222,10 @@ exports.getAllNewsFile = async (req, res) => {
     firmData.push({
       firm: "Rosen",
       payload: {
-        tickerSymbol: "BIDU",
+        tickerSymbol: "BIDUtest",
         firmIssuing: "Berger Montague",
         serviceIssuedOn: "BusinessWire",
-        dateTimeIssued: "January 02, 2024",
+        dateTimeIssued: "January 05, 2024",
         urlToRelease:
           "http://www.businesswire.com/news/home/20240101367342/zh-HK/",
         tickerIssuer: "NYSE",
@@ -241,15 +244,21 @@ exports.getAllNewsFile = async (req, res) => {
         return targetDate < allPRNewsDate;
       });
       const getAllNewsFile = await NewsFileSchema.find();
-      emailSent(req, res, getAllNewsFile, last75DaysData, NewsFileSchema);
+      emailSent(req, res, getAllNewsFile, last75DaysData, NewsFileSchema, flag);
       await browser.close();
     } catch (error) {
       console.error("Error:", error);
-      res.status(500).send("Internal Server Error");
+      {
+      flag !== true && (
+        res.status(500).send("Internal Server Error"))
+    }
     }
   } catch (error) {
     console.error("Error:", error);
-    res.status(500).send("Internal Server Error");
+    {
+      flag !== true && (
+        res.status(500).send("Internal Server Error"))
+    }
   }
 };
 

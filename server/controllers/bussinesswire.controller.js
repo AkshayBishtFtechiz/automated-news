@@ -8,6 +8,9 @@ const moment = require("moment");
 // BUSINESS WIRE API
 
 exports.getAllBussinessWire = async (req, res) => {
+  const { flag } = req.body;
+  console.log("Coming_InsidePR", req.body);
+
   try {
     const law_firms = [
       "Berger Montague",
@@ -172,16 +175,23 @@ exports.getAllBussinessWire = async (req, res) => {
         res,
         getAllBusinessNews,
         last75DaysData,
-        BusinessWireSchema
+        BusinessWireSchema,
+        flag
       );
       await browser.close();
     } catch (error) {
       console.error("Error:", error);
-      res.status(500).send("Internal Server Error");
+      {
+      flag !== true && (
+        res.status(500).send("Internal Server Error"))
+    }
     }
   } catch (error) {
     console.error("Error:", error);
-    res.status(500).send("Internal Server Error");
+    {
+      flag !== true && (
+        res.status(500).send("Internal Server Error"))
+    }
   }
 };
 

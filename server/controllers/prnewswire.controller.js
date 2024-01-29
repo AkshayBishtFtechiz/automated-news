@@ -8,6 +8,9 @@ const { v4: uuidv4 } = require("uuid");
 // PR NEWS WIRE API
 
 exports.getAllPRNewsWire = async (req, res) => {
+  const { flag } = req.body;
+  console.log("Coming_InsidePR", req.body);
+  
   try {
     const law_firms = [
       "berger-montague",
@@ -38,6 +41,8 @@ exports.getAllPRNewsWire = async (req, res) => {
       "Levi & Korsinsky",
       "Rosen",
     ];
+
+    //req.body.firmName?.law_firms.push(req.body.firmName);
 
     const browser = await puppeteer.launch({ headless: "new" });
     const page = await browser.newPage();
@@ -185,15 +190,21 @@ exports.getAllPRNewsWire = async (req, res) => {
         return targetDate < allPRNewsDate;
       });
       const getAllPRNewsWire = await PRNewsWireSchema.find();
-      emailSent(req, res, getAllPRNewsWire, last75DaysData, PRNewsWireSchema);
+      emailSent(req, res, getAllPRNewsWire, last75DaysData, PRNewsWireSchema, flag);
       await browser.close();
     } catch (error) {
       console.error("Error:", error);
-      res.status(500).send("Internal Server Error");
+      {
+        flag !== true && (
+          res.status(500).send("Internal Server Error"))
+      }
     }
   } catch (error) {
     console.error("Error:", error);
-    res.status(500).send("Internal Server Error");
+    {
+      flag !== true && (
+        res.status(500).send("Internal Server Error"))
+    }
   }
 };
 

@@ -1,8 +1,20 @@
 const NewFirmsWireSchema = require("../Schema/NewFirmModel");
 
+const prnewswire = require("./prnewswire.controller");
+
+const accessWire = require("./accesswire.controller");
+
+const businessWire = require("./bussinesswire.controller");
+
+const globenewswire = require("./globenewswire.controller");
+
+const newsfilewire = require("./newsfile.controller");
+
 // Create NewFirmWireNews
 exports.createNewFirmWire = async (req, res) => {
   const r = req.body;
+
+  console.log("ResponseData");
 
   await NewFirmsWireSchema.find({
     $and: [{ firmName: r.firmName }, { index: r.index }],
@@ -21,6 +33,13 @@ exports.createNewFirmWire = async (req, res) => {
         NewFirmsWireSchema.create(r)
           .then(async (data) => {
             const getNewFirm = await NewFirmsWireSchema.find();
+
+            //accessWire.getAllAccessWire(req, res);
+            //businessWire.getAllBussinessWire(req, res);
+            //globenewswire.getAllGlobeNewsWire(req, res);
+            newsfilewire.getAllNewsFile(req, res);
+            //prnewswire.getAllPRNewsWire(req, res);
+
             res.send(getNewFirm);
           })
           .catch((err) => {

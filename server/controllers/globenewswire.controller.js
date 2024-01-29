@@ -9,6 +9,9 @@ const { v4: uuidv4 } = require("uuid");
 // GLOBE NEWS WIRE API
 
 exports.getAllGlobeNewsWire = async (req, res) => {
+  const { flag } = req.body;
+  console.log("Coming_InsidePR", req.body);
+
   try {
     const law_firms = [
       "Berger%20Montague",
@@ -209,16 +212,21 @@ exports.getAllGlobeNewsWire = async (req, res) => {
         res,
         getAllGlobeNewsWire,
         last75DaysData,
-        GlobeNewsWireSchema
+        GlobeNewsWireSchema,
+        flag
       );
       await browser.close();
     } catch (error) {
       console.error("Error:", error);
-      res.status(500).send("Internal Server Error");
+      {
+        flag !== true && res.status(500).send("Internal Server Error");
+      }
     }
   } catch (error) {
     console.error("Error:", error);
-    res.status(500).send("Internal Server Error");
+    {
+      flag !== true && res.status(500).send("Internal Server Error");
+    }
   }
 };
 

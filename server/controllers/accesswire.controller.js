@@ -10,6 +10,9 @@ function delay(time) {
 }
 
 exports.getAllAccessWire = async (req, res) => {
+  const { flag } = req.body;
+  console.log("Coming_InsidePR", req.body);
+
   try {
     const browser = await puppeteer.launch({ headless: "new" });
     const page = await browser.newPage();
@@ -189,16 +192,23 @@ exports.getAllAccessWire = async (req, res) => {
         res,
         getAllAccessWireNews,
         last75DaysData,
-        AccessWireSchema
+        AccessWireSchema,
+        flag
       );
       await browser.close();
     } catch (error) {
       console.error("Error:", error);
-      res.status(500).send("Internal Server Error");
+      {
+        flag !== true && (
+          res.status(500).send("Internal Server Error"))
+      }
     }
   } catch (error) {
     console.error("Error:", error);
-    res.status(500).send("Internal Server Error");
+    {
+      flag !== true && (
+        res.status(500).send("Internal Server Error"))
+    }
   }
 };
 

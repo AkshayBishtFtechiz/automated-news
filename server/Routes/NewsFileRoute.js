@@ -1,12 +1,12 @@
 const NewsFileRoute = (app) => {
-  const prnewswire = require("../controllers/newsfile.controller");
+  const newsfilewire = require("../controllers/newsfile.controller");
   var router = require("express").Router();
 
   // Get all PRNewsWire details
-  router.get("/news-files", prnewswire.getAllNewsFile);
+  router.get("/news-files", newsfilewire.getAllNewsFile);
 
   // Delete PRNewsWire details
-  router.delete("/news-files/deleteall", prnewswire.deleteNewsFile);
+  router.delete("/news-files/deleteall", newsfilewire.deleteNewsFile);
 
   app.use("/api", router);
 };
