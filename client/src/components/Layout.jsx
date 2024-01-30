@@ -2,6 +2,7 @@ import React from "react";
 import ReleasesIssuedByFirm from "./ReleasesIssuedByFirm";
 import MostFrequentlyIssuedByTicker from "./MostFrequentlyIssuedByTicker";
 import MostFrequentlyIssuedByTickerandFirm from "./MostFrequentlyIssuedByTickerandFirm";
+import AddNewFirms from "./AddNewFirms";
 import { Container } from "@mui/material";
 
 const Layout = () => {
@@ -16,6 +17,7 @@ const Layout = () => {
         <ReleasesIssuedByFirm />
         <MostFrequentlyIssuedByTicker />
         <MostFrequentlyIssuedByTickerandFirm />
+        <AddNewFirms />
       </Container>
     </>
   );

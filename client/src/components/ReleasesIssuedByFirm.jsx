@@ -33,20 +33,53 @@ const ReleasesIssuedByFirm = () => {
 
   const fetchBusinessWireData = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/business-wire");
-      const response1 = await axios.get("http://localhost:5000/api/pr-news-wire");
-      const response2 = await axios.get("http://localhost:5000/api/news-files");
-      const response3 = await axios.get(
-        "http://localhost:5000/api/globe-news-wire"
+      const response = await axios.get(
+        "http://localhost:5000/api/business-wire",
+        {
+          params: {
+            flag: true,
+          },
+        }
       );
-      const response4 = await axios.get("http://localhost:5000/api/access-wire")
+      const response1 = await axios.get(
+        "http://localhost:5000/api/pr-news-wire",
+        {
+          params: {
+            flag: true,
+          },
+        }
+      );
+      const response2 = await axios.get(
+        "http://localhost:5000/api/news-files",
+        {
+          params: {
+            flag: true,
+          },
+        }
+      );
+      const response3 = await axios.get(
+        "http://localhost:5000/api/globe-news-wire",
+        {
+          params: {
+            flag: true,
+          },
+        }
+      );
+      const response4 = await axios.get(
+        "http://localhost:5000/api/access-wire",
+        {
+          params: {
+            flag: true,
+          },
+        }
+      );
 
       const allNewsData = [
         ...response.data,
         ...response1.data,
         ...response2.data,
         ...response3.data,
-        ...response4.data
+        ...response4.data,
       ];
 
       const arr = allNewsData
@@ -148,7 +181,6 @@ const ReleasesIssuedByFirm = () => {
     setSortDirection(isAsc ? "desc" : "asc");
   };
 
-
   function stableSort(array, comparator) {
     const stabilizedThis = array.map((el, index) => [el, index]);
     stabilizedThis.sort((a, b) => {
@@ -158,13 +190,13 @@ const ReleasesIssuedByFirm = () => {
     });
     return stabilizedThis.map((el) => el[0]);
   }
-  
+
   function getComparator(order, direction) {
     return direction === "desc"
       ? (a, b) => descendingComparator(a, b, order)
       : (a, b) => -descendingComparator(a, b, order);
   }
-  
+
   function descendingComparator(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) {
       return -1;
@@ -235,13 +267,27 @@ const ReleasesIssuedByFirm = () => {
       totalReleases: item.totalReleases,
       filteredServiceIssuedOnData: item.filteredServiceIssuedOnData.map(
         (serviceIssuedOn, index) => (
-          <Chip key={index} style={{ marginBottom: 5, marginRight: 5, padding: "5px 5px 5px 5px" }} label={serviceIssuedOn} size="small" className="chip"/>
+          <Chip
+            key={index}
+            style={{
+              marginBottom: 5,
+              marginRight: 5,
+              padding: "5px 5px 5px 5px",
+            }}
+            label={serviceIssuedOn}
+            size="small"
+            className="chip"
+          />
         )
       ),
       tickers: item.tickers.map((ticker, index) => (
         <Chip
           key={index}
-          style={{ marginBottom: 5, marginRight: 5,  padding: "5px 5px 5px 5px"}}
+          style={{
+            marginBottom: 5,
+            marginRight: 5,
+            padding: "5px 5px 5px 5px",
+          }}
           label={ticker}
           size="small"
           className="chip"
@@ -263,33 +309,45 @@ const ReleasesIssuedByFirm = () => {
     setPage(0);
   };
 
-
   return (
     <div>
       <Card variant="outlined" sx={{ mb: 3 }}>
-      <CardHeader
-        title={<p style={{fontFamily: 'Inter', fontSize: "medium", fontWeight: 'bold'}}>{"Issued by Firm"}</p>}
-        action={
-          isLoading === false ? (
-            <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
-            <InputLabel id="release-issue-select-small-label">Days</InputLabel>
-            <Select
-              labelId="release-issue-select-small-label"
-              id="release-issue-select-small"
-              label="Days"
-              onChange={(e) => handleChange(e.target.value)}
-              sx={{fontSize: "medium"}}
-              defaultValue={""}
+        <CardHeader
+          title={
+            <p
+              style={{
+                fontFamily: "Inter",
+                fontSize: "medium",
+                fontWeight: "bold",
+              }}
             >
-              <MenuItem value='5'>5 Days</MenuItem>
-              <MenuItem value='15'>15 Days</MenuItem>
-              <MenuItem value='30'>30 Days</MenuItem>
-            </Select>
-          </FormControl>
-          ) : (
-            ""
-          )
-        } />
+              {"Issued by Firm"}
+            </p>
+          }
+          action={
+            isLoading === false ? (
+              <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
+                <InputLabel id="release-issue-select-small-label">
+                  Days
+                </InputLabel>
+                <Select
+                  labelId="release-issue-select-small-label"
+                  id="release-issue-select-small"
+                  label="Days"
+                  onChange={(e) => handleChange(e.target.value)}
+                  sx={{ fontSize: "medium" }}
+                  defaultValue={""}
+                >
+                  <MenuItem value="5">5 Days</MenuItem>
+                  <MenuItem value="15">15 Days</MenuItem>
+                  <MenuItem value="30">30 Days</MenuItem>
+                </Select>
+              </FormControl>
+            ) : (
+              ""
+            )
+          }
+        />
 
         {isLoading ? (
           <div
@@ -300,61 +358,65 @@ const ReleasesIssuedByFirm = () => {
               minHeight: "200px",
             }}
           >
-            <CircularProgress sx={{marginBottom: 10}} />
+            <CircularProgress sx={{ marginBottom: 10 }} />
           </div>
         ) : (
           <TableContainer>
-          <Table>
-            <TableHead sx={{ borderTop: "1px solid #e0e0e0" }}>
-              <TableRow>
-                {columns.map((column) => (
-                  <TableCell
-                    key={column.id}
-                    style={{ fontWeight: "bold" }}
-                    sortDirection={orderBy === column.id ? sortDirection : false}
-                    hidesorticon={`${false}`}
-                  >
-                    {column.id !== "tickers" ? (
-                      <TableSortLabel
-                        active={orderBy === column.id}
-                        direction={orderBy === column.id ? sortDirection : "asc"}
-                        onClick={() => handleSort(column.id)}
-                        hidesorticon={`${false}`}
-                      >
-                        {column.label}
-                      </TableSortLabel>
-                    ) : (
-                      column.label
-                    )}
-                  </TableCell>
-                ))}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {sortedRows
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((row) => (
-                  <TableRow key={row.serial}>
-                    {columns.map((column) => (
-                      <TableCell key={column.id} hidesorticon={`${false}`}>
-                        {row[column.id]}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))}
-            </TableBody>
-          </Table>
-          <TablePagination
-            sx={{ marginBottom: "0px !important" }}
-            rowsPerPageOptions={[5, 10, 25]}
-            component="div"
-            count={sortedRows.length}
-            rowsPerPage={rowsPerPage}
-            page={page}
-            onPageChange={handleChangePage}
-            onRowsPerPageChange={handleChangeRowsPerPage}
-          />
-        </TableContainer>
+            <Table>
+              <TableHead sx={{ borderTop: "1px solid #e0e0e0" }}>
+                <TableRow>
+                  {columns.map((column) => (
+                    <TableCell
+                      key={column.id}
+                      style={{ fontWeight: "bold" }}
+                      sortDirection={
+                        orderBy === column.id ? sortDirection : false
+                      }
+                      hidesorticon={`${false}`}
+                    >
+                      {column.id !== "tickers" ? (
+                        <TableSortLabel
+                          active={orderBy === column.id}
+                          direction={
+                            orderBy === column.id ? sortDirection : "asc"
+                          }
+                          onClick={() => handleSort(column.id)}
+                          hidesorticon={`${false}`}
+                        >
+                          {column.label}
+                        </TableSortLabel>
+                      ) : (
+                        column.label
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {sortedRows
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((row) => (
+                    <TableRow key={row.serial}>
+                      {columns.map((column) => (
+                        <TableCell key={column.id} hidesorticon={`${false}`}>
+                          {row[column.id]}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))}
+              </TableBody>
+            </Table>
+            <TablePagination
+              sx={{ marginBottom: "0px !important" }}
+              rowsPerPageOptions={[5, 10, 25]}
+              component="div"
+              count={sortedRows.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
+          </TableContainer>
         )}
       </Card>
     </div>
