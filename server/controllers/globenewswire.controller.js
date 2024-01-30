@@ -10,7 +10,6 @@ const { v4: uuidv4 } = require("uuid");
 
 exports.getAllGlobeNewsWire = async (req, res) => {
   const { flag } = req.body;
-  console.log("Coming_InsidePR", req.body);
 
   try {
     const law_firms = [
