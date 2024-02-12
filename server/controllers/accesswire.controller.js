@@ -11,7 +11,6 @@ function delay(time) {
 
 exports.getAllAccessWire = async (req, res) => {
   const { flag } = req.body;
-  console.log("Coming_InsidePR", req.body);
 
   try {
     const browser = await puppeteer.launch({ headless: "new" });
@@ -23,7 +22,7 @@ exports.getAllAccessWire = async (req, res) => {
     await page.waitForSelector("#topics", { timeout: 0 });
 
     // Introduce a 2-second delay (adjust as needed)
-    await delay(100);
+    await delay(2000);
 
     await page.select("#topics", "Class Action");
 

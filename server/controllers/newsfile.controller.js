@@ -9,7 +9,6 @@ const { v4: uuidv4 } = require("uuid");
 
 exports.getAllNewsFile = async (req, res) => {
   const { flag } = req.body;
-  console.log("Coming_InsidePR", req.body);
   
   try {
     const law_firms = [
@@ -88,7 +87,7 @@ exports.getAllNewsFile = async (req, res) => {
       "Rosen",
     ];
 
-    const browser = await puppeteer.launch({ headless: false });
+    const browser = await puppeteer.launch({ headless: "new" });
     const page = await browser.newPage();
     await page.setCacheEnabled(false);
 

@@ -9,7 +9,6 @@ const moment = require("moment");
 
 exports.getAllBussinessWire = async (req, res) => {
   const { flag } = req.body;
-  console.log("Coming_InsidePR", req.body);
 
   try {
     const law_firms = [

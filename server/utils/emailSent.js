@@ -1,54 +1,38 @@
 const nodemailer = require("nodemailer");
 const { format, subDays, parse } = require("date-fns");
 
-const emailSent = async (
-  req,
-  res,
-  getAllNews,
-  firmData,
-  newsSchema,
-  flag
-) => {
-  console.log("Checking_Flag:", flag);
-  console.log("Compare_Length:",getAllNews.length, firmData.length);
+const emailSent = async (req, res, getAllNews, firmData, newsSchema, flag) => {
+  const uniqueTickerSymbols = new Set();
+
+  const filteredData = await firmData.filter((entry) => {
+    if (uniqueTickerSymbols.has(entry.payload.tickerSymbol)) {
+      // Duplicate entry, return false to filter it out
+      return false;
+    } else {
+      // Not a duplicate, add the tickerSymbol to the Set and return true
+      uniqueTickerSymbols.add(entry.payload.tickerSymbol);
+      return true;
+    }
+  });
 
   if (getAllNews.length === 0) {
-
-      // NEW LOGIC
-      const uniqueTickerSymbols = new Set();
-
-      const filteredData = await firmData.filter((entry) => {
-        if (uniqueTickerSymbols.has(entry.payload.tickerSymbol)) {
-          // Duplicate entry, return false to filter it out
-          return false;
-        } else {
-          // Not a duplicate, add the tickerSymbol to the Set and return true
-          uniqueTickerSymbols.add(entry.payload.tickerSymbol);
-          return true;
-        }
+    filteredData.forEach(async function (data, index) {
+      const newResponse = data.payload;
+      const newNews = await new newsSchema({
+        firm: data.firm,
+        payload: newResponse,
       });
-  
-      filteredData.forEach(async function (data, index) {
-        const newResponse = data.payload;
-        const newNews = await new newsSchema({ firm: data.firm, payload: newResponse });
-        newNews.save();
-      });
-    
-    console.log("Inside_If");
+      newNews.save();
+    });
     {
-      flag !== true && res.json(firmData);
+      flag !== true && res.json(filteredData);
     }
-  } else if (getAllNews.length !== firmData.length) {
+  } else if (getAllNews.length !== filteredData.length) {
     // Comparing ticker with previous 60 days tikcer and send mail
-    console.log("Inside_ElseIf");
 
-    firmData.forEach(async function (data, index) {
-      if (
-        getAllNews.length > 0 &&
-        getAllNews[index]?.payload.scrapId !== data.payload.scrapId &&
-        getAllNews[index] === undefined
-      ) {
-        firmData.push({ firm: data.firm, payload: data.payload });
+    filteredData.forEach(async function (data, index) {
+      if (getAllNews[index] === undefined) {
+        filteredData.push({ firm: data.firm, payload: data.payload });
 
         const newlyTickerDate = data.payload.dateTimeIssued;
 
@@ -69,10 +53,8 @@ const emailSent = async (
           (compareSixtyNews, index) =>
             compareSixtyNews.payload.tickerSymbol === data.payload.tickerSymbol
         );
-        
-        console.log("Above_If");
+
         if (compareTickerSymbol.length === 0) {
-          console.log("Inside_If");
           const transporter = nodemailer.createTransport({
             service: "gmail",
             auth: {
@@ -109,6 +91,7 @@ const emailSent = async (
         }
       }
     });
+
     setTimeout(async () => {
       const response = await newsSchema.find();
       {
@@ -116,7 +99,6 @@ const emailSent = async (
       }
     }, 1000);
   } else {
-    console.log("Inside_Else");
     const response = await newsSchema.find();
     {
       flag !== true && res.send(response);
