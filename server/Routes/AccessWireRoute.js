@@ -8,6 +8,12 @@ const AccessWireRoute = (app) => {
   // Delete Bussiness wire details
   router.delete("/access-wire/deleteall", accessWire.deleteAccessWireAll);
 
+  router.get((req, res) => {
+    res.send({
+      message:"Running_Swagger"
+    })
+  });
+
   app.use("/api", router);
 };
 module.exports = AccessWireRoute;

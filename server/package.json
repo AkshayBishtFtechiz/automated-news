@@ -25,6 +25,8 @@
     "pretty": "^2.0.0",
     "puppeteer": "^21.6.1",
     "request": "^2.88.2",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.0",
     "uuid": "^9.0.1"
   }
 }

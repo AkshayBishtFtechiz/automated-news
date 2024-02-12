@@ -11,6 +11,8 @@ const NewsFilesRoute = require("./Routes/NewsFileRoute");
 const GlobeNewsWireRoute = require("./Routes/GlobeNewsWireRoute");
 const AccessWireRoute = require("./Routes/AccessWireRoute");
 const NewFirmWireRoute = require("./Routes/NewFirmWireRoute");
+const Sample = require("./Routes/index.js");
+const swaggerDocs = require("./swagger.js");
 
 app.use(cors());
 app.use(express.json());
@@ -36,4 +38,6 @@ connection
 
 // Database connection Ends
 
-app.listen(PORT, () => console.log(`Listening to PORT: ${PORT}`));
+app.listen(PORT, () => { console.log(`Listening to PORT: ${PORT}`)
+swaggerDocs(app, PORT)}
+);
