@@ -16,6 +16,7 @@ import {
   InputLabel,
   MenuItem,
   TableSortLabel,
+  Box,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
@@ -30,6 +31,7 @@ const ReleasesIssuedByFirm = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [orderBy, setOrderBy] = useState("serial");
   const [sortDirection, setSortDirection] = useState("asc");
+  var sequentialData = [];
 
   const fetchBusinessWireData = async () => {
     try {
@@ -41,6 +43,8 @@ const ReleasesIssuedByFirm = () => {
           },
         }
       );
+      myStore.setBusinessWireData(response);
+
       const response1 = await axios.get(
         "http://localhost:5000/api/pr-news-wire",
         {
@@ -49,6 +53,7 @@ const ReleasesIssuedByFirm = () => {
           },
         }
       );
+      myStore.setPRNewsWireData(response1);
       const response2 = await axios.get(
         "http://localhost:5000/api/news-files",
         {
@@ -57,6 +62,7 @@ const ReleasesIssuedByFirm = () => {
           },
         }
       );
+      myStore.setNewsFileData(response2);
       const response3 = await axios.get(
         "http://localhost:5000/api/globe-news-wire",
         {
@@ -65,6 +71,7 @@ const ReleasesIssuedByFirm = () => {
           },
         }
       );
+      myStore.setGlobeNewsWireData(response3);
       const response4 = await axios.get(
         "http://localhost:5000/api/access-wire",
         {
@@ -73,6 +80,7 @@ const ReleasesIssuedByFirm = () => {
           },
         }
       );
+      myStore.setAccessWireData(response4);
 
       const allNewsData = [
         ...response.data,
@@ -82,18 +90,40 @@ const ReleasesIssuedByFirm = () => {
         ...response4.data,
       ];
 
-      const arr = allNewsData
-        .map((items) => items?.payload)
-        .sort((a, b) => a.tickerSymbol.localeCompare(b.tickerSymbol));
-
-      myStore.setAllTickers(arr);
       myStore.setAllNewsData(allNewsData);
+
+      const arr = allNewsData
+      .map((items) => items?.payload)
+      .sort((a, b) => a.tickerSymbol.localeCompare(b.tickerSymbol));
+
+    myStore.setAllTickers(arr);
 
       return allNewsData;
     } catch (error) {
       console.error("Error fetching data:", error);
     }
   };
+
+  
+  if (myStore.businessWireData && myStore.businessWireData.data) {
+    sequentialData.push(...myStore.businessWireData.data);
+  }
+
+  if (myStore.prNewsWireData && myStore.prNewsWireData.data) {
+    sequentialData.push(...myStore.prNewsWireData.data);
+  }
+
+  if (myStore.newsFileData && myStore.newsFileData.data) {
+    sequentialData.push(...myStore.newsFileData.data);
+  }
+
+  if (myStore.globeNewsWireData && myStore.globeNewsWireData.data) {
+    sequentialData.push(...myStore.globeNewsWireData.data);
+  }
+
+  if (myStore.accessWireData && myStore.accessWireData.data) {
+    sequentialData.push(...myStore.accessWireData.data);
+  }
 
   const separateFirmTypes = (data) => {
     const firmData = {
@@ -121,9 +151,11 @@ const ReleasesIssuedByFirm = () => {
     queryKey: [queryKey],
     queryFn: fetchBusinessWireData,
     refetchInterval: 1200000,
+    refetchIntervalInBackground: true
   });
 
-  const separatedData = separateFirmTypes(myStore.allNewsData);
+  const separatedData = separateFirmTypes(sequentialData);
+  // const separatedData = separateFirmTypes(sequentialData);
 
   const filterDataByDays = (separatedData, days) => {
     const currentDate = moment();
@@ -309,6 +341,8 @@ const ReleasesIssuedByFirm = () => {
     setPage(0);
   };
 
+
+
   return (
     <div>
       <Card variant="outlined" sx={{ mb: 3 }}>
@@ -344,12 +378,22 @@ const ReleasesIssuedByFirm = () => {
                 </Select>
               </FormControl>
             ) : (
-              ""
+              <Box>
+                {sortedRows.length > 1 && (
+                  <CircularProgress
+                    sx={{
+                      width: "24px !important",
+                      height: "24px !important",
+                      padding: "15px 15px !important",
+                    }}
+                  />
+                )}
+              </Box>
             )
           }
         />
 
-        {isLoading ? (
+        {sortedRows.length < 1 ? (
           <div
             style={{
               display: "flex",
@@ -408,7 +452,7 @@ const ReleasesIssuedByFirm = () => {
             </Table>
             <TablePagination
               sx={{ marginBottom: "0px !important" }}
-              rowsPerPageOptions={[5, 10, 25]}
+              rowsPerPageOptions={[5, 10, 25, { label: "All", value: sortedRows.length}]}
               component="div"
               count={sortedRows.length}
               rowsPerPage={rowsPerPage}

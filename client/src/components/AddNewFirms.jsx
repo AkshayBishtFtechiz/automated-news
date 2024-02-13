@@ -19,6 +19,7 @@ import {
   TablePagination,
   TableSortLabel,
   Tooltip,
+  CircularProgress,
 } from "@mui/material";
 // import { ReactComponent as EditIcon } from "../Icons/Edit.svg";
 import { ReactComponent as DeleteIcon } from "../Icons/Delete.svg";
@@ -42,6 +43,7 @@ const AddNewFirms = () => {
   const [data, setData] = useState([]);
   const [orderBy, setOrderBy] = useState("firmName");
   const [sortDirection, setSortDirection] = useState("asc");
+  const [loading, setLoading] = useState(false);
   const {
     register,
     handleSubmit,
@@ -51,6 +53,9 @@ const AddNewFirms = () => {
 
   // SORTING LOGIC HERE
   function descendingComparator(a, b, orderBy) {
+    if (orderBy === "serial") {
+      return a.serial - b.serial; // Compare using the 'serial' property
+    }
     if (b[orderBy] < a[orderBy]) {
       return -1;
     }
@@ -117,10 +122,14 @@ const AddNewFirms = () => {
 
   // GET API FOR FETCHING ALL FIRMS
   const fetchFirms = async () => {
+    var arr = [];
     await axios
       .get("http://localhost:5000/api/new-firm-news-wire-getdetails")
-      .then((response) => {
-        setData(response.data);
+      .then((response, index) => {
+        response.data.map((item, index) => {
+          arr.push(Object.assign(item, { serial: index + 1 }));
+        });
+        setData(arr);
       })
       .catch((error) => {
         console.log(error);
@@ -172,6 +181,7 @@ const AddNewFirms = () => {
 
   // POST API FOR ADDING NEW FIRMS
   const submitData = async (data) => {
+    setLoading(true);
     const finalData = data.firmName;
 
     let firmName;
@@ -208,6 +218,7 @@ const AddNewFirms = () => {
             autoClose: 3000,
             theme: "light",
           });
+          setLoading(false);
           handleClose();
           fetchFirms();
         }
@@ -225,9 +236,7 @@ const AddNewFirms = () => {
     };
 
     confirmAlert({
-      title: (
-      <h5 className="delete-firm-title">{"Delete Firm"}</h5>
-      ),
+      title: <h5 className="delete-firm-title">{`Delete Firm`}</h5>,
       message: (
         <p className="delete-firm">
           {`Are you sure you want to delete `}
@@ -342,11 +351,9 @@ const AddNewFirms = () => {
               {paginatedData.map((row, index) => (
                 <TableRow
                   key={row._id}
-                  sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                  // sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                 >
-                  <TableCell component="th" scope="row">
-                    {index + 1 + page * rowsPerPage}
-                  </TableCell>
+                <TableCell>{row.serial}</TableCell>
                   <TableCell>{row.firmName}</TableCell>
                   <TableCell>
                     <div className="d-flex">
@@ -360,18 +367,25 @@ const AddNewFirms = () => {
                   </TableCell>
                 </TableRow>
               ))}
-              <TablePagination
-                rowsPerPageOptions={[5, 10, 25]}
-                colSpan={3}
-                count={data.length}
-                rowsPerPage={rowsPerPage}
-                page={!data.length || data.length <= 0 ? 0 : page}
-                // page={page}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-              />
             </TableBody>
           </Table>
+          <TablePagination
+            rowsPerPageOptions={[
+              5,
+              10,
+              25,
+              { label: "All", value: data.length },
+            ]}
+            sx={{ marginBottom: "0px !important" }}
+            component="div"
+            colSpan={3}
+            count={data.length}
+            rowsPerPage={rowsPerPage}
+            page={!data.length || data.length <= 0 ? 0 : page}
+            // page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
         </TableContainer>
 
         {/* MAIN TABLE ENDS HERE */}
@@ -484,8 +498,18 @@ const AddNewFirms = () => {
                   fontWeight: "600",
                   fontFamily: "Inter",
                 }}
+                disabled={loading === true ? true : false}
               >
-                Add
+                {loading === true ? (
+                  <>
+                    <CircularProgress color="primary" size={20} />
+                    <span style={{ fontFamily: "Inter" }}>
+                      &nbsp;&nbsp;Loading
+                    </span>
+                  </>
+                ) : (
+                  "Add"
+                )}
               </Button>
             </DialogActions>
           </form>
