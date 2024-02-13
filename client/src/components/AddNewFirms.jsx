@@ -35,6 +35,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { confirmAlert } from "react-confirm-alert";
 import "react-confirm-alert/src/react-confirm-alert.css";
 import "../Styles/buttons.css";
+import CustomUi from "../helpers/CustomUI";
 
 const AddNewFirms = () => {
   const [page, setPage] = useState(0);
@@ -127,7 +128,7 @@ const AddNewFirms = () => {
       .get("http://localhost:5000/api/new-firm-news-wire-getdetails")
       .then((response, index) => {
         response.data.map((item, index) => {
-          arr.push(Object.assign(item, { serial: index + 1 }));
+          return arr.push(Object.assign(item, { serial: index + 1 }));
         });
         setData(arr);
       })
@@ -236,44 +237,16 @@ const AddNewFirms = () => {
     };
 
     confirmAlert({
-      title: <h5 className="delete-firm-title">{`Delete Firm`}</h5>,
-      message: (
-        <p className="delete-firm">
-          {`Are you sure you want to delete `}
-          <strong>{firmName}</strong>
-          {`?`}
-        </p>
-      ),
-      buttons: [
-        {
-          label: "Yes",
-          className: "yes",
-          onClick: async () => {
-            await axios
-              .delete("http://localhost:5000/api/new-firm-news-wire/delete", {
-                data: payload,
-              })
-              .then((response) => {
-                toast.success(response.data.message, {
-                  position: "top-right",
-                  autoClose: 3000,
-                  theme: "light",
-                });
-                fetchFirms();
-              })
-              .catch((error) => {
-                console.log(error);
-              });
-          },
-        },
-        {
-          label: "No",
-          className: "no",
-          onClick: () => {
-            return;
-          },
-        },
-      ],
+      customUI: ({ onClose }) => {
+        return (
+          <CustomUi
+            onClose={onClose}
+            fetchData={fetchFirms}
+            payload={payload}
+            firmName={firmName}
+          />
+        );
+      },
     });
   };
 
@@ -353,7 +326,7 @@ const AddNewFirms = () => {
                   key={row._id}
                   // sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                 >
-                <TableCell>{row.serial}</TableCell>
+                  <TableCell>{row.serial}</TableCell>
                   <TableCell>{row.firmName}</TableCell>
                   <TableCell>
                     <div className="d-flex">
@@ -445,6 +418,7 @@ const AddNewFirms = () => {
                 >
                   Firms
                 </Typography>
+
                 <Select
                   displayEmpty
                   labelId="firms-select-label"
@@ -469,12 +443,13 @@ const AddNewFirms = () => {
                       <em>Select Firm</em>
                     </MenuItem>
                   )}
-                  {filteredFirmArray.map((items, index) => (
-                    <MenuItem key={index} value={`${items.firmName}`}>
-                      {items.label}
+                  {filteredFirmArray.map((item, index) => (
+                    <MenuItem key={index} value={item.firmName}>
+                      {item.label}
                     </MenuItem>
                   ))}
                 </Select>
+
                 {errors.firms && (
                   <Typography variant="caption" color="red">
                     {errors.firms.message}
