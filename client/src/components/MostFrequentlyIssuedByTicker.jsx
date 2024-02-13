@@ -15,6 +15,7 @@ import {
   InputLabel,
   MenuItem,
   TableSortLabel,
+  Box,
 } from "@mui/material";
 import { UseNewsStore } from "../store";
 import moment from "moment";
@@ -26,6 +27,7 @@ const MostFrequentlyIssuedByTicker = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [orderBy, setOrderBy] = useState("tickers");
   const [order, setOrder] = useState("asc");
+  var sequentialData = [];
 
   const filterDataByDays = (data, days) => {
     const currentDate = moment();
@@ -40,18 +42,49 @@ const MostFrequentlyIssuedByTicker = () => {
     const tickerCounts = {};
     filteredData.forEach((tickerObj) => {
       const { tickerSymbol, dateTimeIssued } = tickerObj;
-      tickerCounts[tickerSymbol] = tickerCounts[tickerSymbol] || { count: 0, dates: [] };
+      tickerCounts[tickerSymbol] = tickerCounts[tickerSymbol] || {
+        count: 0,
+        dates: [],
+      };
       tickerCounts[tickerSymbol].count += 1;
       tickerCounts[tickerSymbol].dates.push(dateTimeIssued);
     });
 
-    return Object.entries(tickerCounts).map(([tickerSymbol, { count, dates }], index) => ({
-      serial: index + 1,
-      dateTimeIssued: dates.sort().pop(),
-      tickers: tickerSymbol,
-      tickerCount: count,
-    }));
+    return Object.entries(tickerCounts).map(
+      ([tickerSymbol, { count, dates }], index) => ({
+        serial: index + 1,
+        dateTimeIssued: dates.sort().pop(),
+        tickers: tickerSymbol,
+        tickerCount: count,
+      })
+    );
   };
+
+  // NEW CODE
+
+  if (myStore.businessWireData && myStore.businessWireData.data) {
+    sequentialData.push(...myStore.businessWireData.data);
+  }
+
+  if (myStore.prNewsWireData && myStore.prNewsWireData.data) {
+    sequentialData.push(...myStore.prNewsWireData.data);
+  }
+
+  if (myStore.newsFileData && myStore.newsFileData.data) {
+    sequentialData.push(...myStore.newsFileData.data);
+  }
+
+  if (myStore.globeNewsWireData && myStore.globeNewsWireData.data) {
+    sequentialData.push(...myStore.globeNewsWireData.data);
+  }
+
+  if (myStore.accessWireData && myStore.accessWireData.data) {
+    sequentialData.push(...myStore.accessWireData.data);
+  }
+
+  const arr = sequentialData
+    .map((items) => items?.payload)
+    .sort((a, b) => a.tickerSymbol.localeCompare(b.tickerSymbol));
 
   useEffect(() => {
     if (myStore.allTickers.length > 0) {
@@ -63,11 +96,11 @@ const MostFrequentlyIssuedByTicker = () => {
     const dynamicDuration = parseInt(value);
 
     // Step 1: Filter data by days
-    const filteredData = filterDataByDays(myStore.allTickers, dynamicDuration);
+    const filteredData = filterDataByDays(arr, dynamicDuration);
 
     // Step 2: Count occurrences of each ticker in the filtered data
     const tickerCountsArray = countTickerOccurrences(filteredData);
-    
+
     // Step 3: Update the filtered data in the store
     myStore.setTickerFilteredData(tickerCountsArray);
 
@@ -104,13 +137,16 @@ const MostFrequentlyIssuedByTicker = () => {
     },
   ];
 
-  const data = myStore?.allTickers || [];
+  const data = arr || [];
   // Create an object to store the occurrence count of each ticker symbol
   const tickerCounts = {};
 
   data.forEach((tickerObj) => {
     const { tickerSymbol, dateTimeIssued } = tickerObj;
-    tickerCounts[tickerSymbol] = tickerCounts[tickerSymbol] || { count: 0, dates: [] };
+    tickerCounts[tickerSymbol] = tickerCounts[tickerSymbol] || {
+      count: 0,
+      dates: [],
+    };
     tickerCounts[tickerSymbol].count += 1;
     tickerCounts[tickerSymbol].dates.push(dateTimeIssued);
   });
@@ -126,12 +162,12 @@ const MostFrequentlyIssuedByTicker = () => {
   );
 
   // Sort the data based on the current sorting order and column
-  const sortedTickerCountsArray = tickerCountsArray
-    .slice()
-    .sort((a, b) => {
-      const isAsc = order === "asc";
-      return isAsc ? a[orderBy].localeCompare(b[orderBy]) : b[orderBy].localeCompare(a[orderBy]);
-    });
+  const sortedTickerCountsArray = tickerCountsArray.slice().sort((a, b) => {
+    const isAsc = order === "asc";
+    const valueA = String(a[orderBy]);
+    const valueB = String(b[orderBy]);
+    return isAsc ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA);
+  });
 
   const createData = (item) => {
     return {
@@ -142,9 +178,10 @@ const MostFrequentlyIssuedByTicker = () => {
     };
   };
 
-  const rows = myStore?.filteredTickerData?.length === 0
-    ? sortedTickerCountsArray.map((item) => createData(item))
-    : myStore?.filteredTickerData.map((item) => createData(item));
+  const rows =
+    myStore?.filteredTickerData?.length === 0
+      ? sortedTickerCountsArray.map((item) => createData(item))
+      : myStore?.filteredTickerData.map((item) => createData(item));
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -157,37 +194,55 @@ const MostFrequentlyIssuedByTicker = () => {
 
   return (
     <div>
-      <Card
-        title="Issued by Ticker"
-        variant="outlined"
-        sx={{ mb: 3 }}
-      >
+      <Card title="Issued by Ticker" variant="outlined" sx={{ mb: 3 }}>
         <CardHeader
-          title={<p style={{fontFamily: 'Inter', fontSize: "medium", fontWeight: 'bold'}}>{"Issued by Ticker"}</p>}
+          title={
+            <p
+              style={{
+                fontFamily: "Inter",
+                fontSize: "medium",
+                fontWeight: "bold",
+              }}
+            >
+              {"Issued by Ticker"}
+            </p>
+          }
           action={
             !isLoading ? (
               <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
-              <InputLabel id="most-frequent-issue-by-ticker-select-small-label">Days</InputLabel>
-              <Select
-                labelId="most-frequent-issue-by-ticker-select-small-label"
-                id="most-frequent-issue-by-ticker-select-small"
-                label="Days"
-                onChange={(e) => handleChange(e.target.value)}
-                sx={{fontSize: "medium"}}
-                defaultValue={""}
-              >
-                <MenuItem value='5'>5 Days</MenuItem>
-                <MenuItem value='15'>15 Days</MenuItem>
-                <MenuItem value='30'>30 Days</MenuItem>
-              </Select>
-            </FormControl>
+                <InputLabel id="most-frequent-issue-by-ticker-select-small-label">
+                  Days
+                </InputLabel>
+                <Select
+                  labelId="most-frequent-issue-by-ticker-select-small-label"
+                  id="most-frequent-issue-by-ticker-select-small"
+                  label="Days"
+                  onChange={(e) => handleChange(e.target.value)}
+                  sx={{ fontSize: "medium" }}
+                  defaultValue={""}
+                >
+                  <MenuItem value="5">5 Days</MenuItem>
+                  <MenuItem value="15">15 Days</MenuItem>
+                  <MenuItem value="30">30 Days</MenuItem>
+                </Select>
+              </FormControl>
             ) : (
-              ""
+              <Box>
+                {rows.length > 1 && (
+                  <CircularProgress
+                    sx={{
+                      width: "24px !important",
+                      height: "24px !important",
+                      padding: "15px 15px !important",
+                    }}
+                  />
+                )}
+              </Box>
             )
           }
         />
 
-        {isLoading ? (
+        {rows.length < 1 ? (
           <div
             style={{
               display: "flex",
@@ -196,22 +251,22 @@ const MostFrequentlyIssuedByTicker = () => {
               minHeight: "200px",
             }}
           >
-            <CircularProgress sx={{marginBottom: 10}} />
+            <CircularProgress sx={{ marginBottom: 10 }} />
           </div>
         ) : (
           <TableContainer>
             <Table>
-              <TableHead sx={{borderTop: '1px solid #e0e0e0'}}>
+              <TableHead sx={{ borderTop: "1px solid #e0e0e0" }}>
                 <TableRow>
                   {columns.map((column) => (
-                    <TableCell key={column.id} style={{ fontWeight: 'bold' }}>
-                        <TableSortLabel
-                          active={orderBy === column.id}
-                          direction={orderBy === column.id ? order : "asc"}
-                          onClick={createSortHandler(column.id)}
-                        >
-                          {column.label}
-                        </TableSortLabel>
+                    <TableCell key={column.id} style={{ fontWeight: "bold" }}>
+                      <TableSortLabel
+                        active={orderBy === column.id}
+                        direction={orderBy === column.id ? order : "asc"}
+                        onClick={createSortHandler(column.id)}
+                      >
+                        {column.label}
+                      </TableSortLabel>
                     </TableCell>
                   ))}
                 </TableRow>
@@ -229,8 +284,8 @@ const MostFrequentlyIssuedByTicker = () => {
               </TableBody>
             </Table>
             <TablePagination
-            sx={{ marginBottom: '0px !important'}}
-              rowsPerPageOptions={[5, 10, 25]}
+              sx={{ marginBottom: "0px !important" }}
+              rowsPerPageOptions={[5, 10, 25, { label: "All", value: rows.length}]}
               component="div"
               count={rows.length}
               rowsPerPage={rowsPerPage}

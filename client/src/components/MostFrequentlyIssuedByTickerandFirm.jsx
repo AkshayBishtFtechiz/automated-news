@@ -17,6 +17,7 @@ import {
   MenuItem,
   TableSortLabel,
   Avatar,
+  Box,
 } from "@mui/material";
 import { UseNewsStore } from "../store";
 import moment from "moment";
@@ -28,6 +29,7 @@ const MostFrequentlyIssuedByTickerandFirm = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [tickerFirmOrderBy, setTickerFirmOrderBy] = useState("tickers");
   const [tickerFirmSortDirection, setTickerFirmSortDirection] = useState("asc");
+  var sequentialData = [];
 
   const filterDataByDays = (data, days) => {
     const currentDate = moment();
@@ -67,6 +69,29 @@ const MostFrequentlyIssuedByTickerandFirm = () => {
       })
     );
   };
+
+
+
+  if (myStore.businessWireData && myStore.businessWireData.data) {
+    sequentialData.push(...myStore.businessWireData.data);
+  }
+
+  if (myStore.prNewsWireData && myStore.prNewsWireData.data) {
+    sequentialData.push(...myStore.prNewsWireData.data);
+  }
+
+  if (myStore.newsFileData && myStore.newsFileData.data) {
+    sequentialData.push(...myStore.newsFileData.data);
+  }
+
+  if (myStore.globeNewsWireData && myStore.globeNewsWireData.data) {
+    sequentialData.push(...myStore.globeNewsWireData.data);
+  }
+
+  if (myStore.accessWireData && myStore.accessWireData.data) {
+    sequentialData.push(...myStore.accessWireData.data);
+  }
+
 
   useEffect(() => {
     if (myStore.allNewsData.length > 0) {
@@ -143,13 +168,14 @@ const MostFrequentlyIssuedByTickerandFirm = () => {
     },
   ];
 
+
   // Create an object to store the occurrence count of each ticker symbol
-  const data = myStore?.allTickers || [];
+  const data = sequentialData || [];
   const tickerCounts = {};
   const firmsByTicker = {}; // Use an object to store firms by ticker symbol
 
   data.forEach((tickerObj) => {
-    const { tickerSymbol, dateTimeIssued } = tickerObj;
+    const { tickerSymbol, dateTimeIssued } = tickerObj.payload;
     tickerCounts[tickerSymbol] = tickerCounts[tickerSymbol] || {
       count: 0,
       dates: [],
@@ -169,7 +195,7 @@ const MostFrequentlyIssuedByTickerandFirm = () => {
   );
 
   // Count occurrences of each ticker symbol and store firms
-  myStore.allNewsData.forEach((tickerObj) => {
+  sequentialData?.forEach((tickerObj) => {
     const { tickerSymbol, dateTimeIssued } = tickerObj.payload;
     const { firm } = tickerObj;
     const issuedDate = moment(dateTimeIssued, "MMMM DD, YYYY");
@@ -187,7 +213,7 @@ const MostFrequentlyIssuedByTickerandFirm = () => {
   });
 
   const tickerCountsArray = Object.keys(tickerCounts).map((tickerSymbol) => {
-    const dateTimeIssuedArray = myStore.allNewsData
+    const dateTimeIssuedArray = sequentialData
       .filter((tickerObj) => tickerObj.payload.tickerSymbol === tickerSymbol)
       .map((tickerObj) =>
         moment(tickerObj.payload.dateTimeIssued, "MMMM DD, YYYY").valueOf()
@@ -195,7 +221,7 @@ const MostFrequentlyIssuedByTickerandFirm = () => {
 
     function countOccurrences(arr) {
       const occurrences = {};
-      arr.forEach((item) => {
+      arr?.forEach((item) => {
         occurrences[item] = (occurrences[item] || 0) + 1;
       });
       return occurrences;
@@ -210,7 +236,7 @@ const MostFrequentlyIssuedByTickerandFirm = () => {
       extra: Object.entries(occurrences).map((items) => {
         return items;
       }),
-      firmCount: firmsByTicker[tickerSymbol].length,
+      firmCount: firmsByTicker[tickerSymbol]?.length,
       dateTimeIssued: moment(Math.max(...dateTimeIssuedArray)).format(
         "MMMM DD, YYYY"
       ),
@@ -366,12 +392,22 @@ const MostFrequentlyIssuedByTickerandFirm = () => {
                 </Select>
               </FormControl>
             ) : (
-              ""
+              <Box>
+              {tickerFirmSortedRows.length > 1 && (
+                <CircularProgress
+                  sx={{
+                    width: "24px !important",
+                    height: "24px !important",
+                    padding: "15px 15px !important",
+                  }}
+                />
+              )}
+            </Box>
             )
           }
         />
 
-        {isLoading ? (
+        {tickerFirmSortedRows.length < 1 ? (
           <div
             style={{
               display: "flex",
@@ -436,7 +472,7 @@ const MostFrequentlyIssuedByTickerandFirm = () => {
               </TableBody>
             </Table>
             <TablePagination
-              rowsPerPageOptions={[5, 10, 25]}
+               rowsPerPageOptions={[5, 10, 25, { label: "All", value: tickerFirmSortedRows.length}]}
               component="div"
               count={tickerFirmSortedRows.length}
               rowsPerPage={rowsPerPage}
