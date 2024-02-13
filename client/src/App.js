@@ -1,4 +1,4 @@
-import Layout from "./Components/Layout";
+import Layout from "./components/Layout";
 import { Route, Routes } from "react-router-dom";
 function App() {
   return (

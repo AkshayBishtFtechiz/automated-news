@@ -11,7 +11,6 @@ const NewsFilesRoute = require("./Routes/NewsFileRoute");
 const GlobeNewsWireRoute = require("./Routes/GlobeNewsWireRoute");
 const AccessWireRoute = require("./Routes/AccessWireRoute");
 const NewFirmWireRoute = require("./Routes/NewFirmWireRoute");
-const Sample = require("./Routes/index.js");
 const swaggerDocs = require("./swagger.js");
 
 app.use(cors());

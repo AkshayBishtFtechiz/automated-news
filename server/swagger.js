@@ -5,7 +5,7 @@ const options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'Hero API',
+      title: 'AutomatedNews APIs',
       description: 'Example of CRUD API ',
       version: '1.0.0',
     },
