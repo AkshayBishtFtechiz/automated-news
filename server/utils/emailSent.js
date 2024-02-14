@@ -82,13 +82,12 @@ const emailSent = async (req, res, getAllNews, firmData, newsSchema, flag) => {
               return console.error("Error:", error.message);
             }
           });
-
-          const newNews = new newsSchema({
-            firm: data.firm,
-            payload: data.payload,
-          });
-          newNews.save();
         }
+        const newNews = new newsSchema({
+          firm: data.firm,
+          payload: data.payload,
+        });
+        newNews.save();
       }
     });
 
@@ -98,7 +97,7 @@ const emailSent = async (req, res, getAllNews, firmData, newsSchema, flag) => {
         flag !== true && res.json(response);
       }
     }, 1000);
-  } else {
+    } else {
     const response = await newsSchema.find();
     {
       flag !== true && res.send(response);
