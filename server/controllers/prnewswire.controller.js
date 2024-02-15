@@ -21,21 +21,19 @@ exports.getAllPRNewsWire = async (req, res) => {
       })
 
       const listed_firms = [...law_firms];
-
-      console.log("Getting_FirmData:", law_firms, listed_firms);
       
-      const browser = await puppeteer.launch({ headless: "new" });
+      const browser = await puppeteer.launch({ headless: false });
 
       const page = await browser.newPage();
 
       await page.setCacheEnabled(false);
   
       const firmData = [];
-
+      const recentFirm = law_firms[law_firms.length - 1];
+      
       for (let i = 0; i < law_firms.length; i++) {
-        const firm = law_firms[i];
+      const firm = recentFirm;
         const encodedFirm = encodeURI(firm);
-        console.log("testingencodedFirm:", encodedFirm);
         const prNewsUrl = `https://www.prnewswire.com/search/?keyword=${encodedFirm}/`;
         await page.goto(prNewsUrl, {
           waitUntil: "domcontentloaded",
@@ -44,7 +42,6 @@ exports.getAllPRNewsWire = async (req, res) => {
         //await page.waitForSelector(".card-list .newsCards", { timeout: 120000 });
   
         var newsItems = await page.$$eval(".card-list .newsCards .card .pull-left", (items) => {
-          console.log("itemsResp:",items);
           return items
             .map((item) => {
               const title = item
@@ -61,19 +58,46 @@ exports.getAllPRNewsWire = async (req, res) => {
               };
             })
         });
-        console.log("Checking_responseData11@@:", newsItems);
+        //console.log("Checking_responseData11@@:", newsItems);
         
-        // Wait for navigation to finish
-        await page.waitForNavigation();
+        //console.log("testing_below",newsItems);
+
+        const payload = newsItems
+        .map((newsItem) => {
+          const tickerMatch =
+            newsItem.summary.match(/\((NASDAQ|NYSE|OTCBB):([^\)]+)\)/) ||
+            newsItem.title.match(/\((NASDAQ|NYSE|OTCBB):([^\)]+)\)/);
+          const tickerSymbolMatch = (
+            tickerMatch ? tickerMatch[2].trim() : ""
+          ).match(/([^;\s]+)/);
+          const formattedDate = moment(newsItem.date, [
+            "MMM DD, YYYY",
+            "MMM DD, YYYY h:mm A",
+          ]).format("MMMM DD, YYYY");
+          const id = uuidv4();
+          // Check if tickerSymbol is not empty before adding to payload
+            return {
+              scrapId: id,
+              tickerSymbol: "", // Extracted first ticker symbol
+              firmIssuing: law_firms[i],
+              serviceIssuedOn: "PR Newswire", // Replace with actual service
+              dateTimeIssued: formattedDate, // Use the current date and time
+              urlToRelease: `https://www.prnewswire.com${newsItem.link}`,
+              tickerIssuer: "",
+            };
+        })
+        
+        console.log("payloadTest:",payload);
 
         for (const newsData of payload) {
-          // const newNews = new PRNewsWireSchema(newsData);
-          // await newNews.save();
+          //const newNews = new PRNewsWireSchema(newsData);
+          //await newNews.save();
           firmData.push({ firm: law_firms[i], payload: newsData });
         }
+        //firmData.push({ firm: law_firms[law_firms - 1], payload: newsData });
+      
       }
-
-      //console.log("Checking_Array:",firmData);
+      console.log("testing_response5577:",firmData);
     
     }
     catch (error) {
@@ -207,6 +231,7 @@ exports.getAllPRNewsWire = async (req, res) => {
         for (const newsData of payload) {
           // const newNews = new PRNewsWireSchema(newsData);
           // await newNews.save();
+          console.log("listed_firmsData:",listed_firms);
           firmData.push({ firm: listed_firms[i], payload: newsData });
         }
       }
