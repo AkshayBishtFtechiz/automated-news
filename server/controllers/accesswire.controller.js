@@ -62,6 +62,7 @@ exports.getAllAccessWire = async (req, res) => {
     }
 
     const payload = await page.$$eval(".box-words", (newsItems) => {
+      
       return newsItems.map((newsItem) => {
         const urlToRelease =
           newsItem

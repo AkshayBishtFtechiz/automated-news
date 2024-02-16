@@ -2,6 +2,7 @@ const nodemailer = require("nodemailer");
 const { format, subDays, parse } = require("date-fns");
 
 const emailSent = async (req, res, getAllNews, firmData, newsSchema, flag) => {
+  console.log("ResponseFirmData:",firmData);
   const uniqueTickerSymbols = new Set();
 
   const filteredData = await firmData.filter((entry) => {
