@@ -18,9 +18,11 @@ import {
   TableSortLabel,
   Avatar,
   Box,
+  useMediaQuery,
 } from "@mui/material";
 import { UseNewsStore } from "../store";
 import moment from "moment";
+import SearchBar from "@mkyy/mui-search-bar";
 
 const MostFrequentlyIssuedByTickerandFirm = () => {
   const myStore = UseNewsStore();
@@ -29,6 +31,9 @@ const MostFrequentlyIssuedByTickerandFirm = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [tickerFirmOrderBy, setTickerFirmOrderBy] = useState("tickers");
   const [tickerFirmSortDirection, setTickerFirmSortDirection] = useState("asc");
+  const [searched, setSearched] = useState("");
+  const [check, setCheck] = useState(false);
+  const isSmallScreen = useMediaQuery("(max-width:500px)");
   var sequentialData = [];
 
   const filterDataByDays = (data, days) => {
@@ -70,8 +75,6 @@ const MostFrequentlyIssuedByTickerandFirm = () => {
     );
   };
 
-
-
   if (myStore.businessWireData && myStore.businessWireData.data) {
     sequentialData.push(...myStore.businessWireData.data);
   }
@@ -91,7 +94,6 @@ const MostFrequentlyIssuedByTickerandFirm = () => {
   if (myStore.accessWireData && myStore.accessWireData.data) {
     sequentialData.push(...myStore.accessWireData.data);
   }
-
 
   useEffect(() => {
     if (myStore.allNewsData.length > 0) {
@@ -167,7 +169,6 @@ const MostFrequentlyIssuedByTickerandFirm = () => {
       label: "Firm Count",
     },
   ];
-
 
   // Create an object to store the occurrence count of each ticker symbol
   const data = sequentialData || [];
@@ -322,6 +323,29 @@ const MostFrequentlyIssuedByTickerandFirm = () => {
     getTickerFirmComparator(tickerFirmOrderBy, tickerFirmSortDirection)
   );
 
+  const [finalData, setFinalData] = useState(tickerFirmSortedRows);
+
+  const requestSearch = (searchedVal) => {
+    const filteredRows = tickerFirmSortedRows.filter((row) => {
+      return row.tickers.toLowerCase().includes(searchedVal.toLowerCase());
+    });
+    setFinalData(filteredRows);
+    setCheck(true);
+
+    if (searchedVal.length === 0) {
+      setFinalData([]);
+      setCheck(false);
+    } else {
+      setFinalData(filteredRows);
+    }
+  };
+
+  const cancelSearch = () => {
+    setSearched(true);
+    setFinalData(tickerFirmSortedRows);
+    setCheck(false);
+  };
+
   function stableSort(array, comparator) {
     const stabilizedThis = array.map((el, index) => [el, index]);
     stabilizedThis.sort((a, b) => {
@@ -374,35 +398,51 @@ const MostFrequentlyIssuedByTickerandFirm = () => {
           }
           action={
             !isLoading ? (
-              <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
-                <InputLabel id="most-frequent-issue-by-ticker-and-firm-select-small-label">
-                  Days
-                </InputLabel>
-                <Select
-                  labelId="most-frequent-issue-by-ticker-and-firm-select-small-label"
-                  id="most-frequent-issue-by-ticker-and-firm-select-small"
-                  label="Days"
-                  onChange={(e) => handleChange(e.target.value)}
-                  sx={{ fontSize: "medium" }}
-                  defaultValue={""}
-                >
-                  <MenuItem value="5">5 Days</MenuItem>
-                  <MenuItem value="15">15 Days</MenuItem>
-                  <MenuItem value="30">30 Days</MenuItem>
-                </Select>
-              </FormControl>
-            ) : (
-              <Box>
-              {tickerFirmSortedRows.length > 1 && (
-                <CircularProgress
-                  sx={{
-                    width: "24px !important",
-                    height: "24px !important",
-                    padding: "15px 15px !important",
+              <div
+                style={{
+                  display: isSmallScreen ? "block" : "flex",
+                  alignItems: "center",
+                }}
+              >
+                <SearchBar
+                  value={searched}
+                  onChange={(searchVal) => requestSearch(searchVal)}
+                  onCancelResearch={cancelSearch}
+                  style={{
+                    border: "1px solid rgba(0, 0, 0, 0.12)",
+                    margin: isSmallScreen ? "6px" : "0px",
                   }}
                 />
-              )}
-            </Box>
+                <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
+                  <InputLabel id="most-frequent-issue-by-ticker-and-firm-select-small-label">
+                    Days
+                  </InputLabel>
+                  <Select
+                    labelId="most-frequent-issue-by-ticker-and-firm-select-small-label"
+                    id="most-frequent-issue-by-ticker-and-firm-select-small"
+                    label="Days"
+                    onChange={(e) => handleChange(e.target.value)}
+                    sx={{ fontSize: "medium" }}
+                    defaultValue={""}
+                  >
+                    <MenuItem value="5">5 Days</MenuItem>
+                    <MenuItem value="15">15 Days</MenuItem>
+                    <MenuItem value="30">30 Days</MenuItem>
+                  </Select>
+                </FormControl>
+              </div>
+            ) : (
+              <Box>
+                {tickerFirmSortedRows.length > 1 && (
+                  <CircularProgress
+                    sx={{
+                      width: "24px !important",
+                      height: "24px !important",
+                      padding: "15px 15px !important",
+                    }}
+                  />
+                )}
+              </Box>
             )
           }
         />
@@ -448,33 +488,72 @@ const MostFrequentlyIssuedByTickerandFirm = () => {
               </TableHead>
 
               <TableBody>
-                {tickerFirmSortedRows
-                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((row, index) => (
-                    <TableRow key={index}>
-                      {columns.map((column) => (
-                        <TableCell key={column.id}>
-                          {column.id === "firm" ? (
-                            // Render the 'firm' column differently
-                            <div style={{ display: "flex", flexWrap: "wrap" }}>
-                              {row[column.id].map((firm, firmIndex) => (
-                                <div key={firmIndex}>{firm}</div>
-                              ))}
-                            </div>
-                          ) : (
-                            // Render other columns normally
-                            row[column.id]
-                          )}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  ))}
+                {finalData.length !== 0 &&
+                check === true &&
+                finalData.length <= tickerFirmSortedRows.length ? (
+                  finalData
+                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    .map((row) => (
+                      <TableRow key={row.serial}>
+                        {columns.map((column) => (
+                          <TableCell key={column.id} hidesorticon={`${false}`}>
+                            {row[column.id]}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))
+                ) : check === false && finalData.length <= tickerFirmSortedRows.length ? (
+                  tickerFirmSortedRows
+                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    .map((row) => (
+                      <TableRow key={row.serial}>
+                        {columns.map((column) => (
+                          <TableCell key={column.id} hidesorticon={`${false}`}>
+                            {row[column.id]}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))
+                ) : finalData.length === 0 &&
+                  check === true &&
+                  finalData.length <= tickerFirmSortedRows.length ? (
+                  <TableRow>
+                    <TableCell colSpan={columns.length} align="center">
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <img
+                          src="nodata.png"
+                          alt="No Data"
+                          className="noDataImg"
+                        />
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : null}
               </TableBody>
             </Table>
             <TablePagination
-               rowsPerPageOptions={[5, 10, 25, { label: "All", value: tickerFirmSortedRows.length}]}
+              rowsPerPageOptions={[
+                5,
+                10,
+                25,
+                { label: "All", value: tickerFirmSortedRows.length },
+              ]}
               component="div"
-              count={tickerFirmSortedRows.length}
+              count={
+                finalData.length !== 0 &&
+                check === true &&
+                finalData.length <= tickerFirmSortedRows.length
+                  ? finalData.length
+                  : check === false && finalData.length <= tickerFirmSortedRows.length
+                  ? tickerFirmSortedRows.length
+                  : finalData.length
+              }
               rowsPerPage={rowsPerPage}
               page={page}
               onPageChange={handleChangePage}

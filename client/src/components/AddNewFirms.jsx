@@ -45,6 +45,7 @@ const AddNewFirms = () => {
   const [orderBy, setOrderBy] = useState("firmName");
   const [sortDirection, setSortDirection] = useState("asc");
   const [loading, setLoading] = useState(false);
+  const [value, setValue] = useState("");
   const {
     register,
     handleSubmit,
@@ -113,6 +114,7 @@ const AddNewFirms = () => {
   // PAGINATION LOGIC ENDS HERE
 
   const handleClickOpen = () => {
+    setValue("");
     setOpen(true);
     reset();
   };
@@ -184,17 +186,17 @@ const AddNewFirms = () => {
   const submitData = async (data) => {
     setLoading(true);
     const finalData = data.firmName;
-
+    const removedStrData = finalData.replace(/'/g, "");
     let firmName;
     let id;
 
     // Check if the string ends with "-0"
-    if (finalData.endsWith("-0")) {
-      firmName = finalData.slice(0, -2);
-      id = finalData.slice(-1);
+    if (removedStrData.endsWith("-0")) {
+      firmName = removedStrData.slice(0, -2);
+      id = removedStrData.slice(-1);
     } else {
-      firmName = finalData.slice(0, -5);
-      id = finalData.slice(-4);
+      firmName = removedStrData.slice(0, -5);
+      id = removedStrData.slice(-4);
     }
 
     const payload = {
@@ -425,6 +427,7 @@ const AddNewFirms = () => {
                   id="firmName"
                   size="small"
                   name="firmName"
+                  value={value}
                   defaultValue=""
                   {...register("firmName", {
                     required: {
@@ -432,6 +435,7 @@ const AddNewFirms = () => {
                       message: "Select atleast 1 firm!",
                     },
                   })}
+                  onChange={(e) => setValue(e.target.value)}
                   required
                 >
                   {filteredFirmArray.length === 0 ? (
@@ -439,13 +443,22 @@ const AddNewFirms = () => {
                       <em>No firms left to add</em>
                     </MenuItem>
                   ) : (
-                    <MenuItem disabled value="">
+                    <MenuItem value="">
                       <em>Select Firm</em>
                     </MenuItem>
                   )}
-                  {filteredFirmArray.map((item, index) => (
+                  {/* {filteredFirmArray.map((item, index) => (
                     <MenuItem key={index} value={item.firmName}>
                       {item.label}
+                    </MenuItem>
+                  ))} */}
+
+                  {filteredFirmArray.map((element, index) => (
+                    <MenuItem
+                      value={`'${element.firmName}'`}
+                      key={index}
+                    >
+                      {Object.values(element)[1]}
                     </MenuItem>
                   ))}
                 </Select>
