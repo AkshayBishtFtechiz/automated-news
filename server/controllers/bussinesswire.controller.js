@@ -70,12 +70,14 @@ exports.getAllBussinessWire = async (req, res) => {
               .textContent.trim();
             const link = item.querySelector("h3 a").getAttribute("href");
             const summary = item.querySelector("p").textContent.trim();
-
+            const thumb = item.querySelector(".bw-news-thumbs a")?.getAttribute("href");
+           
             return {
               title,
               date,
               link,
               summary,
+              thumb
             };
           })
           .filter((item) => {
@@ -104,7 +106,7 @@ exports.getAllBussinessWire = async (req, res) => {
             : "";
 
           // Check if both tickerSymbol and tickerIssuer are not blank
-          if (tickerSymbol && tickerIssuer) {
+          if (tickerSymbol && tickerIssuer && newsItem.thumb !== undefined) {
             return {
               scrapId: id,
               tickerSymbol: tickerSymbol,

@@ -166,15 +166,30 @@ exports.getAllAccessWire = async (req, res) => {
     //   firm: "Berger Montague",
     //   payload: {
     //     scrapId: "86222b40-518e-4370-9c32-94e5dd0d270e",
-    //     tickerSymbol: "NEWTICKER", // NEW TICKER THAT COMES
-    //     firmIssuing: "Berger Montague",
+    //     tickerSymbol: "VLTN", // NEW TICKER THAT COMES
+    //     firmIssuing: "Valentine",
     //     serviceIssuedOn: "Accesswire",
-    //     dateTimeIssued: "January 19, 2024",
+    //     dateTimeIssued: "February 14, 2024",
     //     urlToRelease:
     //       "https://www.accesswire.com/viewarticle.aspx?id=826383&lang=en",
-    //     tickerIssuer: "NYSE",
+    //     tickerIssuer: "NASDAQ",
     //   },
     // });
+
+    // finalPayload.push({
+    //   firm: "Berger Montague",
+    //   payload: {
+    //     scrapId: "86222b40-518e-4370-9c32-94e5dd0d270f",
+    //     tickerSymbol: "VLTN", // NEW TICKER THAT COMES
+    //     firmIssuing: "Pulwama",
+    //     serviceIssuedOn: "Accesswire",
+    //     dateTimeIssued: "February 14, 2024",
+    //     urlToRelease:
+    //       "https://www.accesswire.com/viewarticle.aspx?id=826388&lang=en",
+    //     tickerIssuer: "NASDAQ",
+    //   },
+    // });
+
 
     try {
       const { targetDate, formattedTargetDate } = filterDays(75);

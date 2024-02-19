@@ -21,6 +21,9 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { UseNewsStore } from "../store";
+import SearchBar from "@mkyy/mui-search-bar";
+import { useMediaQuery } from "@mui/material";
+
 import moment from "moment";
 
 const ReleasesIssuedByFirm = () => {
@@ -31,6 +34,10 @@ const ReleasesIssuedByFirm = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [orderBy, setOrderBy] = useState("serial");
   const [sortDirection, setSortDirection] = useState("asc");
+  const [searched, setSearched] = useState("");
+  const [check, setCheck] = useState(false);
+
+  const isSmallScreen = useMediaQuery("(max-width:500px)");
   var sequentialData = [];
 
   const fetchBusinessWireData = async () => {
@@ -93,10 +100,10 @@ const ReleasesIssuedByFirm = () => {
       myStore.setAllNewsData(allNewsData);
 
       const arr = allNewsData
-      .map((items) => items?.payload)
-      .sort((a, b) => a.tickerSymbol.localeCompare(b.tickerSymbol));
+        .map((items) => items?.payload)
+        .sort((a, b) => a.tickerSymbol.localeCompare(b.tickerSymbol));
 
-    myStore.setAllTickers(arr);
+      myStore.setAllTickers(arr);
 
       return allNewsData;
     } catch (error) {
@@ -104,7 +111,6 @@ const ReleasesIssuedByFirm = () => {
     }
   };
 
-  
   if (myStore.businessWireData && myStore.businessWireData.data) {
     sequentialData.push(...myStore.businessWireData.data);
   }
@@ -150,8 +156,8 @@ const ReleasesIssuedByFirm = () => {
   const { isLoading } = useQuery({
     queryKey: [queryKey],
     queryFn: fetchBusinessWireData,
-    refetchInterval: 1200000,
-    refetchIntervalInBackground: true
+    refetchInterval: 20 * 60 * 1000,
+    refetchIntervalInBackground: true,
   });
 
   const separatedData = separateFirmTypes(sequentialData);
@@ -332,6 +338,31 @@ const ReleasesIssuedByFirm = () => {
 
   const sortedRows = stableSort(rows, getComparator(orderBy, sortDirection));
 
+  const [finalData, setFinalData] = useState(sortedRows);
+
+  const requestSearch = (searchedVal) => {
+    const filteredRows = sortedRows.filter((row) =>
+      row.tickers.some((ticker) =>
+        ticker.props.label.toLowerCase().includes(searchedVal.toLowerCase())
+      )
+    );
+    setFinalData(filteredRows);
+    setCheck(true);
+
+    if (searchedVal.length === 0) {
+      setFinalData([]);
+      setCheck(false);
+    } else {
+      setFinalData(filteredRows);
+    }
+  };
+
+  const cancelSearch = () => {
+    setSearched(true);
+    setFinalData(sortedRows);
+    setCheck(false);
+  };
+
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -341,7 +372,21 @@ const ReleasesIssuedByFirm = () => {
     setPage(0);
   };
 
-
+  // if (
+  //   check === true &&
+  //   finalData.length <= sortedRows.length &&
+  //   finalData.length !== 0
+  // ) {
+  //   console.log("search data loop");
+  // } else if (check === false && finalData.length <= sortedRows.length) {
+  //   console.log("sorted rows loop");
+  // } else if (
+  //   check === true &&
+  //   finalData.length === 0 &&
+  //   finalData.length <= sortedRows.length
+  // ) {
+  //   console.log("no data found statement");
+  // }
 
   return (
     <div>
@@ -360,23 +405,39 @@ const ReleasesIssuedByFirm = () => {
           }
           action={
             isLoading === false ? (
-              <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
-                <InputLabel id="release-issue-select-small-label">
-                  Days
-                </InputLabel>
-                <Select
-                  labelId="release-issue-select-small-label"
-                  id="release-issue-select-small"
-                  label="Days"
-                  onChange={(e) => handleChange(e.target.value)}
-                  sx={{ fontSize: "medium" }}
-                  defaultValue={""}
-                >
-                  <MenuItem value="5">5 Days</MenuItem>
-                  <MenuItem value="15">15 Days</MenuItem>
-                  <MenuItem value="30">30 Days</MenuItem>
-                </Select>
-              </FormControl>
+              <div
+                style={{
+                  display: isSmallScreen ? "block" : "flex",
+                  alignItems: "center",
+                }}
+              >
+                <SearchBar
+                  value={searched}
+                  onChange={(searchVal) => requestSearch(searchVal)}
+                  onCancelResearch={cancelSearch}
+                  style={{
+                    border: "1px solid rgba(0, 0, 0, 0.12)",
+                    margin: isSmallScreen ? "6px" : "0px",
+                  }}
+                />
+                <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
+                  <InputLabel id="release-issue-select-small-label">
+                    Days
+                  </InputLabel>
+                  <Select
+                    labelId="release-issue-select-small-label"
+                    id="release-issue-select-small"
+                    label="Days"
+                    onChange={(e) => handleChange(e.target.value)}
+                    sx={{ fontSize: "medium" }}
+                    defaultValue={""}
+                  >
+                    <MenuItem value="5">5 Days</MenuItem>
+                    <MenuItem value="15">15 Days</MenuItem>
+                    <MenuItem value="30">30 Days</MenuItem>
+                  </Select>
+                </FormControl>
+              </div>
             ) : (
               <Box>
                 {sortedRows.length > 1 && (
@@ -437,24 +498,76 @@ const ReleasesIssuedByFirm = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {sortedRows
-                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((row) => (
-                    <TableRow key={row.serial}>
-                      {columns.map((column) => (
-                        <TableCell key={column.id} hidesorticon={`${false}`}>
-                          {row[column.id]}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  ))}
+                {finalData.length !== 0 &&
+                check === true &&
+                finalData.length <= sortedRows.length ? (
+                  finalData
+                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    .map((row) => (
+                      <TableRow key={row.serial}>
+                        {columns.map((column) => (
+                          <TableCell key={column.id} hidesorticon={`${false}`}>
+                            {row[column.id]}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))
+                ) : check === false && finalData.length <= sortedRows.length ? (
+                  sortedRows
+                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    .map((row) => (
+                      <TableRow key={row.serial}>
+                        {columns.map((column) => (
+                          <TableCell key={column.id} hidesorticon={`${false}`}>
+                            {row[column.id]}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))
+                ) : finalData.length === 0 &&
+                  check === true &&
+                  finalData.length <= sortedRows.length ? (
+                  <TableRow>
+                    <TableCell colSpan={columns.length} align="center">
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <img
+                          src="nodata.png"
+                          alt="No Data"
+                          className="noDataImg"
+                        />
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : null}
               </TableBody>
             </Table>
             <TablePagination
               sx={{ marginBottom: "0px !important" }}
-              rowsPerPageOptions={[5, 10, 25, { label: "All", value: sortedRows.length}]}
+              rowsPerPageOptions={[
+                5,
+                10,
+                25,
+                { label: "All", value: sortedRows.length },
+              ]}
               component="div"
-              count={sortedRows.length}
+              // count={
+              //   finalData.length == 0 ? sortedRows.length : finalData.length
+              // }
+              count={
+                finalData.length !== 0 &&
+                check === true &&
+                finalData.length <= sortedRows.length
+                  ? finalData.length
+                  : check === false && finalData.length <= sortedRows.length
+                  ? sortedRows.length
+                  : finalData.length
+              }
               rowsPerPage={rowsPerPage}
               page={page}
               onPageChange={handleChangePage}

@@ -1,22 +1,12 @@
 const nodemailer = require("nodemailer");
-const { format, subDays, parse } = require("date-fns");
+const { format, subDays } = require("date-fns");
 
 const emailSent = async (req, res, getAllNews, firmData, newsSchema, flag) => {
-  const uniqueTickerSymbols = new Set();
-
-  const filteredData = await firmData.filter((entry) => {
-    if (uniqueTickerSymbols.has(entry.payload.tickerSymbol)) {
-      // Duplicate entry, return false to filter it out
-      return false;
-    } else {
-      // Not a duplicate, add the tickerSymbol to the Set and return true
-      uniqueTickerSymbols.add(entry.payload.tickerSymbol);
-      return true;
-    }
-  });
+  const processedTickerSymbols = new Set();
 
   if (getAllNews.length === 0) {
-    filteredData.forEach(async function (data, index) {
+    // No previous news, save all firm data and respond
+    firmData.forEach(async function (data) {
       const newResponse = data.payload;
       const newNews = await new newsSchema({
         firm: data.firm,
@@ -25,69 +15,71 @@ const emailSent = async (req, res, getAllNews, firmData, newsSchema, flag) => {
       newNews.save();
     });
     {
-      flag !== true && res.json(filteredData);
+      flag !== true && res.json(firmData);
     }
-  } else if (getAllNews.length !== filteredData.length) {
-    // Comparing ticker with previous 60 days tikcer and send mail
-
-    filteredData.forEach(async function (data, index) {
-      if (getAllNews[index] === undefined) {
-        filteredData.push({ firm: data.firm, payload: data.payload });
-
+  } else if (getAllNews.length !== firmData.length) {
+    // Comparing ticker with previous 60 days ticker and send mail
+    firmData.forEach(async function (data) {
+      if (!getAllNews.find((news) => news.payload.tickerSymbol === data.payload.tickerSymbol)) {
+        // If ticker symbol is not found in previous news, proceed
         const newlyTickerDate = data.payload.dateTimeIssued;
-
         const formattedDate = format(newlyTickerDate, "MMMM dd, yyyy");
-
         const sixtyDaysBefore = subDays(formattedDate, 60);
-
         const formattedDateSixtyDay = format(sixtyDaysBefore, "MMMM dd, yyyy");
-
         const dateToCompare = new Date(formattedDateSixtyDay);
-
         const newsWithinSixtyDays = getAllNews.filter(
-          (compareNews, index) =>
-            dateToCompare < new Date(compareNews.payload.dateTimeIssued)
+          (compareNews) => dateToCompare < new Date(compareNews.payload.dateTimeIssued)
         );
 
-        const compareTickerSymbol = newsWithinSixtyDays.filter(
-          (compareSixtyNews, index) =>
-            compareSixtyNews.payload.tickerSymbol === data.payload.tickerSymbol
-        );
+        if (
+          !newsWithinSixtyDays.some((compareSixtyNews) => compareSixtyNews.payload.tickerSymbol === data.payload.tickerSymbol)
+        ) {
+          // If no news found for the ticker within 60 days, send email
+          if (!processedTickerSymbols.has(data.payload.tickerSymbol)) {
+            const transporter = nodemailer.createTransport({
+              service: "gmail",
+              auth: {
+                user: "blocklevitonalerts@gmail.com",
+                pass: "yrhc nqwl gmah odvp",
+              },
+              secure: false,
+              port: 25,
+              tls: {
+                rejectUnauthorized: false,
+              },
+            });
 
-        if (compareTickerSymbol.length === 0) {
-          const transporter = nodemailer.createTransport({
-            service: "gmail",
-            auth: {
-              user: "blocklevitonalerts@gmail.com",
-              pass: "yrhc nqwl gmah odvp",
-            },
-            secure: false,
-            port: 25,
-            tls: {
-              rejectUnauthorized: false,
-            },
-          });
+            // Define the email options
+            const mailOptions = {
+              from: "blocklevitonalerts@gmail.com",
+              to: "akshay.bisht1@ftechiz.com", //client email: jake@blockleviton.com
+              subject: `Alert: First Press Release for ${data?.payload?.tickerSymbol}`,
+              html: `<p><span style='font-weight:bold;'>${data.firm}</span> issued a press release for <span style='font-weight:bold;'>${data?.payload?.tickerSymbol}</span>. This is the first press release observed for <span style='font-weight:bold;'>${data?.payload?.tickerSymbol}</span> in the past 60 days.<br/><br/>View the release here: ${data?.payload?.urlToRelease}.</p>`,
+            };
 
-          // Define the email options
-          const mailOptions = {
-            from: "blocklevitonalerts@gmail.com",
-            to: "shubham.pal@ftechiz.com",
-            subject: `Alert: First Press Release for ${data?.payload?.tickerSymbol}`,
-            html: `<p><span style='font-weight:bold;'>${data.firm}</span> issued a press release for <span style='font-weight:bold;'>${data?.payload?.tickerSymbol}</span>. This is the first press release observed for <span style='font-weight:bold;'>${data?.payload?.tickerSymbol}</span> in the past 60 days.<br/><br/>View the release here: ${data?.payload?.urlToRelease}.</p>`,
-          };
+            // Send the email
+            transporter.sendMail(mailOptions, (error, info) => {
+              if (error) {
+                return console.error("Error:", error.message);
+              }
+            });
 
-          // Send the email
-          transporter.sendMail(mailOptions, (error, info) => {
-            if (error) {
-              return console.error("Error:", error.message);
-            }
-          });
+            processedTickerSymbols.add(data.payload.tickerSymbol); // Add the ticker symbol to processed set
+          }
 
+          // Save the news in the database
           const newNews = new newsSchema({
             firm: data.firm,
             payload: data.payload,
           });
-          newNews.save();
+          await newNews.save();
+        } else {
+          // If news found within 60 days, save in the database only
+          const newNews = new newsSchema({
+            firm: data.firm,
+            payload: data.payload,
+          });
+          await newNews.save();
         }
       }
     });
@@ -99,6 +91,7 @@ const emailSent = async (req, res, getAllNews, firmData, newsSchema, flag) => {
       }
     }, 1000);
   } else {
+    // If the length of getAllNews is the same as the length of firmData, respond with all news
     const response = await newsSchema.find();
     {
       flag !== true && res.send(response);
