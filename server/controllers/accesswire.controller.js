@@ -48,9 +48,7 @@ exports.getAllAccessWire = async (req, res) => {
       "Schall",
       "Kaskela",
       "Glancy",
-      "Rosen",
-      "Edelson Lechtzin LLP",
-      "M&A Class Action Firm",
+      "Rosen"
     ];
 
     function getMatchingFirmIssuer(title, firmIssuers) {
@@ -64,6 +62,7 @@ exports.getAllAccessWire = async (req, res) => {
     }
 
     const payload = await page.$$eval(".box-words", (newsItems) => {
+      
       return newsItems.map((newsItem) => {
         const urlToRelease =
           newsItem

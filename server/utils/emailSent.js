@@ -2,7 +2,18 @@ const nodemailer = require("nodemailer");
 const { format, subDays } = require("date-fns");
 
 const emailSent = async (req, res, getAllNews, firmData, newsSchema, flag) => {
-  const processedTickerSymbols = new Set();
+  const uniqueTickerSymbols = new Set();
+
+  const filteredData = await firmData.filter((entry) => {
+    if (uniqueTickerSymbols.has(entry.payload.tickerSymbol)) {
+      // Duplicate entry, return false to filter it out
+      return false;
+    } else {
+      // Not a duplicate, add the tickerSymbol to the Set and return true
+      uniqueTickerSymbols.add(entry.payload.tickerSymbol);
+      return true;
+    }
+  });
 
   if (getAllNews.length === 0) {
     // No previous news, save all firm data and respond
@@ -64,25 +75,20 @@ const emailSent = async (req, res, getAllNews, firmData, newsSchema, flag) => {
               }
             });
 
-            processedTickerSymbols.add(data.payload.tickerSymbol); // Add the ticker symbol to processed set
-          }
-
-          // Save the news in the database
-          const newNews = new newsSchema({
-            firm: data.firm,
-            payload: data.payload,
+          // Send the email
+          transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+              return console.error("Error:", error.message);
+            }
           });
-          await newNews.save();
-        } else {
-          // If news found within 60 days, save in the database only
-          const newNews = new newsSchema({
-            firm: data.firm,
-            payload: data.payload,
-          });
-          await newNews.save();
         }
+        const newNews = new newsSchema({
+          firm: data.firm,
+          payload: data.payload,
+        });
+        newNews.save();
       }
-    });
+    }});
 
     setTimeout(async () => {
       const response = await newsSchema.find();
@@ -90,8 +96,7 @@ const emailSent = async (req, res, getAllNews, firmData, newsSchema, flag) => {
         flag !== true && res.json(response);
       }
     }, 1000);
-  } else {
-    // If the length of getAllNews is the same as the length of firmData, respond with all news
+    } else {
     const response = await newsSchema.find();
     {
       flag !== true && res.send(response);
