@@ -39,7 +39,6 @@ exports.getAllPRNewsWire = async (req, res) => {
           waitUntil: "domcontentloaded",
           timeout: 120000,
         });
-        //await page.waitForSelector(".card-list .newsCards", { timeout: 120000 });
   
         var newsItems = await page.$$eval(".card-list .newsCards .card .pull-left", (items) => {
           return items
@@ -58,9 +57,6 @@ exports.getAllPRNewsWire = async (req, res) => {
               };
             })
         });
-        //console.log("Checking_responseData11@@:", newsItems);
-        
-        //console.log("testing_below",newsItems);
 
         const payload = newsItems
           .map((newsItem) => {
@@ -105,13 +101,9 @@ exports.getAllPRNewsWire = async (req, res) => {
         for (const newsData of payload) {
           // const newNews = new PRNewsWireSchema(newsData);
           // await newNews.save();
-          //console.log("listed_firmsData:",listed_firms);
           firmData.push({ firm: listed_firms[i], payload: newsData });
         }
-        //firmData.push({ firm: law_firms[law_firms - 1], payload: newsData });
-      
       }
-      console.log("responseData:",firmData);
     
       try {
         const { targetDate, formattedTargetDate } = filterDays(75);
@@ -142,8 +134,6 @@ exports.getAllPRNewsWire = async (req, res) => {
     } 
   }
   else {
-    console.log("Else_Checking:", flag
-    );
     try {
       const law_firms = [
         "berger-montague",
@@ -265,7 +255,6 @@ exports.getAllPRNewsWire = async (req, res) => {
         for (const newsData of payload) {
           // const newNews = new PRNewsWireSchema(newsData);
           // await newNews.save();
-          console.log("listed_firmsData:",listed_firms);
           firmData.push({ firm: listed_firms[i], payload: newsData });
         }
       }
