@@ -9,8 +9,7 @@ const { v4: uuidv4 } = require("uuid");
 // PR NEWS WIRE API
 
 exports.getAllPRNewsWire = async (req, res) => {
-  const { flag, firmName, index } = req.body;
-  console.log("Flag_Checking:",flag, firmName, index);
+  const { flag } = req.body;
  
   if (flag) {
     try {
