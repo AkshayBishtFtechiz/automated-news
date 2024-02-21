@@ -33,10 +33,10 @@ exports.createNewFirmWire = async (req, res) => {
             const getNewFirm = await NewFirmsWireSchema.find();
 
             accessWire.getAllAccessWire(req, res);
-            // businessWire.getAllBussinessWire(req, res);
-            // globenewswire.getAllGlobeNewsWire(req, res);
-            // newsfilewire.getAllNewsFile(req, res);
-            // prnewswire.getAllPRNewsWire(req, res);
+            businessWire.getAllBussinessWire(req, res);
+            globenewswire.getAllGlobeNewsWire(req, res);
+            newsfilewire.getAllNewsFile(req, res);
+            prnewswire.getAllPRNewsWire(req, res);
 
             res.send(getNewFirm);
           })
