@@ -4,88 +4,104 @@ const moment = require("moment");
 const emailSent = require("../utils/emailSent");
 const { filterDays } = require("../utils/filterDays");
 const { v4: uuidv4 } = require("uuid");
+const NewFirmsWireSchema = require("../Schema/NewFirmModel");
 
 // NEWS FILE API
 
 exports.getAllNewsFile = async (req, res) => {
-  const { flag } = req.body;
+  const { flag, index} = req.body;
   
   try {
-    const law_firms = [
-      {
-        index: 7427,
-        name: "Berger-Montague",
-      },
-      {
-        index: 6535,
-        name: "Bernstein-Liebhard-LLP",
-      },
-      {
-        index: 7130,
-        name: "Bronstein-Gewirtz-Grossman-LLC",
-      },
-      {
-        index: 6455,
-        name: "Faruqi-Faruqi-LLP",
-      },
-      {
-        index: 8797,
-        name: "Grabar-Law-Office",
-      },
-      {
-        index: 7059,
-        name: "Hagens-Berman-Sobol-Shapiro-LLP",
-      },
-      {
-        index: 7699,
-        name: "Kessler-Topaz-Meltzer-Check-LLP",
-      },
-      {
-        index: 7611,
-        name: "Pomerantz-LLP",
-      },
-      {
-        index: 8569,
-        name: "Rigrodsky-Law-P.A.",
-      },
-      {
-        index: 6640,
-        name: "Schall-Law-Firm",
-      },
-      {
-        index: 7815,
-        name: "Kaskela-Law-LLC",
-      },
-      {
-        index: 9378,
-        name: "Glancy-Prongay-Murray-LLP",
-      },
-      {
-        index: 7091,
-        name: "Levi-Korsinsky-LLP",
-      },
-      {
-        index: 7397,
-        name: "The-Rosen-Law-Firm-PA",
-      },
-    ];
-
-    const listed_firms = [
-      "Berger Montague",
-      "Bernstein Liebhard",
-      "Bronstein, Gewirtz",
-      "Faruqi & Faruqi",
-      "Grabar",
-      "Hagens Berman",
-      "Kessler Topaz",
-      "Pomerantz",
-      "Rigrodsky",
-      "Schall",
-      "Kaskela",
-      "Glancy",
-      "Levi & Korsinsky",
-      "Rosen",
-    ];
+    if (flag === true) {
+      var law_firms = [];
+      var listed_firms = [];
+      var getAllNewsFirm = await NewFirmsWireSchema.find()
+      
+      getAllNewsFirm?.forEach((response, i) => {
+        listed_firms.push(response.firmName);
+        law_firms.push({
+          index,
+          name: response.firmName
+        });
+      })
+    }
+    else {
+      var law_firms = [
+        {
+          index: 7427,
+          name: "Berger-Montague",
+        },
+        {
+          index: 6535,
+          name: "Bernstein-Liebhard-LLP",
+        },
+        {
+          index: 7130,
+          name: "Bronstein-Gewirtz-Grossman-LLC",
+        },
+        {
+          index: 6455,
+          name: "Faruqi-Faruqi-LLP",
+        },
+        {
+          index: 8797,
+          name: "Grabar-Law-Office",
+        },
+        {
+          index: 7059,
+          name: "Hagens-Berman-Sobol-Shapiro-LLP",
+        },
+        {
+          index: 7699,
+          name: "Kessler-Topaz-Meltzer-Check-LLP",
+        },
+        {
+          index: 7611,
+          name: "Pomerantz-LLP",
+        },
+        {
+          index: 8569,
+          name: "Rigrodsky-Law-P.A.",
+        },
+        {
+          index: 6640,
+          name: "Schall-Law-Firm",
+        },
+        {
+          index: 7815,
+          name: "Kaskela-Law-LLC",
+        },
+        {
+          index: 9378,
+          name: "Glancy-Prongay-Murray-LLP",
+        },
+        {
+          index: 7091,
+          name: "Levi-Korsinsky-LLP",
+        },
+        {
+          index: 7397,
+          name: "The-Rosen-Law-Firm-PA",
+        },
+      ];
+  
+      var listed_firms = [
+        "Berger Montague",
+        "Bernstein Liebhard",
+        "Bronstein, Gewirtz",
+        "Faruqi & Faruqi",
+        "Grabar",
+        "Hagens Berman",
+        "Kessler Topaz",
+        "Pomerantz",
+        "Rigrodsky",
+        "Schall",
+        "Kaskela",
+        "Glancy",
+        "Levi & Korsinsky",
+        "Rosen",
+      ]; 
+    }
 
     const browser = await puppeteer.launch({ headless: "new" });
     const page = await browser.newPage();
