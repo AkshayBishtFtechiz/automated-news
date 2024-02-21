@@ -13,14 +13,12 @@ exports.getAllBussinessWire = async (req, res) => {
 
   try {
     if (flag === true) {
-        
       var law_firms = [];
       var getAllNewsFirm = await NewFirmsWireSchema.find()
       
       getAllNewsFirm?.forEach((response, index) => {
         law_firms.push(response.firmName);
       })
-
       var listed_firms = [...law_firms];
     }
     else {
@@ -64,7 +62,7 @@ exports.getAllBussinessWire = async (req, res) => {
       await page.setCacheEnabled(false);
   
       let firmData = [];
-  
+    
       for (let i = 0; i < law_firms.length; i++) {
         const firm = law_firms[i];
         const encodedFirm = encodeURI(firm);
@@ -102,8 +100,6 @@ exports.getAllBussinessWire = async (req, res) => {
               );
             });
         });
-
-        console.log("newsItemsTest:",newsItems);
   
         const payload = newsItems
           .map((newsItem) => {

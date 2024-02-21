@@ -12,39 +12,50 @@ exports.getAllGlobeNewsWire = async (req, res) => {
   const { flag } = req.body;
 
   try {
-    const law_firms = [
-      "Berger%20Montague",
-      "Bernstein%20Liebhard%20LLP",
-      "Bronsteinδ%20Gewirtz%20&%20Grossmanδ%20LLC",
-      "Faruqi%20&%20Faruqi%20LLP",
-      //   "Grabar",
-      "Hagens%20Berman%20Sobol%20Shapiro%20LLP",
-      "Kessler%20Topaz%20Meltzer%20&%20Check%20LLP",
-      "Pomerantz%20LLP",
-      "Rigrodsky%20Lawδ%20P§A",
-      "Schall%20Law",
-      "Kaskela%20Law",
-      "Glancy%20Prongay%20&%20Murray%20LLP",
-      "Levi%20&%20Korsinskyδ%20LLP",
-      "The%20Rosen%20Law%20Firm%20PA",
-    ];
-
-    const listed_firms = [
-      "Berger Montague",
-      "Bernstein Liebhard",
-      "Bronstein, Gewirtz",
-      "Faruqi & Faruqi",
-      // "Grabar",
-      "Hagens Berman",
-      "Kessler Topaz",
-      "Pomerantz",
-      "Rigrodsky",
-      "Schall",
-      "Kaskela",
-      "Glancy",
-      "Levi & Korsinsky",
-      "Rosen",
-    ];
+    if (flag === true) {
+      var law_firms = [];
+      var getAllNewsFirm = await NewFirmsWireSchema.find()
+      
+      getAllNewsFirm?.forEach((response, index) => {
+        law_firms.push(response.firmName);
+      })
+      var listed_firms = [...law_firms];
+    }
+    else {
+      var law_firms = [
+        "Berger%20Montague",
+        "Bernstein%20Liebhard%20LLP",
+        "Bronsteinδ%20Gewirtz%20&%20Grossmanδ%20LLC",
+        "Faruqi%20&%20Faruqi%20LLP",
+        //   "Grabar",
+        "Hagens%20Berman%20Sobol%20Shapiro%20LLP",
+        "Kessler%20Topaz%20Meltzer%20&%20Check%20LLP",
+        "Pomerantz%20LLP",
+        "Rigrodsky%20Lawδ%20P§A",
+        "Schall%20Law",
+        "Kaskela%20Law",
+        "Glancy%20Prongay%20&%20Murray%20LLP",
+        "Levi%20&%20Korsinskyδ%20LLP",
+        "The%20Rosen%20Law%20Firm%20PA",
+      ];
+  
+      var listed_firms = [
+        "Berger Montague",
+        "Bernstein Liebhard",
+        "Bronstein, Gewirtz",
+        "Faruqi & Faruqi",
+        // "Grabar",
+        "Hagens Berman",
+        "Kessler Topaz",
+        "Pomerantz",
+        "Rigrodsky",
+        "Schall",
+        "Kaskela",
+        "Glancy",
+        "Levi & Korsinsky",
+        "Rosen",
+      ];
+    }
 
     const browser = await puppeteer.launch({ headless: "new" });
     const page = await browser.newPage();

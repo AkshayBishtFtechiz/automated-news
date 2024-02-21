@@ -3,6 +3,7 @@ const AccessWireSchema = require("../Schema/AccessWireModel");
 const { filterDays } = require("../utils/filterDays");
 const emailSent = require("../utils/emailSent");
 const moment = require("moment");
+const NewFirmsWireSchema = require("../Schema/NewFirmModel");
 
 // Function to introduce a delay using setTimeout
 function delay(time) {
@@ -34,23 +35,33 @@ exports.getAllAccessWire = async (req, res) => {
       });
     });
 
-    const firmIssuers = [
-      "Levi & Korsinsky",
-      "Berger Montague",
-      "Bernstein Liebhard",
-      "Bronstein, Gewirtz",
-      "Faruqi & Faruqi",
-      "Grabar",
-      "Hagens Berman",
-      "Kessler Topaz",
-      "Pomerantz",
-      "Rigrodsky",
-      "Schall",
-      "Kaskela",
-      "Glancy",
-      "Rosen"
-    ];
-
+    if (flag === true) {
+      var firmIssuers = [];
+      var getAllNewsFirm = await NewFirmsWireSchema.find()
+      
+      getAllNewsFirm?.forEach((response, i) => {
+        firmIssuers.push(response.firmName);
+      })
+    }
+    else {
+      var firmIssuers = [
+        "Levi & Korsinsky",
+        "Berger Montague",
+        "Bernstein Liebhard",
+        "Bronstein, Gewirtz",
+        "Faruqi & Faruqi",
+        "Grabar",
+        "Hagens Berman",
+        "Kessler Topaz",
+        "Pomerantz",
+        "Rigrodsky",
+        "Schall",
+        "Kaskela",
+        "Glancy",
+        "Rosen"
+      ]; 
+    }
+    
     function getMatchingFirmIssuer(title, firmIssuers) {
       const lowercasedTitle = title.toLowerCase();
       for (const firm of firmIssuers) {

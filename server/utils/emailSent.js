@@ -2,18 +2,7 @@ const nodemailer = require("nodemailer");
 const { format, subDays } = require("date-fns");
 
 const emailSent = async (req, res, getAllNews, firmData, newsSchema, flag) => {
-  const uniqueTickerSymbols = new Set();
-
-  const filteredData = await firmData.filter((entry) => {
-    if (uniqueTickerSymbols.has(entry.payload.tickerSymbol)) {
-      // Duplicate entry, return false to filter it out
-      return false;
-    } else {
-      // Not a duplicate, add the tickerSymbol to the Set and return true
-      uniqueTickerSymbols.add(entry.payload.tickerSymbol);
-      return true;
-    }
-  });
+  const processedTickerSymbols = new Set();
 
   if (getAllNews.length === 0) {
     // No previous news, save all firm data and respond
@@ -47,6 +36,7 @@ const emailSent = async (req, res, getAllNews, firmData, newsSchema, flag) => {
         ) {
           // If no news found for the ticker within 60 days, send email
           if (!processedTickerSymbols.has(data.payload.tickerSymbol)) {
+
             const transporter = nodemailer.createTransport({
               service: "gmail",
               auth: {
@@ -74,14 +64,8 @@ const emailSent = async (req, res, getAllNews, firmData, newsSchema, flag) => {
                 return console.error("Error:", error.message);
               }
             });
-
-          // Send the email
-          transporter.sendMail(mailOptions, (error, info) => {
-            if (error) {
-              return console.error("Error:", error.message);
-            }
-          });
-        }
+          }
+          
         const newNews = new newsSchema({
           firm: data.firm,
           payload: data.payload,
