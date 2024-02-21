@@ -35,7 +35,6 @@ const emailSent = async (req, res, getAllNews, firmData, newsSchema, flag) => {
           !newsWithinSixtyDays.some((compareSixtyNews) => compareSixtyNews.payload.tickerSymbol === data.payload.tickerSymbol)
         ) {
           // If no news found for the ticker within 60 days, send email
-          if (!processedTickerSymbols.has(data.payload.tickerSymbol)) {
 
             const transporter = nodemailer.createTransport({
               service: "gmail",
@@ -64,8 +63,7 @@ const emailSent = async (req, res, getAllNews, firmData, newsSchema, flag) => {
                 return console.error("Error:", error.message);
               }
             });
-          }
-          
+
         const newNews = new newsSchema({
           firm: data.firm,
           payload: data.payload,
