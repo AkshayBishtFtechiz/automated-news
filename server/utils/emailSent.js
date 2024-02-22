@@ -74,7 +74,7 @@ const emailSent = async (req, res, getAllNews, firmData, newsSchema, flag) => {
         });
         newNews.save();
       }
-    }});
+    });
 
     setTimeout(async () => {
       const response = await newsSchema.find();
