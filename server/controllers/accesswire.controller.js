@@ -4,6 +4,7 @@ const { filterDays } = require("../utils/filterDays");
 const emailSent = require("../utils/emailSent");
 const moment = require("moment");
 const NewFirmsWireSchema = require("../Schema/NewFirmModel");
+const { v4: uuidv4 } = require("uuid");
 
 // Function to introduce a delay using setTimeout
 function delay(time) {
@@ -35,16 +36,12 @@ exports.getAllAccessWire = async (req, res) => {
       });
     });
 
+    let firmIssuers = [];
     if (flag === true) {
-      var firmIssuers = [];
-      var getAllNewsFirm = await NewFirmsWireSchema.find()
-      
-      getAllNewsFirm?.forEach((response, i) => {
-        firmIssuers.push(response.firmName);
-      })
-    }
-    else {
-      var firmIssuers = [
+      const getAllNewsFirm = await NewFirmsWireSchema.find();
+      firmIssuers = getAllNewsFirm.map((response) => response.firmName);
+    } else {
+      firmIssuers = [
         "Levi & Korsinsky",
         "Berger Montague",
         "Bernstein Liebhard",
@@ -58,10 +55,10 @@ exports.getAllAccessWire = async (req, res) => {
         "Schall",
         "Kaskela",
         "Glancy",
-        "Rosen"
-      ]; 
+        "Rosen",
+      ];
     }
-    
+
     function getMatchingFirmIssuer(title, firmIssuers) {
       const lowercasedTitle = title.toLowerCase();
       for (const firm of firmIssuers) {
@@ -73,7 +70,6 @@ exports.getAllAccessWire = async (req, res) => {
     }
 
     const payload = await page.$$eval(".box-words", (newsItems) => {
-      
       return newsItems.map((newsItem) => {
         const urlToRelease =
           newsItem
@@ -150,15 +146,11 @@ exports.getAllAccessWire = async (req, res) => {
 
     const finalPayload = payload
       .map((item, index) => ({
-        firm:
-          getMatchingFirmIssuer(titles[index], firmIssuers) ||
-          "Levi & Korsinsky",
+        firm: getMatchingFirmIssuer(titles[index], firmIssuers),
         payload: {
           scrapId: item.scrapId,
           tickerSymbol: item.tickerSymbol,
-          firmIssuing:
-            getMatchingFirmIssuer(titles[index], firmIssuers) ||
-            "Levi & Korsinsky",
+          firmIssuing: getMatchingFirmIssuer(titles[index], firmIssuers),
           serviceIssuedOn: item.serviceIssuedOn,
           dateTimeIssued: item.dateTimeIssued,
           urlToRelease: item.urlToRelease,
@@ -170,68 +162,93 @@ exports.getAllAccessWire = async (req, res) => {
           item.payload.tickerSymbol !== "" || item.payload.tickerIssuer !== ""
       );
 
-    // JSON FOR NEW TICKER
+    // JSON OF NEW TICKER.
 
     // finalPayload.push({
     //   firm: "Berger Montague",
     //   payload: {
-    //     scrapId: "86222b40-518e-4370-9c32-94e5dd0d270e",
-    //     tickerSymbol: "VLTN", // NEW TICKER THAT COMES
-    //     firmIssuing: "Valentine",
-    //     serviceIssuedOn: "Accesswire",
-    //     dateTimeIssued: "February 14, 2024",
+    //     scrapId: uuidv4(),
+    //     tickerSymbol: "NEWTICKER", // NEW TICKER THAT COMES
+    //     firmIssuing: "Berger Montague",
+    //     serviceIssuedOn: "BusinessWire",
+    //     dateTimeIssued: "January 23, 2024",
     //     urlToRelease:
-    //       "https://www.accesswire.com/viewarticle.aspx?id=826383&lang=en",
-    //     tickerIssuer: "NASDAQ",
+    //       "http://www.businesswire.com/news/home/20240101367342/zh-HK/",
+    //     tickerIssuer: "NYSE",
     //   },
     // });
 
-    // finalPayload.push({
-    //   firm: "Berger Montague",
-    //   payload: {
-    //     scrapId: "86222b40-518e-4370-9c32-94e5dd0d270f",
-    //     tickerSymbol: "VLTN", // NEW TICKER THAT COMES
-    //     firmIssuing: "Pulwama",
-    //     serviceIssuedOn: "Accesswire",
-    //     dateTimeIssued: "February 14, 2024",
-    //     urlToRelease:
-    //       "https://www.accesswire.com/viewarticle.aspx?id=826388&lang=en",
-    //     tickerIssuer: "NASDAQ",
-    //   },
-    // });
+    // JSON OF TICKER ALREADY THAT EXISTS IN LAST 60 DAYS.
 
+    finalPayload.push({
+      firm: "Rosen",
+      payload: {
+        scrapId: uuidv4(),
+        tickerSymbol: "TEST2", //TICKER ALREADY EXISTS
+        firmIssuing: "Berger Montague",
+        serviceIssuedOn: "BusinessWire",
+        dateTimeIssued: "January 16, 2024",
+        urlToRelease:
+          "http://www.businesswire.com/news/home/20240101367342/zh-HK/",
+        tickerIssuer: "NYSE",
+      },
+    });
 
-    try {
-      const { targetDate, formattedTargetDate } = filterDays(75);
-      const last75DaysData = finalPayload.filter((newsDetails) => {
-        const allAccessWireNewsDate = moment(
-          newsDetails?.payload.dateTimeIssued,
-          "MMMM DD, YYYY"
-        );
-        return targetDate < allAccessWireNewsDate;
-      });
-      const getAllAccessWireNews = await AccessWireSchema.find();
-      emailSent(
-        req,
-        res,
-        getAllAccessWireNews,
-        last75DaysData,
-        AccessWireSchema,
-        flag
+    finalPayload.push({
+      firm: "Rosen",
+      payload: {
+        scrapId: uuidv4(),
+        tickerSymbol: "TEST2", //TICKER ALREADY EXISTS
+        firmIssuing: "Berger Montague",
+        serviceIssuedOn: "BusinessWire",
+        dateTimeIssued: "January 16, 2024",
+        urlToRelease:
+          "http://www.businesswire.com/news/home/20240101367342/zh-HK/",
+        tickerIssuer: "NYSE",
+      },
+    });
+
+    finalPayload.push({
+      firm: "Rosen",
+      payload: {
+        scrapId: uuidv4(),
+        tickerSymbol: "TEST2", //TICKER ALREADY EXISTS
+        firmIssuing: "Berger Montague",
+        serviceIssuedOn: "BusinessWire",
+        dateTimeIssued: "January 16, 2024",
+        urlToRelease:
+          "http://www.businesswire.com/news/home/20240101367342/zh-HK/",
+        tickerIssuer: "NYSE",
+      },
+    });
+
+    // Filtering payload to include only data matching firmIssuers
+    const filteredPayload = finalPayload.filter((item) =>
+      firmIssuers.includes(item.firm)
+    );
+
+    const { targetDate, formattedTargetDate } = filterDays(75);
+    const last75DaysData = filteredPayload.filter((newsDetails) => {
+      const allAccessWireNewsDate = moment(
+        newsDetails?.payload.dateTimeIssued,
+        "MMMM DD, YYYY"
       );
-      await browser.close();
-    } catch (error) {
-      console.error("Error:", error);
-      {
-        flag !== true && (
-          res.status(500).send("Internal Server Error"))
-      }
-    }
+      return targetDate < allAccessWireNewsDate;
+    });
+    const getAllAccessWireNews = await AccessWireSchema.find();
+    emailSent(
+      req,
+      res,
+      getAllAccessWireNews,
+      last75DaysData,
+      AccessWireSchema,
+      flag
+    );
+    await browser.close();
   } catch (error) {
     console.error("Error:", error);
     {
-      flag !== true && (
-        res.status(500).send("Internal Server Error"))
+      flag !== true && res.status(500).send("Internal Server Error");
     }
   }
 };

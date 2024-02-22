@@ -202,7 +202,7 @@ const AddNewFirms = () => {
     const payload = {
       firmName: firmName,
       index: Number(id),
-      flag: false,
+      flag: true,
     };
 
     await axios
