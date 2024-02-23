@@ -180,47 +180,47 @@ exports.getAllAccessWire = async (req, res) => {
 
     // JSON OF TICKER ALREADY THAT EXISTS IN LAST 60 DAYS.
 
-    finalPayload.push({
-      firm: "Rosen",
-      payload: {
-        scrapId: uuidv4(),
-        tickerSymbol: "TEST2", //TICKER ALREADY EXISTS
-        firmIssuing: "Berger Montague",
-        serviceIssuedOn: "BusinessWire",
-        dateTimeIssued: "January 16, 2024",
-        urlToRelease:
-          "http://www.businesswire.com/news/home/20240101367342/zh-HK/",
-        tickerIssuer: "NYSE",
-      },
-    });
+    // finalPayload.push({
+    //   firm: "Rosen",
+    //   payload: {
+    //     scrapId: uuidv4(),
+    //     tickerSymbol: "TEST2", //TICKER ALREADY EXISTS
+    //     firmIssuing: "Berger Montague",
+    //     serviceIssuedOn: "BusinessWire",
+    //     dateTimeIssued: "January 16, 2024",
+    //     urlToRelease:
+    //       "http://www.businesswire.com/news/home/20240101367342/zh-HK/",
+    //     tickerIssuer: "NYSE",
+    //   },
+    // });
 
-    finalPayload.push({
-      firm: "Rosen",
-      payload: {
-        scrapId: uuidv4(),
-        tickerSymbol: "TEST2", //TICKER ALREADY EXISTS
-        firmIssuing: "Berger Montague",
-        serviceIssuedOn: "BusinessWire",
-        dateTimeIssued: "January 16, 2024",
-        urlToRelease:
-          "http://www.businesswire.com/news/home/20240101367342/zh-HK/",
-        tickerIssuer: "NYSE",
-      },
-    });
+    // finalPayload.push({
+    //   firm: "Rosen",
+    //   payload: {
+    //     scrapId: uuidv4(),
+    //     tickerSymbol: "TEST2", //TICKER ALREADY EXISTS
+    //     firmIssuing: "Berger Montague",
+    //     serviceIssuedOn: "BusinessWire",
+    //     dateTimeIssued: "January 16, 2024",
+    //     urlToRelease:
+    //       "http://www.businesswire.com/news/home/20240101367342/zh-HK/",
+    //     tickerIssuer: "NYSE",
+    //   },
+    // });
 
-    finalPayload.push({
-      firm: "Rosen",
-      payload: {
-        scrapId: uuidv4(),
-        tickerSymbol: "TEST2", //TICKER ALREADY EXISTS
-        firmIssuing: "Berger Montague",
-        serviceIssuedOn: "BusinessWire",
-        dateTimeIssued: "January 16, 2024",
-        urlToRelease:
-          "http://www.businesswire.com/news/home/20240101367342/zh-HK/",
-        tickerIssuer: "NYSE",
-      },
-    });
+    // finalPayload.push({
+    //   firm: "Rosen",
+    //   payload: {
+    //     scrapId: uuidv4(),
+    //     tickerSymbol: "TEST2", //TICKER ALREADY EXISTS
+    //     firmIssuing: "Berger Montague",
+    //     serviceIssuedOn: "BusinessWire",
+    //     dateTimeIssued: "January 16, 2024",
+    //     urlToRelease:
+    //       "http://www.businesswire.com/news/home/20240101367342/zh-HK/",
+    //     tickerIssuer: "NYSE",
+    //   },
+    // });
 
     // Filtering payload to include only data matching firmIssuers
     const filteredPayload = finalPayload.filter((item) =>

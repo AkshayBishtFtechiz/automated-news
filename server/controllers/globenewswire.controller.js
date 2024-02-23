@@ -5,6 +5,7 @@ const moment = require("moment");
 const emailSent = require("../utils/emailSent");
 const { filterDays } = require("../utils/filterDays");
 const { v4: uuidv4 } = require("uuid");
+const NewFirmsWireSchema = require("../Schema/NewFirmModel");
 
 // GLOBE NEWS WIRE API
 
