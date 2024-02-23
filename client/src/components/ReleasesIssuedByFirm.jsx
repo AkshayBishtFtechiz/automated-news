@@ -43,49 +43,22 @@ const ReleasesIssuedByFirm = () => {
   const fetchBusinessWireData = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:5000/api/business-wire",
-        {
-          params: {
-            flag: true,
-          },
-        }
+        "http://localhost:5000/api/business-wire"
       );
       myStore.setBusinessWireData(response);
 
       const response1 = await axios.get(
-        "http://localhost:5000/api/pr-news-wire",
-        {
-          params: {
-            flag: true,
-          },
-        }
+        "http://localhost:5000/api/pr-news-wire"
       );
       myStore.setPRNewsWireData(response1);
-      const response2 = await axios.get(
-        "http://localhost:5000/api/news-files",
-        {
-          params: {
-            flag: true,
-          },
-        }
-      );
+      const response2 = await axios.get("http://localhost:5000/api/news-files");
       myStore.setNewsFileData(response2);
       const response3 = await axios.get(
-        "http://localhost:5000/api/globe-news-wire",
-        {
-          params: {
-            flag: true,
-          },
-        }
+        "http://localhost:5000/api/globe-news-wire"
       );
       myStore.setGlobeNewsWireData(response3);
       const response4 = await axios.get(
-        "http://localhost:5000/api/access-wire",
-        {
-          params: {
-            flag: true,
-          },
-        }
+        "http://localhost:5000/api/access-wire"
       );
       myStore.setAccessWireData(response4);
 
