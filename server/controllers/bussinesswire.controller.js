@@ -78,8 +78,7 @@ exports.getAllBussinessWire = async (req, res) => {
             .map((item) => {
               const title = item.querySelector("h3 a").textContent.trim();
               const date = item
-                .querySelector(".bw-news-meta time")
-                .textContent.trim();
+                .querySelector(".bw-news-meta time");
               const link = item.querySelector("h3 a").getAttribute("href");
               const summary = item.querySelector("p").textContent.trim();
               const thumb = item.querySelector(".bw-news-thumbs a")?.getAttribute("href");
@@ -141,19 +140,19 @@ exports.getAllBussinessWire = async (req, res) => {
   
       // JSON OF NEW TICKER.
   
-      // firmData.push({
-      //   firm: "Berger Montague",
-      //   payload: {
-      //     scrapId: uuidv4(),
-      //     tickerSymbol: "NEWTICKER", // NEW TICKER THAT COMES
-      //     firmIssuing: "Berger Montague",
-      //     serviceIssuedOn: "BusinessWire",
-      //     dateTimeIssued: "January 23, 2024",
-      //     urlToRelease:
-      //       "http://www.businesswire.com/news/home/20240101367342/zh-HK/",
-      //     tickerIssuer: "NYSE",
-      //   },
-      // });
+      firmData.push({
+        firm: "Berger Montague",
+        payload: {
+          scrapId: uuidv4(),
+          tickerSymbol: "CHPT77", // NEW TICKER THAT COMES
+          firmIssuing: "Berger Montague",
+          serviceIssuedOn: "BusinessWire",
+          dateTimeIssued: "January 28, 2024",
+          urlToRelease:
+            "http://www.businesswire.com/news/home/20240101367342/zh-HK/",
+          tickerIssuer: "NYSE",
+        },
+      });
   
       // JSON OF TICKER ALREADY THAT EXISTS IN LAST 60 DAYS.
   
@@ -197,7 +196,7 @@ exports.getAllBussinessWire = async (req, res) => {
         {
         flag !== true && (
           res.status(500).send("Internal Server Error"))
-      }
+        }
       }
     } catch (error) {
       console.error("Error:", error);
