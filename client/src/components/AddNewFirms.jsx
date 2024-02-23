@@ -160,24 +160,36 @@ const AddNewFirms = () => {
     { firmName: "Levi & Korsinsky-7091", label: "Levi & Korsinsky" },
 
     // NEWLY ADDED FIRMS LIST
-    { firmName: "Robbins Geller-0", label: "Robbins Geller" },
+    {
+      firmName: "Robbins-Geller-Rudman-Dowd-LLP-8150",
+      label: "Robbins Geller",
+    },
     { firmName: "Saxena white-0", label: "Saxena white" },
-    { firmName: "Scott & Scott-0", label: "Scott & Scott" },
-    { firmName: "Robbins LLP-0", label: "Robbins LLP" },
+    {
+      firmName: "Scott & Scott-Attorneys-at-Law-LLP-8957",
+      label: "Scott & Scott",
+    },
+    { firmName: "Robbins-LLP-7239", label: "Robbins LLP" },
     { firmName: "Bernstein Litowitz-0", label: "Bernstein Litowitz" },
-    { firmName: "Kahn Swick-0", label: "Kahn Swick" },
+    { firmName: "Kahn-Swick-Foti-LLC-7442", label: "Kahn Swick" },
     { firmName: "Abraham Fruchter-0", label: "Abraham Fruchter" },
     { firmName: "Entwistle-0", label: "Entwistle" },
-    { firmName: "Holzer & Holzer-0", label: "Holzer & Holzer" },
-    { firmName: "Frank R. Cruz-0", label: "Frank R. Cruz" },
-    { firmName: "Portnoy Law Firm-0", label: "Portnoy Law Firm" },
-    { firmName: "Kirby McInerney-0", label: "Kirby McInerney" },
-    { firmName: "Howard G. Smith-0", label: "Howard G. Smith" },
+    { firmName: "Holzer-Holzer-LLC-7426", label: "Holzer & Holzer" },
+    {
+      firmName: "The-Law-Offices-of-Frank-R.-Cruz-9419",
+      label: "Frank R. Cruz",
+    },
+    { firmName: "Portnoy-Law-7179", label: "Portnoy Law Firm" },
+    { firmName: "Kirby-McInerney-LLP-9576", label: "Kirby McInerney" },
+    {
+      firmName: "Law-Offices-of-Howard-G.-Smith-9420",
+      label: "Howard G. Smith",
+    },
     { firmName: "Bragar Eagel-0", label: "Bragar Eagel" },
   ];
 
   // FILTERED ITEMS OF ARRAY IF THE VALUE IS SELECTED FROM SELECT
-  const firmNamesToRemove = data.map((item) => item.firmName);
+  const firmNamesToRemove = data.map((item) => item.label);
   const filteredFirmArray = firmArray.filter(
     (item) => !firmNamesToRemove.includes(item.label)
   );
@@ -185,9 +197,10 @@ const AddNewFirms = () => {
   // POST API FOR ADDING NEW FIRMS
   const submitData = async (data) => {
     setLoading(true);
-    const finalData = data.firmName;
+    const selectedValue = data.firmName;
+    let [firmName, label] = selectedValue.split("#");
+    const finalData = firmName;
     const removedStrData = finalData.replace(/'/g, "");
-    let firmName;
     let id;
 
     // Check if the string ends with "-0"
@@ -201,6 +214,7 @@ const AddNewFirms = () => {
 
     const payload = {
       firmName: firmName,
+      label: label,
       index: Number(id),
       flag: true,
     };
@@ -233,7 +247,7 @@ const AddNewFirms = () => {
 
   // DELETE API FOR DELETING A FIRM WITH AN CONFIRM ALERT CONFIGURATION
 
-  const deleteFirms = async (_id, firmName) => {
+  const deleteFirms = async (_id, firmName, label) => {
     const payload = {
       _id: _id,
     };
@@ -245,7 +259,7 @@ const AddNewFirms = () => {
             onClose={onClose}
             fetchData={fetchFirms}
             payload={payload}
-            firmName={firmName}
+            label={label}
           />
         );
       },
@@ -329,13 +343,13 @@ const AddNewFirms = () => {
                   // sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                 >
                   <TableCell>{row.serial}</TableCell>
-                  <TableCell>{row.firmName}</TableCell>
+                  <TableCell>{row.label}</TableCell>
                   <TableCell>
                     <div className="d-flex">
                       <Tooltip title="Delete firm" arrow placement="right">
                         <DeleteIcon
                           className="iconHover delete-icon"
-                          onClick={() => deleteFirms(row._id, row.firmName)}
+                          onClick={() => deleteFirms(row._id, row.firmName, row.label)}
                         />
                       </Tooltip>
                     </div>
@@ -448,20 +462,30 @@ const AddNewFirms = () => {
                     </MenuItem>
                   )}
                   {/* {filteredFirmArray.map((item, index) => (
-                    <MenuItem key={index} value={item.firmName}>
+                    <MenuItem
+                      key={index}
+                      value={`${item.firmName}#${item.label}`}
+                    >
                       {item.label}
                     </MenuItem>
                   ))} */}
 
                   {filteredFirmArray.map((element, index) => (
                     <MenuItem
-                      value={`'${element.firmName}'`}
+                    value={`${element.firmName}#${element.label}`}
                       key={index}
                     >
                       {Object.values(element)[1]}
                     </MenuItem>
                   ))}
+
+                  {/* {filteredFirmArray.map((element, index) => (
+                    <MenuItem value={element.label} key={index}>
+                      {element.label}
+                    </MenuItem>
+                  ))} */}
                 </Select>
+
 
                 {errors.firms && (
                   <Typography variant="caption" color="red">

@@ -31,7 +31,7 @@ const CustomUi = (props) => {
             <h2 className="delete-firm-title">Delete Firm</h2>
             <p className="delete-firm">
               Are you sure you want to delete
-              <strong>&nbsp;{props.firmName}</strong>?
+              <strong>&nbsp;{props.label}</strong>?
             </p>
 
             <button className="yes" onClick={handleConfirm}>
