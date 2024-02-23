@@ -21,7 +21,7 @@ exports.getAllPRNewsWire = async (req, res) => {
 
       const listed_firms = [...law_firms];
       
-      const browser = await puppeteer.launch({ headless: "new" });
+      const browser = await puppeteer.launch({ headless: false });
 
       const page = await browser.newPage();
 
