@@ -17,6 +17,7 @@ import {
   MenuItem,
   TableSortLabel,
   Box,
+  Button,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
@@ -36,6 +37,7 @@ const ReleasesIssuedByFirm = () => {
   const [sortDirection, setSortDirection] = useState("asc");
   const [searched, setSearched] = useState("");
   const [check, setCheck] = useState(false);
+  const [expandedRows, setExpandedRows] = useState({});
 
   const isSmallScreen = useMediaQuery("(max-width:500px)");
   var sequentialData = [];
@@ -345,6 +347,15 @@ const ReleasesIssuedByFirm = () => {
     setPage(0);
   };
 
+  // Function to handle expanding/collapsing a row
+  const handleExpandRow = (rowKey) => {
+    console.log(rowKey);
+    setExpandedRows((prevState) => ({
+      ...prevState,
+      [rowKey]: !prevState[rowKey],
+    }));
+  };
+
   // if (
   //   check === true &&
   //   finalData.length <= sortedRows.length &&
@@ -489,13 +500,49 @@ const ReleasesIssuedByFirm = () => {
                   sortedRows
                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                     .map((row) => (
-                      <TableRow key={row.serial}>
-                        {columns.map((column) => (
-                          <TableCell key={column.id} hidesorticon={`${false}`}>
-                            {row[column.id]}
-                          </TableCell>
-                        ))}
-                      </TableRow>
+                      <TableRow>
+                      {columns.map((column) => (
+                        <TableCell key={column.id} hidesorticon={`${false}`}>
+                          {column.id === "tickers" && row.tickers.length > 50 ? (
+                            <div>
+                              {expandedRows[row.serial] ? (
+                                <>
+                                  {row.tickers}
+                                  <Button
+                                    size="small"
+                                    variant="text"
+                                    sx={{ textTransform: "lowercase" }}
+                                    onClick={() => handleExpandRow(row.serial)}
+                                    disableRipple
+                                    disableElevation
+                                    disableFocusRipple
+                                  >
+                                    ...show less
+                                  </Button>
+                                </>
+                              ) : (
+                                <>
+                                  {row.tickers.slice(0, 50)}
+                                  <Button
+                                    size="small"
+                                    variant="text"
+                                    sx={{ textTransform: "lowercase" }}
+                                    onClick={() => handleExpandRow(row.serial)}
+                                    disableRipple
+                                    disableElevation
+                                    disableFocusRipple
+                                  >
+                                    ...show more
+                                  </Button>
+                                </>
+                              )}
+                            </div>
+                          ) : (
+                            row[column.id]
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
                     ))
                 ) : finalData.length === 0 &&
                   check === true &&
@@ -530,7 +577,7 @@ const ReleasesIssuedByFirm = () => {
               ]}
               component="div"
               // count={
-              //   finalData.length == 0 ? sortedRows.length : finalData.length
+              //    finalData.length
               // }
               count={
                 finalData.length !== 0 &&
@@ -539,6 +586,7 @@ const ReleasesIssuedByFirm = () => {
                   ? finalData.length
                   : check === false && finalData.length <= sortedRows.length
                   ? sortedRows.length
+                  // : finalData.length
                   : finalData.length
               }
               rowsPerPage={rowsPerPage}
@@ -546,6 +594,7 @@ const ReleasesIssuedByFirm = () => {
               onPageChange={handleChangePage}
               onRowsPerPageChange={handleChangeRowsPerPage}
             />
+            {console.log(page)}
           </TableContainer>
         )}
       </Card>

@@ -36,6 +36,7 @@ import { confirmAlert } from "react-confirm-alert";
 import "react-confirm-alert/src/react-confirm-alert.css";
 import "../Styles/buttons.css";
 import CustomUi from "../helpers/CustomUI";
+import { UseNewsStore } from "../store";
 
 const AddNewFirms = () => {
   const [page, setPage] = useState(0);
@@ -46,6 +47,7 @@ const AddNewFirms = () => {
   const [sortDirection, setSortDirection] = useState("asc");
   const [loading, setLoading] = useState(false);
   const [value, setValue] = useState("");
+  const myStore = UseNewsStore();
   const {
     register,
     handleSubmit,
@@ -161,28 +163,28 @@ const AddNewFirms = () => {
 
     // NEWLY ADDED FIRMS LIST
     {
-      firmName: "Robbins-Geller-Rudman-Dowd-LLP-8150",
+      firmName: "Robbins Geller Rudman Dowd LLP-8150",
       label: "Robbins Geller",
     },
     { firmName: "Saxena white-0", label: "Saxena white" },
     {
-      firmName: "Scott & Scott-Attorneys-at-Law-LLP-8957",
+      firmName: "Scott & Scott Attorneys at Law LLP-8957",
       label: "Scott & Scott",
     },
-    { firmName: "Robbins-LLP-7239", label: "Robbins LLP" },
+    { firmName: "Robbins LLP-7239", label: "Robbins LLP" },
     { firmName: "Bernstein Litowitz-0", label: "Bernstein Litowitz" },
-    { firmName: "Kahn-Swick-Foti-LLC-7442", label: "Kahn Swick" },
+    { firmName: "Kahn Swick Foti LLC-7442", label: "Kahn Swick" },
     { firmName: "Abraham Fruchter-0", label: "Abraham Fruchter" },
     { firmName: "Entwistle-0", label: "Entwistle" },
-    { firmName: "Holzer-Holzer-LLC-7426", label: "Holzer & Holzer" },
+    { firmName: "Holzer Holzer LLC-7426", label: "Holzer & Holzer" },
     {
-      firmName: "The-Law-Offices-of-Frank-R.-Cruz-9419",
+      firmName: "The Law Offices of Frank R. Cruz-9419",
       label: "Frank R. Cruz",
     },
-    { firmName: "Portnoy-Law-7179", label: "Portnoy Law Firm" },
-    { firmName: "Kirby-McInerney-LLP-9576", label: "Kirby McInerney" },
+    { firmName: "Portnoy Law-7179", label: "Portnoy Law Firm" },
+    { firmName: "Kirby McInerney LLP-9576", label: "Kirby McInerney" },
     {
-      firmName: "Law-Offices-of-Howard-G.-Smith-9420",
+      firmName: "Law Offices of Howard G. Smith-9420",
       label: "Howard G. Smith",
     },
     { firmName: "Bragar Eagel-0", label: "Bragar Eagel" },
@@ -193,6 +195,48 @@ const AddNewFirms = () => {
   const filteredFirmArray = firmArray.filter(
     (item) => !firmNamesToRemove.includes(item.label)
   );
+
+
+  // TEST
+  const testAPICall = async() => {
+    const response = await axios.get(
+      "http://localhost:5000/api/business-wire"
+    );
+    myStore.setBusinessWireData(response);
+
+    const response1 = await axios.get(
+      "http://localhost:5000/api/pr-news-wire"
+    );
+    myStore.setPRNewsWireData(response1);
+    const response2 = await axios.get("http://localhost:5000/api/news-files");
+    myStore.setNewsFileData(response2);
+    const response3 = await axios.get(
+      "http://localhost:5000/api/globe-news-wire"
+    );
+    myStore.setGlobeNewsWireData(response3);
+    const response4 = await axios.get(
+      "http://localhost:5000/api/access-wire"
+    );
+    myStore.setAccessWireData(response4);
+
+    const allNewsData = [
+      ...response.data,
+      ...response1.data,
+      ...response2.data,
+      ...response3.data,
+      ...response4.data,
+    ];
+
+    myStore.setAllNewsData(allNewsData);
+
+    const arr = allNewsData
+      .map((items) => items?.payload)
+      .sort((a, b) => a.tickerSymbol.localeCompare(b.tickerSymbol));
+
+    myStore.setAllTickers(arr);
+
+    return allNewsData;
+  }
 
   // POST API FOR ADDING NEW FIRMS
   const submitData = async (data) => {
@@ -229,6 +273,7 @@ const AddNewFirms = () => {
             theme: "light",
           });
           handleClose();
+          
         } else {
           toast.success("Firm has been added successfully.", {
             position: "top-right",
@@ -238,6 +283,7 @@ const AddNewFirms = () => {
           setLoading(false);
           handleClose();
           fetchFirms();
+          testAPICall();
         }
       })
       .catch((error) => {

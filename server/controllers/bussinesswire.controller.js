@@ -70,7 +70,8 @@ exports.getAllBussinessWire = async (req, res) => {
         waitUntil: "domcontentloaded",
         timeout: 300000,
       });
-      await page.waitForSelector(".bw-news-section li", { timeout: 300000 });
+      // await page.waitForSelector(".bw-news-section li", { timeout: 300000 });
+      await page.waitForSelector(".bw-news-section li");
 
       const newsItems = await page.$$eval(".bw-news-section li", (items) => {
         return items
@@ -159,16 +160,16 @@ exports.getAllBussinessWire = async (req, res) => {
     // JSON OF TICKER ALREADY THAT EXISTS IN LAST 60 DAYS.
 
     // firmData.push({
-    //   firm: "Rosen",
+    //   firm: "Levi & Korsinsky",
     //   payload: {
     //     scrapId: uuidv4(),
-    //     tickerSymbol: "DADA", //TICKER ALREADY EXISTS
-    //     firmIssuing: "Berger Montague",
+    //     tickerSymbol: "BTI", //TICKER ALREADY EXISTS
+    //     firmIssuing: "Levi & Korsinsky",
     //     serviceIssuedOn: "BusinessWire",
-    //     dateTimeIssued: "January 16, 2024",
+    //     dateTimeIssued: "January 31, 2024",
     //     urlToRelease:
     //       "http://www.businesswire.com/news/home/20240101367342/zh-HK/",
-    //     tickerIssuer: "NYSE",
+    //     tickerIssuer: "NASDAQ",
     //   },
     // });
 
