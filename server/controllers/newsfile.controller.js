@@ -116,9 +116,10 @@ exports.getAllNewsFile = async (req, res) => {
         waitUntil: "domcontentloaded",
         timeout: 300000,
       });
-      await page.waitForSelector(".latest-news.no-images li", {
-        timeout: 300000,
-      });
+      // await page.waitForSelector(".latest-news.no-images li", {
+      //   timeout: 300000,
+      // });
+      await page.waitForSelector(".latest-news.no-images li");
 
       var newsItems = await page.$$eval(
         ".latest-news.no-images li",

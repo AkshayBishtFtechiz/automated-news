@@ -72,7 +72,8 @@ exports.getAllGlobeNewsWire = async (req, res) => {
         waitUntil: "domcontentloaded",
         timeout: 300000,
       });
-      await page.waitForSelector(".pagging-list-item", { timeout: 300000 });
+      // await page.waitForSelector(".pagging-list-item", { timeout: 300000 });
+      await page.waitForSelector(".pagging-list-item");
 
       const htmlContent = await page.content();
       const $ = cheerio.load(htmlContent);
