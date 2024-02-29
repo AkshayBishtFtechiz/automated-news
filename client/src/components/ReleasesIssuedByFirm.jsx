@@ -45,22 +45,22 @@ const ReleasesIssuedByFirm = () => {
   const fetchBusinessWireData = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:5000/api/business-wire"
+        `${process.env.REACT_APP_BASE_URL}/api/business-wire`
       );
       myStore.setBusinessWireData(response);
 
       const response1 = await axios.get(
-        "http://localhost:5000/api/pr-news-wire"
+        `${process.env.REACT_APP_BASE_URL}/api/pr-news-wire`
       );
       myStore.setPRNewsWireData(response1);
-      const response2 = await axios.get("http://localhost:5000/api/news-files");
+      const response2 = await axios.get(`${process.env.REACT_APP_BASE_URL}/api/news-files`);
       myStore.setNewsFileData(response2);
       const response3 = await axios.get(
-        "http://localhost:5000/api/globe-news-wire"
+        `${process.env.REACT_APP_BASE_URL}/api/globe-news-wire`
       );
       myStore.setGlobeNewsWireData(response3);
       const response4 = await axios.get(
-        "http://localhost:5000/api/access-wire"
+        `${process.env.REACT_APP_BASE_URL}/api/access-wire`
       );
       myStore.setAccessWireData(response4);
 

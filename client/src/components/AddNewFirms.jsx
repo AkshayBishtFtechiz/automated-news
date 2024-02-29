@@ -129,7 +129,7 @@ const AddNewFirms = () => {
   const fetchFirms = async () => {
     var arr = [];
     await axios
-      .get("http://localhost:5000/api/new-firm-news-wire-getdetails")
+      .get(`${process.env.REACT_APP_BASE_URL}/api/new-firm-news-wire-getdetails`)
       .then((response, index) => {
         response.data.map((item, index) => {
           return arr.push(Object.assign(item, { serial: index + 1 }));
@@ -200,22 +200,22 @@ const AddNewFirms = () => {
   // TEST
   const testAPICall = async() => {
     const response = await axios.get(
-      "http://localhost:5000/api/business-wire"
+      `${process.env.REACT_APP_BASE_URL}/api/business-wire`
     );
     myStore.setBusinessWireData(response);
 
     const response1 = await axios.get(
-      "http://localhost:5000/api/pr-news-wire"
+      `${process.env.REACT_APP_BASE_URL}/api/pr-news-wire`
     );
     myStore.setPRNewsWireData(response1);
-    const response2 = await axios.get("http://localhost:5000/api/news-files");
+    const response2 = await axios.get(`${process.env.REACT_APP_BASE_URL}/api/news-files`);
     myStore.setNewsFileData(response2);
     const response3 = await axios.get(
-      "http://localhost:5000/api/globe-news-wire"
+      `${process.env.REACT_APP_BASE_URL}/api/globe-news-wire`
     );
     myStore.setGlobeNewsWireData(response3);
     const response4 = await axios.get(
-      "http://localhost:5000/api/access-wire"
+      `${process.env.REACT_APP_BASE_URL}/api/access-wire`
     );
     myStore.setAccessWireData(response4);
 
@@ -264,7 +264,7 @@ const AddNewFirms = () => {
     };
 
     await axios
-      .post("http://localhost:5000/api/new-firm-news-wire", payload)
+      .post(`${process.env.REACT_APP_BASE_URL}/api/new-firm-news-wire`, payload)
       .then((response) => {
         if (response.data[0].message !== undefined) {
           toast.error(response.data[0].message, {
