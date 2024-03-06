@@ -1,0 +1,96 @@
+.delete-icon {
+  background-color: #f5365c;
+  border-radius: 5px;
+  margin-right: 5px;
+  color: white;
+  padding: 6px;
+  height: 16px;
+  width: 16px;
+  transition: 0.2s;
+}
+.delete-icon:hover {
+  box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.75);
+  -webkit-box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.75);
+  -moz-box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.75);
+  transform: translate(0, -3px) !important;
+  cursor: pointer;
+}
+.edit-icon {
+  background-color: #5e72e4;
+  border-radius: 5px;
+  margin-right: 10px;
+  color: white;
+  padding: 6px;
+  height: 16px;
+  width: 16px;
+  transition: 0.2s;
+  margin-top: unset !important;
+}
+.edit-icon:hover {
+  box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.75);
+  -webkit-box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.75);
+  -moz-box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.75);
+  transform: translate(0, -3px) !important;
+  cursor: pointer;
+}
+
+.close:hover {
+  background: #f5365c !important;
+}
+
+.delete-firm {
+  font-family: "Inter";
+  color: #666666;
+}
+
+.delete-firm-title {
+  font-family: "Inter";
+  margin: 0;
+  color: #666666;
+}
+
+.no {
+  background-color: #19e33e !important;
+  font-size: 14px !important;
+  font-family: "Inter" !important;
+  transition: 0.2s;
+  padding: 7px 18px;
+  border: none;
+  border-radius: 4px;
+  color: white;
+}
+
+.no:hover {
+  box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.75);
+  -webkit-box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.75);
+  -moz-box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.75);
+  transform: translate(0, -3px) !important;
+  cursor: pointer;
+  font-weight: bold !important;
+}
+
+.yes {
+  background-color: #f5365c !important;
+  font-size: 14px !important;
+  font-family: "Inter" !important;
+  transition: 0.2s;
+  margin-right: 10px;
+  padding: 7px 18px;
+  border: none;
+  border-radius: 4px;
+  color: white;
+}
+
+.yes:hover {
+  box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.75);
+  -webkit-box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.75);
+  -moz-box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.75);
+  transform: translate(0, -3px) !important;
+  cursor: pointer;
+  font-weight: bold !important;
+}
+
+.react-confirm-alert-overlay
+{
+  background: rgba(255, 255, 255, 0.6) !important;
+}

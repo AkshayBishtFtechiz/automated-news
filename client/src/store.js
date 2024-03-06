@@ -15,6 +15,27 @@ export const UseNewsStore = create(
       // FILTERED TICKERS IN THIS
       filteredTickerData: [],
 
+      // BUSINESS WIRE DATA
+      businessWireData: [],
+
+      // PR NEWS WIRE DATA
+      prNewsWireData: [],
+
+      // ACCESS WIRE DATA
+      accessWireData: [],
+
+      // GLOBE NEWS WIRE DATA
+      globeNewsWireData: [],
+
+      // NEWS FILE DATA
+      newsFileData: [],
+
+      // LOADING
+      isLoading: false,
+
+      // ISFETCHED
+      isFetched: false,
+      
       // SETTING FILTERED DATA HERE
       setFilteredData: (data) => set({ filteredData: data }),
       setFilteredDataTandF: (data) => set({ filteredDataofTandF: data }),
@@ -25,6 +46,25 @@ export const UseNewsStore = create(
 
       // SETTING ALL TICKERS
       setAllTickers: (data) => set({ allTickers: data }),
+      
+      // SETTING BUSINESSWIRE DATA
+      setBusinessWireData: (data) => set({ businessWireData: data}),
+      
+      // SETTING PRNEWSWIRE DATA
+      setPRNewsWireData: (data) => set({ prNewsWireData: data}),
+      
+      // SETTING ACCESSWIRE DATA
+      setAccessWireData: (data) => set({ accessWireData: data}),
+      
+      // SETTING GLOBENEWSWIRE DATA
+      setGlobeNewsWireData: (data) => set({ globeNewsWireData: data}),
+      
+      // SETTING NEWS FILE DATA
+      setNewsFileData: (data) => set({ newsFileData: data}),
+
+      // SETTING LOADING
+      setLoading: (data, data1) => set({ isLoading: data, isFetched: data1 })
+
     }),
     "NewsStore"
   )

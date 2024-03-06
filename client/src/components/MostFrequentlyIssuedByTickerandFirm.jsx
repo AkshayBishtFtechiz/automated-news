@@ -17,9 +17,12 @@ import {
   MenuItem,
   TableSortLabel,
   Avatar,
+  Box,
+  useMediaQuery,
 } from "@mui/material";
 import { UseNewsStore } from "../store";
 import moment from "moment";
+import SearchBar from "@mkyy/mui-search-bar";
 
 const MostFrequentlyIssuedByTickerandFirm = () => {
   const myStore = UseNewsStore();
@@ -28,6 +31,10 @@ const MostFrequentlyIssuedByTickerandFirm = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [tickerFirmOrderBy, setTickerFirmOrderBy] = useState("tickers");
   const [tickerFirmSortDirection, setTickerFirmSortDirection] = useState("asc");
+  const [searched, setSearched] = useState("");
+  const [check, setCheck] = useState(false);
+  const isSmallScreen = useMediaQuery("(max-width:500px)");
+  var sequentialData = [];
 
   const filterDataByDays = (data, days) => {
     const currentDate = moment();
@@ -67,6 +74,26 @@ const MostFrequentlyIssuedByTickerandFirm = () => {
       })
     );
   };
+
+  if (myStore.businessWireData && myStore.businessWireData.data) {
+    sequentialData.push(...myStore.businessWireData.data);
+  }
+
+  if (myStore.prNewsWireData && myStore.prNewsWireData.data) {
+    sequentialData.push(...myStore.prNewsWireData.data);
+  }
+
+  if (myStore.newsFileData && myStore.newsFileData.data) {
+    sequentialData.push(...myStore.newsFileData.data);
+  }
+
+  if (myStore.globeNewsWireData && myStore.globeNewsWireData.data) {
+    sequentialData.push(...myStore.globeNewsWireData.data);
+  }
+
+  if (myStore.accessWireData && myStore.accessWireData.data) {
+    sequentialData.push(...myStore.accessWireData.data);
+  }
 
   useEffect(() => {
     if (myStore.allNewsData.length > 0) {
@@ -144,12 +171,12 @@ const MostFrequentlyIssuedByTickerandFirm = () => {
   ];
 
   // Create an object to store the occurrence count of each ticker symbol
-  const data = myStore?.allTickers || [];
+  const data = sequentialData || [];
   const tickerCounts = {};
   const firmsByTicker = {}; // Use an object to store firms by ticker symbol
 
   data.forEach((tickerObj) => {
-    const { tickerSymbol, dateTimeIssued } = tickerObj;
+    const { tickerSymbol, dateTimeIssued } = tickerObj.payload;
     tickerCounts[tickerSymbol] = tickerCounts[tickerSymbol] || {
       count: 0,
       dates: [],
@@ -169,7 +196,7 @@ const MostFrequentlyIssuedByTickerandFirm = () => {
   );
 
   // Count occurrences of each ticker symbol and store firms
-  myStore.allNewsData.forEach((tickerObj) => {
+  sequentialData?.forEach((tickerObj) => {
     const { tickerSymbol, dateTimeIssued } = tickerObj.payload;
     const { firm } = tickerObj;
     const issuedDate = moment(dateTimeIssued, "MMMM DD, YYYY");
@@ -187,7 +214,7 @@ const MostFrequentlyIssuedByTickerandFirm = () => {
   });
 
   const tickerCountsArray = Object.keys(tickerCounts).map((tickerSymbol) => {
-    const dateTimeIssuedArray = myStore.allNewsData
+    const dateTimeIssuedArray = sequentialData
       .filter((tickerObj) => tickerObj.payload.tickerSymbol === tickerSymbol)
       .map((tickerObj) =>
         moment(tickerObj.payload.dateTimeIssued, "MMMM DD, YYYY").valueOf()
@@ -195,7 +222,7 @@ const MostFrequentlyIssuedByTickerandFirm = () => {
 
     function countOccurrences(arr) {
       const occurrences = {};
-      arr.forEach((item) => {
+      arr?.forEach((item) => {
         occurrences[item] = (occurrences[item] || 0) + 1;
       });
       return occurrences;
@@ -210,7 +237,7 @@ const MostFrequentlyIssuedByTickerandFirm = () => {
       extra: Object.entries(occurrences).map((items) => {
         return items;
       }),
-      firmCount: firmsByTicker[tickerSymbol].length,
+      firmCount: firmsByTicker[tickerSymbol]?.length,
       dateTimeIssued: moment(Math.max(...dateTimeIssuedArray)).format(
         "MMMM DD, YYYY"
       ),
@@ -296,6 +323,29 @@ const MostFrequentlyIssuedByTickerandFirm = () => {
     getTickerFirmComparator(tickerFirmOrderBy, tickerFirmSortDirection)
   );
 
+  const [finalData, setFinalData] = useState(tickerFirmSortedRows);
+
+  const requestSearch = (searchedVal) => {
+    const filteredRows = tickerFirmSortedRows.filter((row) => {
+      return row.tickers.toLowerCase().includes(searchedVal.toLowerCase());
+    });
+    setFinalData(filteredRows);
+    setCheck(true);
+
+    if (searchedVal.length === 0) {
+      setFinalData([]);
+      setCheck(false);
+    } else {
+      setFinalData(filteredRows);
+    }
+  };
+
+  const cancelSearch = () => {
+    setSearched(true);
+    setFinalData(tickerFirmSortedRows);
+    setCheck(false);
+  };
+
   function stableSort(array, comparator) {
     const stabilizedThis = array.map((el, index) => [el, index]);
     stabilizedThis.sort((a, b) => {
@@ -347,31 +397,57 @@ const MostFrequentlyIssuedByTickerandFirm = () => {
             </p>
           }
           action={
-            !isLoading ? (
-              <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
-                <InputLabel id="most-frequent-issue-by-ticker-and-firm-select-small-label">
-                  Days
-                </InputLabel>
-                <Select
-                  labelId="most-frequent-issue-by-ticker-and-firm-select-small-label"
-                  id="most-frequent-issue-by-ticker-and-firm-select-small"
-                  label="Days"
-                  onChange={(e) => handleChange(e.target.value)}
-                  sx={{ fontSize: "medium" }}
-                  defaultValue={""}
-                >
-                  <MenuItem value="5">5 Days</MenuItem>
-                  <MenuItem value="15">15 Days</MenuItem>
-                  <MenuItem value="30">30 Days</MenuItem>
-                </Select>
-              </FormControl>
+            !isLoading && !myStore.isLoading ? (
+              <div
+                style={{
+                  display: isSmallScreen ? "block" : "flex",
+                  alignItems: "center",
+                }}
+              >
+                <SearchBar
+                  value={searched}
+                  onChange={(searchVal) => requestSearch(searchVal)}
+                  onCancelResearch={cancelSearch}
+                  style={{
+                    border: "1px solid rgba(0, 0, 0, 0.12)",
+                    margin: isSmallScreen ? "6px" : "0px",
+                  }}
+                />
+                <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
+                  <InputLabel id="most-frequent-issue-by-ticker-and-firm-select-small-label">
+                    Days
+                  </InputLabel>
+                  <Select
+                    labelId="most-frequent-issue-by-ticker-and-firm-select-small-label"
+                    id="most-frequent-issue-by-ticker-and-firm-select-small"
+                    label="Days"
+                    onChange={(e) => handleChange(e.target.value)}
+                    sx={{ fontSize: "medium" }}
+                    defaultValue={""}
+                  >
+                    <MenuItem value="5">5 Days</MenuItem>
+                    <MenuItem value="15">15 Days</MenuItem>
+                    <MenuItem value="30">30 Days</MenuItem>
+                  </Select>
+                </FormControl>
+              </div>
             ) : (
-              ""
+              <Box>
+                {tickerFirmSortedRows.length > 1 && myStore.isLoading && (
+                  <CircularProgress
+                    sx={{
+                      width: "24px !important",
+                      height: "24px !important",
+                      padding: "15px 15px !important",
+                    }}
+                  />
+                )}
+              </Box>
             )
           }
         />
 
-        {isLoading ? (
+        {tickerFirmSortedRows.length < 1  && myStore.isLoading ? (
           <div
             style={{
               display: "flex",
@@ -412,33 +488,126 @@ const MostFrequentlyIssuedByTickerandFirm = () => {
               </TableHead>
 
               <TableBody>
-                {tickerFirmSortedRows
-                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((row, index) => (
-                    <TableRow key={index}>
+                {/* {finalData.length !== 0 &&
+                check === true &&
+                finalData.length <= tickerFirmSortedRows.length ? (
+                  finalData
+                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    .map((row) => (
+                      <TableRow key={row.serial}>
+                        {columns.map((column) => (
+                          <TableCell key={column.id} hidesorticon={`${false}`}>
+                            {row[column.id]}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))
+                ) : check === false && finalData.length <= tickerFirmSortedRows.length ? (
+                  tickerFirmSortedRows
+                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    .map((row) => (
+                      <TableRow key={row.serial}>
+                        {columns.map((column) => (
+                          <TableCell key={column.id} hidesorticon={`${false}`}>
+                            {row[column.id]}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))
+                ) : finalData.length === 0 &&
+                  check === true &&
+                  finalData.length <= tickerFirmSortedRows.length ? (
+                  <TableRow>
+                    <TableCell colSpan={columns.length} align="center">
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <img
+                          src="nodata.png"
+                          alt="No Data"
+                          className="noDataImg"
+                        />
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : null} */}
+
+                {finalData.length !== 0 &&
+                check === true &&
+                finalData.length <= tickerFirmSortedRows.length ? (
+                  finalData
+                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    .map((row) => (
+                      <TableRow key={row.serial}>
                       {columns.map((column) => (
-                        <TableCell key={column.id}>
-                          {column.id === "firm" ? (
-                            // Render the 'firm' column differently
-                            <div style={{ display: "flex", flexWrap: "wrap" }}>
-                              {row[column.id].map((firm, firmIndex) => (
-                                <div key={firmIndex}>{firm}</div>
-                              ))}
-                            </div>
-                          ) : (
-                            // Render other columns normally
-                            row[column.id]
-                          )}
+                        <TableCell key={column.id} hidesorticon={`${false}`}>
+                          {row[column.id]}
                         </TableCell>
                       ))}
-                    </TableRow>
-                  ))}
+                    </TableRow>                    
+                    ))
+                ) : check === false &&
+                  finalData.length <= tickerFirmSortedRows.length ? (
+                  tickerFirmSortedRows
+                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    .map((row) => (
+                      <TableRow key={row.serial}>
+                        {" "}
+                        {/* Ensure each TableRow has a unique key */}
+                        {columns.map((column) => (
+                          <TableCell key={column.id} hidesorticon={`${false}`}>
+                            {row[column.id]}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))
+                ) : finalData.length === 0 &&
+                  check === true &&
+                  finalData.length <= tickerFirmSortedRows.length ? (
+                  <TableRow key="no-data">
+                    {" "}
+                    {/* Use a unique key for special cases */}
+                    <TableCell colSpan={columns.length} align="center">
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <img
+                          src="nodata.png"
+                          alt="No Data"
+                          className="noDataImg"
+                        />
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : null}
               </TableBody>
             </Table>
             <TablePagination
-              rowsPerPageOptions={[5, 10, 25]}
+              rowsPerPageOptions={[
+                5,
+                10,
+                25,
+                { label: "All", value: tickerFirmSortedRows.length },
+              ]}
               component="div"
-              count={tickerFirmSortedRows.length}
+              count={
+                finalData.length !== 0 &&
+                check === true &&
+                finalData.length <= tickerFirmSortedRows.length
+                  ? finalData.length
+                  : check === false &&
+                    finalData.length <= tickerFirmSortedRows.length
+                  ? tickerFirmSortedRows.length
+                  : finalData.length
+              }
               rowsPerPage={rowsPerPage}
               page={page}
               onPageChange={handleChangePage}
