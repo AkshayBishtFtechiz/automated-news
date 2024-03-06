@@ -397,7 +397,7 @@ const MostFrequentlyIssuedByTickerandFirm = () => {
             </p>
           }
           action={
-            !isLoading ? (
+            !isLoading && !myStore.isLoading ? (
               <div
                 style={{
                   display: isSmallScreen ? "block" : "flex",
@@ -433,7 +433,7 @@ const MostFrequentlyIssuedByTickerandFirm = () => {
               </div>
             ) : (
               <Box>
-                {tickerFirmSortedRows.length > 1 && (
+                {tickerFirmSortedRows.length > 1 && myStore.isLoading && (
                   <CircularProgress
                     sx={{
                       width: "24px !important",
@@ -447,7 +447,7 @@ const MostFrequentlyIssuedByTickerandFirm = () => {
           }
         />
 
-        {tickerFirmSortedRows.length < 1 ? (
+        {tickerFirmSortedRows.length < 1  && myStore.isLoading ? (
           <div
             style={{
               display: "flex",
@@ -488,7 +488,7 @@ const MostFrequentlyIssuedByTickerandFirm = () => {
               </TableHead>
 
               <TableBody>
-                {finalData.length !== 0 &&
+                {/* {finalData.length !== 0 &&
                 check === true &&
                 finalData.length <= tickerFirmSortedRows.length ? (
                   finalData
@@ -534,6 +534,59 @@ const MostFrequentlyIssuedByTickerandFirm = () => {
                       </div>
                     </TableCell>
                   </TableRow>
+                ) : null} */}
+
+                {finalData.length !== 0 &&
+                check === true &&
+                finalData.length <= tickerFirmSortedRows.length ? (
+                  finalData
+                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    .map((row) => (
+                      <TableRow key={row.serial}>
+                      {columns.map((column) => (
+                        <TableCell key={column.id} hidesorticon={`${false}`}>
+                          {row[column.id]}
+                        </TableCell>
+                      ))}
+                    </TableRow>                    
+                    ))
+                ) : check === false &&
+                  finalData.length <= tickerFirmSortedRows.length ? (
+                  tickerFirmSortedRows
+                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    .map((row) => (
+                      <TableRow key={row.serial}>
+                        {" "}
+                        {/* Ensure each TableRow has a unique key */}
+                        {columns.map((column) => (
+                          <TableCell key={column.id} hidesorticon={`${false}`}>
+                            {row[column.id]}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))
+                ) : finalData.length === 0 &&
+                  check === true &&
+                  finalData.length <= tickerFirmSortedRows.length ? (
+                  <TableRow key="no-data">
+                    {" "}
+                    {/* Use a unique key for special cases */}
+                    <TableCell colSpan={columns.length} align="center">
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <img
+                          src="nodata.png"
+                          alt="No Data"
+                          className="noDataImg"
+                        />
+                      </div>
+                    </TableCell>
+                  </TableRow>
                 ) : null}
               </TableBody>
             </Table>
@@ -550,7 +603,8 @@ const MostFrequentlyIssuedByTickerandFirm = () => {
                 check === true &&
                 finalData.length <= tickerFirmSortedRows.length
                   ? finalData.length
-                  : check === false && finalData.length <= tickerFirmSortedRows.length
+                  : check === false &&
+                    finalData.length <= tickerFirmSortedRows.length
                   ? tickerFirmSortedRows.length
                   : finalData.length
               }

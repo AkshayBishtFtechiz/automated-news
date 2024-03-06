@@ -113,15 +113,18 @@ const MostFrequentlyIssuedByTicker = () => {
     setPage(0);
   };
 
-  const handleSort = (columnId) => {
+  // const handleSort = (columnId) => {
+  //   const isAsc = orderBy === columnId && order === "asc";
+  //   setOrder(isAsc ? "desc" : "asc");
+  //   setOrderBy(columnId);
+  // };
+
+  const createSortHandler = (columnId) => () => {
     const isAsc = orderBy === columnId && order === "asc";
     setOrder(isAsc ? "desc" : "asc");
     setOrderBy(columnId);
   };
-
-  const createSortHandler = (columnId) => () => {
-    handleSort(columnId);
-  };
+  
 
   const columns = [
     {
@@ -236,7 +239,7 @@ const MostFrequentlyIssuedByTicker = () => {
             </p>
           }
           action={
-            !isLoading ? (
+            !isLoading && !myStore.isLoading? (
               <div
                 style={{
                   display: isSmallScreen ? "block" : "flex",
@@ -286,7 +289,7 @@ const MostFrequentlyIssuedByTicker = () => {
           }
         />
 
-        {rows.length < 1 ? (
+        {rows.length < 1 && myStore.isLoading ? (
           <div
             style={{
               display: "flex",

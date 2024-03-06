@@ -19,6 +19,8 @@ import {
   TablePagination,
   TableSortLabel,
   Tooltip,
+  Snackbar,
+  Slide,
   CircularProgress,
 } from "@mui/material";
 // import { ReactComponent as EditIcon } from "../Icons/Edit.svg";
@@ -47,7 +49,24 @@ const AddNewFirms = () => {
   const [sortDirection, setSortDirection] = useState("asc");
   const [loading, setLoading] = useState(false);
   const [value, setValue] = useState("");
+  const [isClick, setClick] = useState(false);
   const myStore = UseNewsStore();
+  const [state, setState] = useState({
+    open: false,
+    Transition: Slide,
+  });
+
+  function SlideTransition(props) {
+    return <Slide {...props} direction="up" />;
+  }
+
+  const handleCloseSnack = () => {
+    setState({
+      ...state,
+      open: false,
+    });
+  };
+
   const {
     register,
     handleSubmit,
@@ -129,7 +148,9 @@ const AddNewFirms = () => {
   const fetchFirms = async () => {
     var arr = [];
     await axios
-      .get(`${process.env.REACT_APP_BASE_URL}/api/new-firm-news-wire-getdetails`)
+      .get(
+        `${process.env.REACT_APP_BASE_URL}/api/new-firm-news-wire-getdetails`
+      )
       .then((response, index) => {
         response.data.map((item, index) => {
           return arr.push(Object.assign(item, { serial: index + 1 }));
@@ -147,19 +168,19 @@ const AddNewFirms = () => {
 
   // FIRM ARRAY FOR ALL FIRMS
   const firmArray = [
-    { firmName: "Berger Montague-7427", label: "Berger Montague" },
-    { firmName: "Bernstein Liebhard-6535", label: "Bernstein Liebhard" },
-    { firmName: "Bronstein, Gewirtz-7130", label: "Bronstein, Gewirtz" },
-    { firmName: "Faruqi & Faruqi-6455", label: "Faruqi & Faruqi" },
-    { firmName: "Grabar-8797", label: "Grabar" },
-    { firmName: "Hagens Berman-7059", label: "Hagens Berman" },
-    { firmName: "Kessler Topaz-7699", label: "Kessler Topaz" },
-    { firmName: "Pomerantz-7611", label: "Pomerantz" },
-    { firmName: "Rigrodsky-8569", label: "Rigrodsky" },
-    { firmName: "Schall-6640", label: "Schall" },
-    { firmName: "Kaskela-7815", label: "Kaskela" },
-    { firmName: "Glancy-9378", label: "Glancy" },
-    { firmName: "Levi & Korsinsky-7091", label: "Levi & Korsinsky" },
+    // { firmName: "Berger Montague-7427", label: "Berger Montague" },
+    // { firmName: "Bernstein Liebhard-6535", label: "Bernstein Liebhard" },
+    // { firmName: "Bronstein, Gewirtz-7130", label: "Bronstein, Gewirtz" },
+    // { firmName: "Faruqi & Faruqi-6455", label: "Faruqi & Faruqi" },
+    // { firmName: "Grabar-8797", label: "Grabar" },
+    // { firmName: "Hagens Berman-7059", label: "Hagens Berman" },
+    // { firmName: "Kessler Topaz-7699", label: "Kessler Topaz" },
+    // { firmName: "Pomerantz-7611", label: "Pomerantz" },
+    // { firmName: "Rigrodsky-8569", label: "Rigrodsky" },
+    // { firmName: "Schall-6640", label: "Schall" },
+    // { firmName: "Kaskela-7815", label: "Kaskela" },
+    // { firmName: "Glancy-9378", label: "Glancy" },
+    // { firmName: "Levi & Korsinsky-7091", label: "Levi & Korsinsky" },
 
     // NEWLY ADDED FIRMS LIST
     {
@@ -196,9 +217,19 @@ const AddNewFirms = () => {
     (item) => !firmNamesToRemove.includes(item.label)
   );
 
-
   // TEST
-  const testAPICall = async() => {
+  const testAPICall = async () => {
+    // myStore.setLoading(true);
+    // console.log(myStore.isLoading);
+    // console.log(myStore.isFetched);
+    // if(myStore.isFetched == false)
+    // {
+    myStore.setLoading(true);
+    // }
+    // else
+    // {
+    //   myStore.setLoading(false);
+    // }
     const response = await axios.get(
       `${process.env.REACT_APP_BASE_URL}/api/business-wire`
     );
@@ -208,7 +239,9 @@ const AddNewFirms = () => {
       `${process.env.REACT_APP_BASE_URL}/api/pr-news-wire`
     );
     myStore.setPRNewsWireData(response1);
-    const response2 = await axios.get(`${process.env.REACT_APP_BASE_URL}/api/news-files`);
+    const response2 = await axios.get(
+      `${process.env.REACT_APP_BASE_URL}/api/news-files`
+    );
     myStore.setNewsFileData(response2);
     const response3 = await axios.get(
       `${process.env.REACT_APP_BASE_URL}/api/globe-news-wire`
@@ -235,12 +268,17 @@ const AddNewFirms = () => {
 
     myStore.setAllTickers(arr);
 
+    if (allNewsData.length > 0) {
+      myStore.setLoading(false);
+    }
+
     return allNewsData;
-  }
+  };
 
   // POST API FOR ADDING NEW FIRMS
   const submitData = async (data) => {
     setLoading(true);
+    setClick(true);
     const selectedValue = data.firmName;
     let [firmName, label] = selectedValue.split("#");
     const finalData = firmName;
@@ -273,7 +311,6 @@ const AddNewFirms = () => {
             theme: "light",
           });
           handleClose();
-          
         } else {
           toast.success("Firm has been added successfully.", {
             position: "top-right",
@@ -284,6 +321,7 @@ const AddNewFirms = () => {
           handleClose();
           fetchFirms();
           testAPICall();
+          setClick(false);
         }
       })
       .catch((error) => {
@@ -312,6 +350,29 @@ const AddNewFirms = () => {
     });
   };
 
+  useEffect(() => {
+    if(isClick === true)
+    {
+      setTimeout(() => {
+        if (myStore.isLoading) {
+          setState({
+            open: true,
+            Transition: SlideTransition,
+          });
+        } else {
+          setState({
+            ...state,
+            open: false,
+          });
+        }
+      }, 5000);
+    }
+   else {
+    return;
+   }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [myStore.isLoading, isClick]);
+
   return (
     <div>
       <Card variant="outlined" sx={{ mb: 3 }}>
@@ -336,6 +397,7 @@ const AddNewFirms = () => {
             }
           />
           <Box sx={{ paddingRight: 3 }}>
+          <span>
             <Tooltip title="Add new firm" arrow placement="bottom">
               <Button
                 variant="contained"
@@ -345,10 +407,21 @@ const AddNewFirms = () => {
                   fontFamily: "Inter",
                 }}
                 onClick={handleClickOpen}
+                disabled={myStore.isLoading ? true : false}
               >
-                Add new firms
+                {myStore.isLoading ? (
+                  <>
+                    <CircularProgress color="primary" size={20} />
+                    <span style={{ fontFamily: "Inter" }}>
+                      &nbsp;&nbsp;Loading
+                    </span>
+                  </>
+                ) : (
+                  "Add new firms"
+                )}
               </Button>
             </Tooltip>
+            </span>
           </Box>
         </Box>
         {/* MAIN TABLE STARTS FROM HERE */}
@@ -395,7 +468,9 @@ const AddNewFirms = () => {
                       <Tooltip title="Delete firm" arrow placement="right">
                         <DeleteIcon
                           className="iconHover delete-icon"
-                          onClick={() => deleteFirms(row._id, row.firmName, row.label)}
+                          onClick={() =>
+                            deleteFirms(row._id, row.firmName, row.label)
+                          }
                         />
                       </Tooltip>
                     </div>
@@ -518,7 +593,7 @@ const AddNewFirms = () => {
 
                   {filteredFirmArray.map((element, index) => (
                     <MenuItem
-                    value={`${element.firmName}#${element.label}`}
+                      value={`${element.firmName}#${element.label}`}
                       key={index}
                     >
                       {Object.values(element)[1]}
@@ -531,7 +606,6 @@ const AddNewFirms = () => {
                     </MenuItem>
                   ))} */}
                 </Select>
-
 
                 {errors.firms && (
                   <Typography variant="caption" color="red">
@@ -573,6 +647,28 @@ const AddNewFirms = () => {
           </form>
         </Dialog>
 
+        {myStore.isLoading ? (
+          <Snackbar
+          open={state.open}
+          onClose={handleCloseSnack}
+          TransitionComponent={state.Transition}
+          key={state.Transition.name}
+          autoHideDuration={5000}
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        >
+          <Box className="snackbar_css">
+            {myStore.isLoading && (
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <CircularProgress color="primary" size={20} />
+                <span style={{ fontFamily: "Inter" }}>
+                  &nbsp;&nbsp;Scraping is in progress. Please wait!
+                </span>
+              </Box>
+            )}
+          </Box>
+        </Snackbar>
+        ): ""}
+        
         {/* MODAL FOR ADDING FIRM */}
       </Card>
       <ToastContainer autoClose={3000} limit={1} theme="light" />

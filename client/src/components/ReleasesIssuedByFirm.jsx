@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Card,
   Select,
@@ -24,7 +24,6 @@ import axios from "axios";
 import { UseNewsStore } from "../store";
 import SearchBar from "@mkyy/mui-search-bar";
 import { useMediaQuery } from "@mui/material";
-
 import moment from "moment";
 
 const ReleasesIssuedByFirm = () => {
@@ -53,7 +52,9 @@ const ReleasesIssuedByFirm = () => {
         `${process.env.REACT_APP_BASE_URL}/api/pr-news-wire`
       );
       myStore.setPRNewsWireData(response1);
-      const response2 = await axios.get(`${process.env.REACT_APP_BASE_URL}/api/news-files`);
+      const response2 = await axios.get(
+        `${process.env.REACT_APP_BASE_URL}/api/news-files`
+      );
       myStore.setNewsFileData(response2);
       const response3 = await axios.get(
         `${process.env.REACT_APP_BASE_URL}/api/globe-news-wire`
@@ -128,12 +129,17 @@ const ReleasesIssuedByFirm = () => {
   };
 
   // Use useQuery hook to handle data fetching and caching
-  const { isLoading } = useQuery({
+  const { isLoading, isFetched } = useQuery({
     queryKey: [queryKey],
     queryFn: fetchBusinessWireData,
     refetchInterval: 20 * 60 * 1000,
     refetchIntervalInBackground: true,
   });
+
+  useEffect(() => {
+    myStore.setLoading(isLoading, isFetched);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading, isFetched]);
 
   const separatedData = separateFirmTypes(sequentialData);
   // const separatedData = separateFirmTypes(sequentialData);
@@ -253,12 +259,12 @@ const ReleasesIssuedByFirm = () => {
       const filteredfirmData = firmData.slice(0);
       const filteredTickerData =
         myStore.filteredData[firmName] !== undefined
-          ? myStore.filteredData[firmName].map((item) => item.tickerSymbol)
-          : filteredfirmData.map((items) => items.tickerSymbol);
+          ? myStore.filteredData[firmName].map((item) => item?.tickerSymbol)
+          : filteredfirmData.map((items) => items?.tickerSymbol);
       const filteredServiceIssuedOnData =
         myStore.filteredData[firmName] !== undefined
-          ? myStore.filteredData[firmName].map((item) => item.serviceIssuedOn)
-          : filteredfirmData.map((items) => items.serviceIssuedOn);
+          ? myStore.filteredData[firmName].map((item) => item?.serviceIssuedOn)
+          : filteredfirmData.map((items) => items?.serviceIssuedOn);
       const data = [...new Set(filteredServiceIssuedOnData)];
 
       return {
@@ -349,7 +355,6 @@ const ReleasesIssuedByFirm = () => {
 
   // Function to handle expanding/collapsing a row
   const handleExpandRow = (rowKey) => {
-    console.log(rowKey);
     setExpandedRows((prevState) => ({
       ...prevState,
       [rowKey]: !prevState[rowKey],
@@ -388,7 +393,7 @@ const ReleasesIssuedByFirm = () => {
             </p>
           }
           action={
-            isLoading === false ? (
+            isLoading === false && myStore.isLoading === false ? (
               <div
                 style={{
                   display: isSmallScreen ? "block" : "flex",
@@ -438,7 +443,7 @@ const ReleasesIssuedByFirm = () => {
           }
         />
 
-        {sortedRows.length < 1 ? (
+        {sortedRows.length < 1 && myStore.isLoading ? (
           <div
             style={{
               display: "flex",
@@ -487,8 +492,8 @@ const ReleasesIssuedByFirm = () => {
                 finalData.length <= sortedRows.length ? (
                   finalData
                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                    .map((row) => (
-                      <TableRow key={row.serial}>
+                    .map((row, index) => (
+                      <TableRow key={index}>
                         {columns.map((column) => (
                           <TableCell key={column.id} hidesorticon={`${false}`}>
                             {row[column.id]}
@@ -499,55 +504,84 @@ const ReleasesIssuedByFirm = () => {
                 ) : check === false && finalData.length <= sortedRows.length ? (
                   sortedRows
                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                    .map((row) => (
-                      <TableRow>
-                      {columns.map((column) => (
-                        <TableCell key={column.id} hidesorticon={`${false}`}>
-                          {column.id === "tickers" && row.tickers.length > 50 ? (
-                            <div>
-                              {expandedRows[row.serial] ? (
-                                <>
-                                  {row.tickers}
-                                  <Button
-                                    size="small"
-                                    variant="text"
-                                    sx={{ textTransform: "lowercase" }}
-                                    onClick={() => handleExpandRow(row.serial)}
-                                    disableRipple
-                                    disableElevation
-                                    disableFocusRipple
-                                  >
-                                    ...show less
-                                  </Button>
-                                </>
-                              ) : (
-                                <>
-                                  {row.tickers.slice(0, 50)}
-                                  <Button
-                                    size="small"
-                                    variant="text"
-                                    sx={{ textTransform: "lowercase" }}
-                                    onClick={() => handleExpandRow(row.serial)}
-                                    disableRipple
-                                    disableElevation
-                                    disableFocusRipple
-                                  >
-                                    ...show more
-                                  </Button>
-                                </>
-                              )}
-                            </div>
-                          ) : (
-                            row[column.id]
-                          )}
-                        </TableCell>
-                      ))}
-                    </TableRow>
+                    .map((row, index) => (
+                      <TableRow key={index}>
+                        {columns.map((column) => (
+                          <TableCell key={column.id} hidesorticon={`${false}`}>
+                            {column.id === "tickers" ? (
+                              <>
+                                {expandedRows[row.serial] ? (
+                                  <>
+                                    {row.tickers}
+                                    <Button
+                                      size="small"
+                                      variant="text"
+                                      sx={{ textTransform: "lowercase" }}
+                                      onClick={() =>
+                                        handleExpandRow(row.serial)
+                                      }
+                                      disableRipple
+                                      disableElevation
+                                      disableFocusRipple
+                                    >
+                                      ...Show Less
+                                    </Button>
+                                  </>
+                                ) : (
+                                  <>
+                                    {isSmallScreen ? (
+                                      <>
+                                        {row.tickers.slice(0, 5)}
+                                        {row.tickers.length > 5 && (
+                                          <Button
+                                            size="small"
+                                            variant="text"
+                                            sx={{ textTransform: "lowercase" }}
+                                            onClick={() =>
+                                              handleExpandRow(row.serial)
+                                            }
+                                            disableRipple
+                                            disableElevation
+                                            disableFocusRipple
+                                          >
+                                            ...Show More
+                                          </Button>
+                                        )}
+                                      </>
+                                    ) : (
+                                      <>
+                                        {row.tickers.slice(0, 50)}
+                                        {row.tickers.length > 50 && (
+                                          <Button
+                                            size="small"
+                                            variant="text"
+                                            sx={{ textTransform: "lowercase" }}
+                                            onClick={() =>
+                                              handleExpandRow(row.serial)
+                                            }
+                                            disableRipple
+                                            disableElevation
+                                            disableFocusRipple
+                                          >
+                                            ...Show More
+                                          </Button>
+                                        )}
+                                      </>
+                                    )}
+                                  </>
+                                )}
+                              </>
+                            ) : (
+                              row[column.id]
+                            )}
+                          </TableCell>
+                        ))}
+                      </TableRow>
                     ))
                 ) : finalData.length === 0 &&
                   check === true &&
                   finalData.length <= sortedRows.length ? (
-                  <TableRow>
+                  <TableRow key="no-data">
                     <TableCell colSpan={columns.length} align="center">
                       <div
                         style={{
@@ -576,9 +610,6 @@ const ReleasesIssuedByFirm = () => {
                 { label: "All", value: sortedRows.length },
               ]}
               component="div"
-              // count={
-              //    finalData.length
-              // }
               count={
                 finalData.length !== 0 &&
                 check === true &&
@@ -586,7 +617,6 @@ const ReleasesIssuedByFirm = () => {
                   ? finalData.length
                   : check === false && finalData.length <= sortedRows.length
                   ? sortedRows.length
-                  // : finalData.length
                   : finalData.length
               }
               rowsPerPage={rowsPerPage}
@@ -594,7 +624,6 @@ const ReleasesIssuedByFirm = () => {
               onPageChange={handleChangePage}
               onRowsPerPageChange={handleChangeRowsPerPage}
             />
-            {console.log(page)}
           </TableContainer>
         )}
       </Card>

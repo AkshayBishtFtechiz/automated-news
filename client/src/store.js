@@ -30,6 +30,12 @@ export const UseNewsStore = create(
       // NEWS FILE DATA
       newsFileData: [],
 
+      // LOADING
+      isLoading: false,
+
+      // ISFETCHED
+      isFetched: false,
+      
       // SETTING FILTERED DATA HERE
       setFilteredData: (data) => set({ filteredData: data }),
       setFilteredDataTandF: (data) => set({ filteredDataofTandF: data }),
@@ -55,6 +61,9 @@ export const UseNewsStore = create(
       
       // SETTING NEWS FILE DATA
       setNewsFileData: (data) => set({ newsFileData: data}),
+
+      // SETTING LOADING
+      setLoading: (data, data1) => set({ isLoading: data, isFetched: data1 })
 
     }),
     "NewsStore"
