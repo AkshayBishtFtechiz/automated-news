@@ -12,13 +12,10 @@ exports.getAllNewsFile = async (req, res) => {
 
   try {
     let law_firms = [];
-    let listed_firms = [];
+    
     if (flag === true) {
       const getAllNewsFirm = await NewFirmsWireSchema.find();
-      listed_firms = getAllNewsFirm.map((response) => ({
-        index: response.index,
-        name: response.label,
-      }));
+     
       law_firms = getAllNewsFirm.map((response) => ({
         index: response.index,
         name: response.firmName,
@@ -40,46 +37,12 @@ exports.getAllNewsFile = async (req, res) => {
         { index: 7091, name: "Levi-Korsinsky-LLP" },
         { index: 7397, name: "The-Rosen-Law-Firm-PA" },
       ];
-
-      // listed_firms = [
-      //   {name: "Berger Montague"},
-      //   {name: "Bernstein Liebhard"},
-      //   {name: "Bronstein, Gewirtz"},
-      //   {name: "Faruqi & Faruqi"},
-      //   {name: "Grabar"},
-      //   {name: "Hagens Berman"},
-      //   {name: "Kessler Topaz"},
-      //   {name: "Pomerantz"},
-      //   {name: "Rigrodsky"},
-      //   {name: "Schall"},
-      //   {name: "Kaskela"},
-      //   {name: "Glancy"},
-      //   {name: "Levi & Korsinsky"},
-      //   {name: "Rosen"},
-      // ];
-      listed_firms = [
-        "Berger Montague",
-        "Bernstein Liebhard",
-        "Bronstein, Gewirtz",
-        "Faruqi & Faruqi",
-        "Grabar",
-        "Hagens Berman",
-        "Kessler Topaz",
-        "Pomerantz",
-        "Rigrodsky",
-        "Schall",
-        "Kaskela",
-        "Glancy",
-        "Levi & Korsinsky",
-        "Rosen",
-      ];
     }
 
     const firmData = [];
 
     for (let i = 0; i < law_firms.length; i++) {
       const firm = law_firms[i];
-      const firmName = listed_firms[i];
       const newsFilesUrl = `https://www.newsfilecorp.com/company/${firm.index}/${firm.name}`;
       const response = await axios.get(newsFilesUrl);
       const $ = cheerio.load(response.data);
@@ -130,8 +93,7 @@ exports.getAllNewsFile = async (req, res) => {
             return {
               scrapId: id,
               tickerSymbol: tickerMatch[2].trim(),
-              // firmIssuing: firm.name,
-              firmIssuing: firmName.name,
+              firmIssuing: firm.name,
               serviceIssuedOn: "News File Corp", // Replace with actual service
               dateTimeIssued: formattedDate,
               urlToRelease: `https://www.newsfilecorp.com${newsItem.link}`,
@@ -144,7 +106,7 @@ exports.getAllNewsFile = async (req, res) => {
         .filter(Boolean);
 
       for (const newsData of payload) {
-        firmData.push({ firm: listed_firms[i].name, payload: newsData });
+        firmData.push({ firm: law_firms[i].name, payload: newsData });
       }
     }
 
