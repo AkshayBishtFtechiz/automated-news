@@ -351,8 +351,7 @@ const AddNewFirms = () => {
   };
 
   useEffect(() => {
-    if(isClick === true)
-    {
+    if (isClick === true) {
       setTimeout(() => {
         if (myStore.isLoading) {
           setState({
@@ -366,10 +365,9 @@ const AddNewFirms = () => {
           });
         }
       }, 5000);
+    } else {
+      return;
     }
-   else {
-    return;
-   }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [myStore.isLoading, isClick]);
 
@@ -397,30 +395,30 @@ const AddNewFirms = () => {
             }
           />
           <Box sx={{ paddingRight: 3 }}>
-          <span>
-            <Tooltip title="Add new firm" arrow placement="bottom">
-              <Button
-                variant="contained"
-                size="small"
-                sx={{
-                  fontWeight: "600",
-                  fontFamily: "Inter",
-                }}
-                onClick={handleClickOpen}
-                disabled={myStore.isLoading ? true : false}
-              >
-                {myStore.isLoading ? (
-                  <>
-                    <CircularProgress color="primary" size={20} />
-                    <span style={{ fontFamily: "Inter" }}>
-                      &nbsp;&nbsp;Loading
-                    </span>
-                  </>
-                ) : (
-                  "Add new firms"
-                )}
-              </Button>
-            </Tooltip>
+            <span>
+              <Tooltip title="Add new firm" arrow placement="bottom">
+                <Button
+                  variant="contained"
+                  size="small"
+                  sx={{
+                    fontWeight: "600",
+                    fontFamily: "Inter",
+                  }}
+                  onClick={handleClickOpen}
+                  disabled={myStore.isLoading ? true : false}
+                >
+                  {myStore.isLoading ? (
+                    <>
+                      <CircularProgress color="primary" size={20} />
+                      <span style={{ fontFamily: "Inter" }}>
+                        &nbsp;&nbsp;Loading
+                      </span>
+                    </>
+                  ) : (
+                    "Add new firms"
+                  )}
+                </Button>
+              </Tooltip>
             </span>
           </Box>
         </Box>
@@ -455,29 +453,51 @@ const AddNewFirms = () => {
               </TableRow>
             </TableHead>
 
-            <TableBody>
-              {paginatedData.map((row, index) => (
-                <TableRow
-                  key={row._id}
-                  // sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                >
-                  <TableCell>{row.serial}</TableCell>
-                  <TableCell>{row.label}</TableCell>
-                  <TableCell>
-                    <div className="d-flex">
-                      <Tooltip title="Delete firm" arrow placement="right">
-                        <DeleteIcon
-                          className="iconHover delete-icon"
-                          onClick={() =>
-                            deleteFirms(row._id, row.firmName, row.label)
-                          }
-                        />
-                      </Tooltip>
-                    </div>
+            {paginatedData.length === 0 ? (
+              <TableBody>
+                <TableRow>
+                  <TableCell colSpan={3} align="center">
+                    <Box sx={{ marginTop: "50px !important" }}>
+                      <img src="no-data-2.svg" alt="no-data-img" />
+                      <p
+                        style={{
+                          color: "#00000040",
+                          marginBottom: 50,
+                          marginTop: 5,
+                        }}
+                      >
+                        No data to display
+                      </p>
+                    </Box>
                   </TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
+              </TableBody>
+            ) : (
+              <TableBody>
+                {paginatedData.map((row, index) => (
+                  <TableRow
+                  key={row._id}
+                  // sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                  >
+                  
+                    <TableCell>{row.serial}</TableCell>
+                    <TableCell>{row.label}</TableCell>
+                    <TableCell>
+                      <div className="d-flex">
+                        <Tooltip title="Delete firm" arrow placement="right">
+                          <DeleteIcon
+                            className="iconHover delete-icon"
+                            onClick={() =>
+                              deleteFirms(row._id, row.firmName, row.label)
+                            }
+                          />
+                        </Tooltip>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            )}
           </Table>
           <TablePagination
             rowsPerPageOptions={[
@@ -649,26 +669,28 @@ const AddNewFirms = () => {
 
         {myStore.isLoading ? (
           <Snackbar
-          open={state.open}
-          onClose={handleCloseSnack}
-          TransitionComponent={state.Transition}
-          key={state.Transition.name}
-          autoHideDuration={5000}
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        >
-          <Box className="snackbar_css">
-            {myStore.isLoading && (
-              <Box sx={{ display: "flex", alignItems: "center" }}>
-                <CircularProgress color="primary" size={20} />
-                <span style={{ fontFamily: "Inter" }}>
-                  &nbsp;&nbsp;Scraping is in progress. Please wait!
-                </span>
-              </Box>
-            )}
-          </Box>
-        </Snackbar>
-        ): ""}
-        
+            open={state.open}
+            onClose={handleCloseSnack}
+            TransitionComponent={state.Transition}
+            key={state.Transition.name}
+            autoHideDuration={5000}
+            anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+          >
+            <Box className="snackbar_css">
+              {myStore.isLoading && (
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <CircularProgress color="primary" size={20} />
+                  <span style={{ fontFamily: "Inter" }}>
+                    &nbsp;&nbsp;Scraping is in progress. Please wait!
+                  </span>
+                </Box>
+              )}
+            </Box>
+          </Snackbar>
+        ) : (
+          ""
+        )}
+
         {/* MODAL FOR ADDING FIRM */}
       </Card>
       <ToastContainer autoClose={3000} limit={1} theme="light" />
