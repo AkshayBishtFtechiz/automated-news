@@ -57,13 +57,13 @@ app.get("/test", (req, res) => {
 
 // Cron job for every 20 minutes
 
-// cron.schedule("*/20 * * * *", () => {
-  // axios.get('https://cuddly-octo-fiesta.onrender.com/api/business-wire');
-  // axios.get('https://cuddly-octo-fiesta.onrender.com/api/access-wire');
-  // axios.get('https://cuddly-octo-fiesta.onrender.com/api/globe-news-wire');
-  // axios.get('https://cuddly-octo-fiesta.onrender.com/api/pr-news-wire');
-  // axios.get('https://cuddly-octo-fiesta.onrender.com/api/news-files');
-// })
+cron.schedule("*/20 * * * *", () => {
+  axios.get('https://cuddly-octo-fiesta.onrender.com/api/business-wire');
+  axios.get('https://cuddly-octo-fiesta.onrender.com/api/access-wire');
+  axios.get('https://cuddly-octo-fiesta.onrender.com/api/globe-news-wire');
+  axios.get('https://cuddly-octo-fiesta.onrender.com/api/pr-news-wire');
+  axios.get('https://cuddly-octo-fiesta.onrender.com/api/news-files');
+})
 
 app.listen(PORT, () => {
   console.log(`Listening to PORT: ${PORT}`);
