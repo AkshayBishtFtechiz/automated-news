@@ -92,7 +92,6 @@ const emailSent = async (req, res, getAllNews, firmData, newsSchema, flag) => {
               return true
             } 
           }
-
         }
         
         const checkDuplicateTickerSymbol = agenciesDuplicateTickerSymbol()
