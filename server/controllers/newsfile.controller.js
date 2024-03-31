@@ -12,9 +12,9 @@ exports.getAllNewsFile = async (req, res) => {
   const { flag, index} = req.body;
   
   try {
+    var law_firms = [];
+    var listed_firms = [];
     if (flag === true) {
-      var law_firms = [];
-      var listed_firms = [];
       var getAllNewsFirm = await NewFirmsWireSchema.find()
       
       getAllNewsFirm?.forEach((response, i) => {
@@ -225,10 +225,10 @@ exports.getAllNewsFile = async (req, res) => {
     /* firmData.push({
       firm: "Berger Montague",
       payload: {
-        tickerSymbol: "SERVtest",
+        tickerSymbol: "NEWTICKERSHUBHAM",
         firmIssuing: "Berger Montague",
         serviceIssuedOn: "BusinessWire",
-        dateTimeIssued: "January 02, 2024",
+        dateTimeIssued: "March 30, 2024",
         urlToRelease:
           "http://www.businesswire.com/news/home/20240101367342/zh-HK/",
         tickerIssuer: "NYSE",

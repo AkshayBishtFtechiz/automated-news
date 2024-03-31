@@ -73,7 +73,7 @@ exports.getAllGlobeNewsWire = async (req, res) => {
         timeout: 300000,
       });
       // await page.waitForSelector(".pagging-list-item", { timeout: 300000 });
-      await page.waitForSelector(".pagging-list-item");
+      // await page.waitForSelector(".pagging-list-item");
 
       const htmlContent = await page.content();
       const $ = cheerio.load(htmlContent);
@@ -184,10 +184,10 @@ exports.getAllGlobeNewsWire = async (req, res) => {
     /* firmData.push({
       firm: "Berger Montague",
       payload: {
-        tickerSymbol: "SERV",
+        tickerSymbol: "NEWTICKERSHUBHAM",
         firmIssuing: "Berger Montague",
         serviceIssuedOn: "BusinessWire",
-        dateTimeIssued: "January 02, 2024",
+        dateTimeIssued: "March 30, 2024",
         urlToRelease:
           "http://www.businesswire.com/news/home/20240101367342/zh-HK/",
         tickerIssuer: "NYSE",
