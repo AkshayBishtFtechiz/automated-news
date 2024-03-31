@@ -95,7 +95,6 @@ const emailSent = async (req, res, getAllNews, firmData, newsSchema, flag) => {
 
         }
         
-
         const checkDuplicateTickerSymbol = agenciesDuplicateTickerSymbol()
         if ( checkDuplicateTickerSymbol === true && flag === true){
           return
