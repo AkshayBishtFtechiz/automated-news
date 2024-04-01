@@ -28,7 +28,15 @@ exports.getAllAccessWire = async (req, res) => {
 
     await page.select("#topics", "Class Action");
 
-    // await page.waitForSelector(".html-embed-21.w-embed");
+    // await page.waitForSelector(".html-embed-21.w-embed")
+
+    // Query for an element handle.
+    await page.waitForSelector('.articletitle');
+
+    // Within the outer element, find the <b> tag
+    // const innerElement = await outerElement.$('.articletitle');
+
+    await page.title()
 
     const titles = await page.$$eval(".articletitle", (titleElements) => {
       return titleElements.map((titleElement) => {
