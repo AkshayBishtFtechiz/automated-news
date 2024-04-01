@@ -10,7 +10,6 @@ const emailSent = async (req, res, getAllNews, firmData, newsSchema, flag) => {
   const processedTickerSymbols = new Set();
 
   if (getAllNews.length === 0) {
-    console.log("Inside_If")
     // No previous news, save all firm data and respond
     firmData.forEach(async function (data) {
       const newResponse = data.payload;
@@ -24,7 +23,6 @@ const emailSent = async (req, res, getAllNews, firmData, newsSchema, flag) => {
       flag !== true && res.json(firmData);
     }
   } else if (getAllNews.length !== firmData.length) {
-    console.log("Inside_ElseIf")
     // Comparing ticker with previous 60 days ticker and send mail
     for (const data of firmData) {
       // If ticker symbol is not found in previous news, proceed
